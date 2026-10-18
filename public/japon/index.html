@@ -789,7 +789,7 @@ a.r:active, button.r:active { background: var(--fill2); }
 
 /* control segmentado */
 .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--fill); border-radius: 9px; padding: 2px; gap: 2px; }
-.seg button { border: 0; background: none; font-size: 13px; font-weight: 500; padding: 6px 4px; border-radius: 7px; cursor: pointer; color: var(--label); }
+.seg button { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; border: 0; background: none; font-size: 13px; font-weight: 500; padding: 6px 4px; border-radius: 7px; cursor: pointer; color: var(--label); }
 .seg button[aria-pressed="true"] { background: var(--segsel); font-weight: 600; box-shadow: 0 3px 8px rgba(0,0,0,.12), 0 3px 1px rgba(0,0,0,.04); }
 
 /* widget de cuenta regresiva */
@@ -884,6 +884,32 @@ a.r:active, button.r:active { background: var(--fill2); }
 .play { display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 12px; padding: 14px 10px; font-size: 17px; font-weight: 600; cursor: pointer; background: var(--tint); color: #fff; }
 .play.alt { background: color-mix(in srgb, var(--tint) 15%, transparent); color: var(--tint); }
 .play.alt.on { background: var(--tint); color: #fff; }
+
+/* hoy en tiempo real */
+.nowc { --c: var(--tint); background: var(--card); border-radius: 20px; padding: 16px; display: grid; gap: 8px; box-shadow: inset 0 4px 0 var(--c); }
+.nowh { display: flex; align-items: center; gap: 8px; }
+.stl { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; padding: 3px 9px; border-radius: 999px; background: var(--fill); color: var(--label2); }
+.stl.now { background: var(--red); color: #fff; } .stl.next { background: color-mix(in srgb, var(--tint) 16%, transparent); color: var(--tint); }
+.pos { font-size: 13px; color: var(--label2); }
+.stp { margin-left: auto; display: flex; gap: 8px; }
+.stp button { width: 36px; height: 36px; border-radius: 50%; border: 0; background: var(--fill); color: var(--tint); font-size: 24px; line-height: 1; cursor: pointer; padding-bottom: 3px; }
+.stp button:disabled { color: var(--label3); cursor: default; }
+.nowc .when { font-size: 15px; color: var(--label2); font-weight: 500; }
+.nowc h2 { font-size: 24px; line-height: 1.2; font-weight: 700; text-wrap: balance; }
+.nowc .d, .nowc .food { font-size: 15px; line-height: 20px; } .nowc .food { color: var(--label2); } .nowc .food b { color: var(--label); }
+.nowc .rec { font-size: 13px; color: var(--label2); } .nowc .rec::before { content: "ⓘ "; color: var(--tint); }
+.nowc .tbtn { justify-self: start; }
+a.play { text-decoration: none; }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 4px; }
+.flow .badge { height: 22px; min-width: 26px; font-size: 10px; }
+.flow .badge svg { width: 14px; height: 14px; }
+.sepr { color: var(--label3); font-size: 15px; }
+.tm { color: var(--label2); font-size: 15px; margin-right: 4px; }
+.fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.fchip { background: var(--card); border-radius: 12px; padding: 10px 12px; display: grid; gap: 2px; color: var(--label); }
+.fchip b { font-size: 15px; font-weight: 600; } .fchip span { font-size: 12px; color: var(--label2); }
+.fchip.spec { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--orange) 60%, transparent); } .fchip.spec span { color: var(--orange); }
+.fchip:active { background: var(--fill2); }
 
 /* barra de pestañas */
 .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--bar); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-top: .5px solid var(--barline); padding-bottom: env(safe-area-inset-bottom, 0px); }
@@ -1492,6 +1518,8 @@ const I = {
   sos: sv('<path d="M12 5v14M5 12h14"/>'),
   bulb: sv('<path d="M9 17.5h6M10 20.5h4M12 3.5a6 6 0 0 0-3.5 10.9V16h7v-1.6A6 6 0 0 0 12 3.5z"/>'),
   speaker: sv('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>'),
+  umbrella: sv('<path d="M3 12a9 9 0 0 1 18 0z"/><path d="M12 12v6.5a2 2 0 0 1-4 0"/><path d="M12 3v0"/>'),
+  sunset: sv('<path d="M5 17a7 7 0 0 1 14 0M3 20.5h18M12 4v3M4.9 9.9l1.4 1.4M19.1 9.9l-1.4 1.4"/>'),
   bed: sv('<path d="M3 18.5v-11M3 14h18v4.5M21 14v-2.5a3 3 0 0 0-3-3h-7V14"/><circle cx="7" cy="11" r="1.8"/>')
 };
 const ico = (svg, color) => `<span class="ico" style="--b:${color}">${svg}</span>`;
@@ -1559,11 +1587,11 @@ function dayMapData(day) {
 /* ---------- vistas ---------- */
 function viewHoy() {
   const now = jstNow();
-  if (mem.preview) return viewDay(mem.preview, { today: true, hm: now.hm, preview: true });
+  if (mem.preview) return viewToday(mem.preview, mem.previewHm || now.hm, true);
   const ymd = now.ymd, p = ymdParts(ymd);
   const cap = `${DOWL[p.w]} ${p.d} ${MES[p.m - 1]} · ${now.hm} en Japón`;
   if (ymd > TRIP_END) return { ...viewItin(), title: 'おかえり', cap: 'Bienvenidos de vuelta' };
-  if (ymd >= TRIP_START) { const i = dayIndexFor(ymd); return viewDay(DAYS[i].n, { today: true, hm: now.hm }); }
+  if (ymd >= TRIP_START) return viewToday(DAYS[dayIndexFor(ymd)].n, now.hm);
   const left = daysBetween(ymd, TRIP_START);
   const c = checks();
   const done = TODO.filter(t => c[t.id]).length;
@@ -1576,10 +1604,132 @@ function viewHoy() {
   </section>
   ${grp('Próximas fechas', nextAlerts.map(a => row({ cls: 'ld', lead: cal(a.d), t: esc(a.t), s: inDays(daysBetween(ymd, a.d)) })).join(''))}
   ${grp('Antes de salir', TODO.filter(t => !c[t.id]).slice(0, 5).map(todoRow).join('') + row({ href: '#reservas', t: 'Ver todos los pendientes', cls: 'link', chev: 1 }), null, `${done} de ${TODO.length}`)}
-  ${grp('Vista previa', `<div class="r field"><label for="pv">Día</label><select id="pv">${DAYS.map(d => `<option value="${d.n}">${d.n} · ${fdate(d.date, true)} · ${esc(d.title)}</option>`).join('')}</select></div>` +
+  ${grp('Vista previa', `<div class="r field"><label for="pv">Día</label><select id="pv">${DAYS.map(d => `<option value="${d.n}">${d.n} · ${fdate(d.date, true)} · ${esc(d.title)}</option>`).join('')}</select></div><div class="r field"><label for="pvh">Hora en Japón</label><input id="pvh" type="time" value="10:00"></div>` +
     row({ tag: 'button', cls: 'center', t: 'Ver como si fuera ese día', attrs: 'data-preview' }),
     'Durante el viaje esta pestaña abre sola el día actual (hora de Japón) y marca lo que toca en ese momento.')}`;
   return { title: 'Hoy', cap, body };
+}
+
+/* ---------- Hoy en tiempo real ---------- */
+const RAIN = { TK: ['baja', 'Diciembre en Tokio es seco y soleado.'], FJ: ['baja', 'Suele estar despejado; el viento del lago enfría.'], KY: ['moderada', 'Pueden caer lloviznas; un paraguas plegable no estorba.'], OS: ['baja', 'Normalmente seco.'], KB: ['baja', 'Normalmente seco; viento frío en el puerto.'], KZ: ['alta', 'Kanazawa es de las ciudades más lluviosas de Japón en diciembre.'], HD: ['nieve', 'En las montañas puede nevar o haber hielo.'] };
+const DAY_EXTRA = {
+  1: 'Llegan cansados: ropa cómoda y una capa extra para el avión.',
+  5: 'teamLab: pantalones que se puedan arremangar arriba de la rodilla.',
+  6: 'Ryokan con baño al aire libre: la yukata la dan ahí.',
+  7: 'Chūreitō temprano: gorro y guantes, a esa hora hace ~0 °C.',
+  13: 'USJ: todo el día de pie y afuera. Batería externa y capas.',
+  17: 'Botas con suela antiderrapante: puede haber nieve o hielo.',
+  20: 'Pasaportes y documentos del vuelo en la mochila de mano.'
+};
+const FOOD_CITY = {
+  TK: [['Tonkatsu', 'tonkatsu'], ['Monjayaki', 'monjayaki'], ['Sushi', 'sushi']],
+  FJ: [['Hōtō', 'houtou noodles'], ['Udon de Yoshida', 'yoshida udon']],
+  KY: [['Yudōfu', 'yudofu'], ['Dulces de matcha', 'matcha sweets'], ['Obanzai', 'obanzai kyoto']],
+  OS: [['Takoyaki', 'takoyaki'], ['Okonomiyaki', 'okonomiyaki'], ['Kushikatsu', 'kushikatsu']],
+  KB: [['Kobe beef', 'kobe beef'], ['Sobameshi', 'sobameshi']],
+  KZ: [['Kaisendon', 'kaisendon'], ['Curry de Kanazawa', 'kanazawa curry'], ['Sushi', 'sushi']],
+  HD: [['Carne de Hida', 'hida beef'], ['Ramen de Takayama', 'takayama ramen']]
+};
+const FOOD_ALL = [['Ramen', 'ramen'], ['Sushi giratorio', 'kaitenzushi conveyor sushi'], ['Restaurante familiar', 'family restaurant'], ['Café y desayuno', 'cafe breakfast'], ['Konbini', 'convenience store'], ['Postres', 'dessert'], ['Curry japonés', 'japanese curry'], ['Izakaya', 'izakaya']];
+const toMin = hm => { const [h, m] = hm.split(':').map(Number); return h * 60 + m; };
+const fmtMin = m => m < 60 ? m + ' min' : Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + (m % 60) + ' min' : '');
+const gmDirFromHere = (key, mode = 'transit') => 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(place(key).q) + '&travelmode=' + mode;
+const gmFood = (term, key) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(key ? term + ' near ' + place(key).q : term + ' near me');
+
+function itemStatus(it, hm) {
+  if (it.t <= hm && hm < it.e) return ['now', 'Ahora', 'termina a las ' + it.e];
+  if (hm < it.t) return ['next', 'Siguiente', 'empieza en ' + fmtMin(toMin(it.t) - toMin(hm))];
+  return ['past', 'Antes', 'terminó a las ' + it.e];
+}
+function legsForItem(day, it) { return day.legs.filter(l => (it.p || []).includes(l.d)); }
+const flowHtml = l => `<div class="flow">${l.steps.filter(s => !s.alt).map(s => {
+  const ln = s.m === 'walk' ? null : LINES[s.line];
+  if (!ln) return `<span class="badge walk">${I.walk}</span>`;
+  if (s.line === 'taxi') return `<span class="badge" style="--c:${ln[1]}">${I.car}</span>`;
+  if (s.line === 'bus') return `<span class="badge" style="--c:${ln[1]}">${I.bus}</span>`;
+  return `<span class="badge" style="--c:${ln[1]}">${esc(ln[0])}</span>`;
+}).join('<span class="sepr">›</span>')}</div>`;
+
+function viewToday(n, hm, preview) {
+  const day = DAYS[n - 1], items = day.items, c = checks(), base = BASES[day.base], p = ymdParts(day.date);
+  const nowIdx = items.findIndex(it => it.t <= hm && hm < it.e);
+  const nextIdx = items.findIndex(it => it.t > hm);
+  const auto = nowIdx >= 0 ? nowIdx : nextIdx >= 0 ? nextIdx : items.length - 1;
+  const fi = mem.focus && mem.focus.n === n ? Math.min(mem.focus.i, items.length - 1) : auto;
+  const it = items[fi];
+  const [sk, sl, sd] = itemStatus(it, hm);
+  const label = sk === 'next' && fi !== auto ? 'Más tarde' : sk === 'past' && fi === auto ? 'Último del día' : sl;
+  const id = 'd' + n + '-' + fi, done = !!c[id];
+  const ended = nowIdx < 0 && nextIdx < 0;
+  const morning = hm < '12:00';
+  const tomorrow = DAYS[n];
+
+  // tarjeta principal
+  const card = `<section class="nowc" style="--c:${cityVar(day.city)}">
+    <div class="nowh"><span class="stl ${sk}">${label}</span><span class="pos">${fi + 1} de ${items.length}</span>
+      <span class="stp"><button type="button" data-step="-1" aria-label="Actividad anterior" ${fi === 0 ? 'disabled' : ''}>‹</button><button type="button" data-step="1" aria-label="Actividad siguiente" ${fi === items.length - 1 ? 'disabled' : ''}>›</button></span></div>
+    <div class="when">${it.t} – ${it.e} · ${sd}</div>
+    <h2>${esc(it.h)}</h2>
+    ${it.d ? `<p class="d">${esc(it.d)}</p>` : ''}
+    ${it.f ? `<p class="food"><b>Comer:</b> ${esc(it.f)}</p>` : ''}
+    ${it.r ? `<p class="rec">${esc(it.r)}</p>` : ''}
+    ${(it.p || []).length ? `<div class="chips">${it.p.map(k => `<a href="${gmSearch(k)}" target="_blank" rel="noopener">${esc(place(k).n)}</a>`).join('')}</div>` : ''}
+    <div class="playbar">${(it.p || []).length ? `<a class="play" href="${gmDirFromHere(it.p[it.p.length - 1])}" target="_blank" rel="noopener">Cómo llegar</a>` : `<a class="play" href="#dia${n}">Ver el día</a>`}
+      <button class="play alt${done ? ' on' : ''}" type="button" data-check="${id}">${done ? 'Hecho ✓' : 'Marcar hecho'}</button></div>
+    ${fi !== auto ? `<button class="tbtn" type="button" data-step="0">Volver a lo de ahora</button>` : ''}
+  </section>`;
+
+  // ruta rápida
+  const legs = legsForItem(day, it);
+  const target = (it.p || []).filter(k => !k.startsWith('b:') || legs.length === 0).slice(-1)[0] || (it.p || [])[0];
+  const route = legs.length
+    ? legs.map(l => { const a = place(l.o), b = place(l.d); const tot = l.steps.filter(s => !s.alt).reduce((x, s) => x + (s.min || 0), 0);
+        return row({ t: `${esc(a.n)} → ${esc(b.n)}`, extra: flowHtml(l), x: l.steps.filter(s => !s.alt && s.m !== 'walk').map(s => esc(s.t)).join(' · '), tr: `≈ ${tot} min` }) +
+          row({ href: gmRoute(l.o, l.d, l.steps.filter(s => !s.alt).every(s => s.m === 'walk') ? 'walking' : 'transit'), ext: 1, cls: 'link', t: 'Ruta del plan en Google Maps' }); }).join('') +
+      row({ href: gmDirFromHere(legs[legs.length - 1].d), ext: 1, cls: 'link', t: 'Desde donde estoy ahora' })
+    : target ? row({ t: 'Sin traslado largo en esta actividad', s: esc(place(target).n) }) + row({ href: gmDirFromHere(target), ext: 1, cls: 'link', t: 'Cómo llegar desde donde estoy' }) : '';
+
+  // consejo del día
+  const [rk, rt] = RAIN[day.city];
+  const [hi, lo] = day.wx;
+  const ropa = lo <= 1 ? 'Abrigo grueso, gorro, guantes y bufanda. Capa térmica abajo.' : lo <= 5 ? 'Chamarra abrigadora y capas: la mañana es fría.' : 'Chamarra ligera o suéter.';
+  const capas = hi - lo >= 8 ? ` Hay ${hi - lo}° de diferencia entre la mañana y el mediodía: vístanse en capas.` : '';
+  const advice = grp(morning ? 'Consejo de la mañana' : 'Clima de hoy',
+    row({ cls: 'ld', lead: ico(I.cloud, 'var(--c-FJ)'), t: `${CITY[day.city].n}: ${hi}° / ${lo}°`, s: esc(ropa + capas) }) +
+    row({ cls: 'ld', lead: ico(I.umbrella, rk === 'alta' || rk === 'nieve' ? 'var(--indigo)' : 'var(--gray)'), t: rk === 'alta' ? 'Lleven paraguas' : rk === 'nieve' ? 'Posible nieve: calzado antiderrapante' : rk === 'moderada' ? 'Paraguas plegable por si acaso' : 'Paraguas: probablemente no', s: esc(rt) }) +
+    row({ cls: 'ld', lead: ico(I.sunset, 'var(--orange)'), t: `Oscurece ≈ ${day.sun}`, s: 'Lo de exterior conviene antes de esa hora.' }) +
+    (DAY_EXTRA[n] ? row({ cls: 'ld', lead: ico(I.bulb, 'var(--yellow)'), t: esc(DAY_EXTRA[n]), sm: 1 }) : '') +
+    row({ href: 'https://www.google.com/search?q=' + encodeURIComponent('clima ' + CITY[day.city].n + ' Japón hoy'), ext: 1, cls: 'link', t: 'Ver el pronóstico real de hoy' }),
+    'Basado en promedios de temporada. Antes de salir revisen el pronóstico real.');
+
+  // comida cerca
+  const fm = mem.foodMode || 'yo';
+  const ref = (it.p || []).find(k => !k.startsWith('b:')) || (it.p || [])[0] || 'b:' + day.base;
+  const refKey = fm === 'yo' ? null : ref;
+  const chip = ([l, q], spec) => `<a class="fchip${spec ? ' spec' : ''}" href="${gmFood(q, refKey)}" target="_blank" rel="noopener"><b>${esc(l)}</b><span>${spec ? 'Especialidad local' : fm === 'yo' ? 'Cerca de mí' : 'Cerca del plan'}</span></a>`;
+  const food = `<section class="grp"><h2 class="gh"><span>Comer cerca</span></h2>
+    <div class="seg" role="group" aria-label="Buscar comida"><button type="button" data-food="yo" aria-pressed="${fm === 'yo'}">Cerca de mí</button><button type="button" data-food="plan" aria-pressed="${fm === 'plan'}">Cerca de ${esc(place(ref).n)}</button></div>
+    ${it.f ? `<div class="list">${row({ cls: 'ld', lead: ico(I.bulb, 'var(--green)'), t: 'Idea del itinerario', s: esc(it.f) })}</div>` : ''}
+    <div class="fgrid">${(FOOD_CITY[day.city] || []).map(f => chip(f, true)).join('')}${FOOD_ALL.map(f => chip(f)).join('')}</div>
+    <p class="gf">${fm === 'yo' ? 'Abre Google Maps con la ubicación de tu teléfono y te muestra lo que hay alrededor, con horarios y reseñas.' : 'Busca alrededor de ' + esc(place(ref).n) + ', la parada de esta actividad.'}</p></section>`;
+
+  const body = `
+  ${preview ? grp(null, row({ t: `Vista previa: Día ${n} a las ${hm}`, s: 'Así se verá esta pestaña ese día y a esa hora.' }) + row({ tag: 'button', cls: 'center', t: 'Salir de la vista previa', attrs: 'data-preview-off' })) : ''}
+  ${ended ? grp(null, row({ cls: 'ld', lead: ico(I.bed, cityVar(day.city)), t: 'Terminó el plan de hoy', s: tomorrow ? `Mañana: ${tomorrow.items[0].t} · ${esc(tomorrow.items[0].h)}` : '¡Buen viaje de regreso!' }) + (tomorrow ? row({ href: '#dia' + tomorrow.n, cls: 'link', t: `Ver Día ${tomorrow.n}`, chev: 1 }) : '')) : ''}
+  ${card}
+  ${route ? grp('Ruta rápida', route) : ''}
+  ${grp('Plan de hoy', items.map((x, i) => {
+    const xid = 'd' + n + '-' + i, on = !!c[xid];
+    const st = itemStatus(x, hm)[0];
+    const tag = i === fi ? '<span class="pill tint">Viendo</span>' : st === 'now' ? '<span class="pill now">Ahora</span>' : '';
+    return row({ cls: 'li' + (on ? ' done' : ''), lead: checkBtn(xid, x.h), t: `<span class="tm">${x.t}</span> ${esc(x.h)}`, tr: tag || `<button class="tbtn" type="button" data-focus="${i}">Ver</button>` });
+  }).join(''), null, `${dayProgress(day)[0]} de ${items.length}`)}
+  ${advice}
+  ${food}
+  ${grp('Accesos rápidos', row({ href: gmDirFromHere('b:' + day.base), ext: 1, cls: 'ld', lead: ico(I.bed, cityVar(day.city)), t: 'Volver al alojamiento', s: esc(base.n) }) +
+    row({ tag: 'button', cls: 'ld', lead: ico(I.car, 'var(--orange)'), t: 'Dirección para el taxista', attrs: `data-taxi="${day.base}"`, chev: 1 }) +
+    row({ href: '#dia' + n, cls: 'ld', lead: ico(I.ticket, 'var(--tint)'), t: 'Día completo: rutas, mapa y tips', chev: 1 }))}`;
+  return { title: 'Hoy', cap: `Día ${n} · ${DOWL[p.w]} ${p.d} ${MES[p.m - 1]} · ${CITY[day.city].n}`, lead: roundel(day, 'lg'), body };
 }
 
 function viewItin() {
@@ -1878,7 +2028,7 @@ function copyText(txt) {
   try { navigator.clipboard.writeText(txt).then(() => hud('Copiado'), fail); } catch (e) { fail(); }
 }
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-say],[data-check],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket]');
+  const t = e.target.closest('[data-say],[data-check],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket],[data-step],[data-focus],[data-food]');
   if (!t) return;
   const d = t.dataset;
   if (d.say) speak(d.say, 'slow' in d, t);
@@ -1890,8 +2040,16 @@ document.addEventListener('click', e => {
   else if (d.seg) { const [n, k] = d.seg.split(':'); mem.seg[n] = k; rerender(); }
   else if (d.base) baseSheet(d.base);
   else if (d.ticket) ticketSheet(+d.ticket);
-  else if ('preview' in d) { mem.preview = +$('#pv').value; route(); window.scrollTo(0, 0); }
-  else if ('previewOff' in d) { mem.preview = 0; route(); window.scrollTo(0, 0); }
+  else if ('preview' in d) { mem.preview = +$('#pv').value; mem.previewHm = $('#pvh').value || '10:00'; mem.focus = null; route(); window.scrollTo(0, 0); }
+  else if (d.step != null) {
+    const n = mem.preview || DAYS[dayIndexFor(jstNow().ymd)].n;
+    if (+d.step === 0) mem.focus = null;
+    else { const cur = $('.nowc .pos').textContent.split(' ')[0] - 1; mem.focus = { n, i: Math.max(0, Math.min(DAYS[n - 1].items.length - 1, cur + +d.step)) }; }
+    rerender();
+  }
+  else if (d.focus != null) { mem.focus = { n: mem.preview || DAYS[dayIndexFor(jstNow().ymd)].n, i: +d.focus }; route(); window.scrollTo(0, 0); }
+  else if (d.food) { mem.foodMode = d.food; rerender(); }
+  else if ('previewOff' in d) { mem.preview = 0; mem.focus = null; route(); window.scrollTo(0, 0); }
   else if ('kid' in d) {
     const k = store.get('kid', { n: 'Sam', p1: '', p2: '' });
     const b = BASES[baseForNight(jstNow().ymd)];
@@ -1919,7 +2077,14 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#sheet
 window.addEventListener('scroll', onScroll, { passive: true });
 window.addEventListener('hashchange', route);
 
-function tick() { const now = jstNow(); $('#clock').innerHTML = `<b>${now.hm}</b><br>Japón`; }
+function tick() {
+  const now = jstNow(); $('#clock').innerHTML = `<b>${now.hm}</b><br>Japón`;
+  // En el viaje, la pestaña Hoy se actualiza sola cada minuto
+  const onHoy = !location.hash || location.hash === '#hoy';
+  const live = onHoy && !mem.preview && now.ymd >= TRIP_START && now.ymd <= TRIP_END;
+  if (live && mem.lastTick && mem.lastTick !== now.hm && $('#sheet').hidden && !/INPUT|SELECT/.test((document.activeElement || {}).tagName || '')) rerender();
+  mem.lastTick = now.hm;
+}
 tick(); setInterval(tick, 30000);
 route();
 </script>
