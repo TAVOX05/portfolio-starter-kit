@@ -1445,6 +1445,7 @@ const WEATHER = [
 
 /* ============ APP ============ */
 const TRIP_START = '2026-11-20', TRIP_END = '2026-12-09';
+const IS_ANDROID = /Android/i.test(navigator.userAgent);
 const USE_TILES = document.documentElement.dataset.tiles === 'osm';
 const mem = { seg: {} };
 const store = {
@@ -1725,8 +1726,15 @@ function viewGuia(sub) {
       '<b>Maletas en Shinkansen:</b> si la suma de lados pasa de 160 cm, reserven asiento con espacio para equipaje grande.',
       '<b>Takkyūbin</b> (envío de maletas) desde konbinis o el alojamiento; llegan en 1–2 días. Confirmen antes que el siguiente anfitrión las recibe.',
       '<b>Taxis:</b> la puerta trasera se abre sola. Muestren la dirección en japonés desde Reservas.']));
-  else if (sub === 'frases') body = grp('Toca la bocina para escucharla', PHRASES.map((p, i) => row({ cls: 'ld', lead: `<button class="spk" type="button" data-say="${esc(p[1].replace('…', ''))}" aria-label="Escuchar ${esc(p[0])}">${I.speaker}</button>`, t: esc(p[0]), s: `<span lang="ja" style="color:var(--label);font-weight:600">${esc(p[1])}</span>`, x: esc(p[2]), tr: `<button class="tbtn" type="button" data-phrase="${i}">Mostrar</button>` })).join(''),
-    'El audio usa la voz japonesa de tu teléfono y funciona sin internet. Si no suena, quita el modo silencio y sube el volumen. Para una voz más natural en iPhone: Ajustes › Accesibilidad › Contenido leído › Voces › Japonés.');
+  else if (sub === 'frases') {
+    const [vs, vl] = voiceState();
+    const howto = IS_ANDROID
+      ? 'Android: abre esta página en <b>Chrome</b> (el navegador dentro de otras apps puede no tener voz). Para instalar la voz: Ajustes › Sistema › Idiomas › Salida de texto a voz › Motor: <b>Servicios de voz de Google</b> › ⚙ › Instalar datos de voz › <b>Japonés</b>. En Samsung está en Administración general › Idioma › Texto a voz. Así funciona sin internet.'
+      : 'iPhone: para una voz más natural ve a Ajustes › Accesibilidad › Contenido leído › Voces › Japonés y descarga Kyoko u Otoya.';
+    body = grp('Voz de tu teléfono', row({ t: 'Voz en japonés', tr: `<span class="pill ${vs}">${vl}</span>` }) +
+        row({ tag: 'button', cls: 'center', t: 'Probar voz', attrs: `data-say="こんにちは。日本へようこそ。"` }), howto + ' Si no suena, quita el modo silencio y sube el volumen.') +
+      grp('Toca la bocina para escucharla', PHRASES.map((p, i) => row({ cls: 'ld', lead: `<button class="spk" type="button" data-say="${esc(p[1].replace('…', ''))}" aria-label="Escuchar ${esc(p[0])}">${I.speaker}</button>`, t: esc(p[0]), s: `<span lang="ja" style="color:var(--label);font-weight:600">${esc(p[1])}</span>`, x: esc(p[2]), tr: `<button class="tbtn" type="button" data-phrase="${i}">Mostrar</button>` })).join(''));
+  }
   else if (sub === 'sam') {
     const kid = store.get('kid', { n: 'Sam', p1: '', p2: '' });
     body = grp('Regla del viaje', tipRows(['Si se separan, Sam se queda quieto donde está o va al <b>kōban</b> (caseta de policía) más cercano.', 'Tomen una foto de Sam cada mañana: sirve para describir su ropa.'])) +
@@ -1803,7 +1811,7 @@ function ticketSheet(i) {
 let speakBtn = null;
 function speak(text, slow, btn) {
   const synth = window.speechSynthesis;
-  if (!synth || typeof SpeechSynthesisUtterance === 'undefined') { hud('Este navegador no tiene voz'); return; }
+  if (!synth || typeof SpeechSynthesisUtterance === 'undefined') { hud(IS_ANDROID ? 'Abre esta página en Chrome para escuchar el audio' : 'Este navegador no tiene voz'); return; }
   const wasThis = speakBtn === btn && synth.speaking;
   synth.cancel();
   if (speakBtn) speakBtn.classList.remove('on');
@@ -1812,15 +1820,31 @@ function speak(text, slow, btn) {
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'ja-JP';
   u.rate = slow ? 0.6 : 0.9;
-  const voices = synth.getVoices().filter(v => /^ja/i.test(v.lang));
-  const pick = voices.find(v => /Kyoko|Otoya|O-ren|Hattori|Google/i.test(v.name)) || voices[0];
+  const pick = jaVoice();
   if (pick) u.voice = pick;
   else if (synth.getVoices().length) hud('Sin voz en japonés: instálala en los ajustes del teléfono');
   speakBtn = btn; if (btn) btn.classList.add('on');
   u.onend = u.onerror = () => { if (btn) btn.classList.remove('on'); if (speakBtn === btn) speakBtn = null; };
   synth.speak(u);
 }
-try { window.speechSynthesis && window.speechSynthesis.getVoices(); } catch (e) {}
+function jaVoice() {
+  try {
+    const voices = window.speechSynthesis.getVoices().filter(v => /^ja[-_]?/i.test(v.lang));
+    return voices.find(v => /Kyoko|Otoya|O-ren|Hattori|Google|ja-jp-x/i.test(v.name + ' ' + v.voiceURI)) || voices[0] || null;
+  } catch (e) { return null; }
+}
+function voiceState() {
+  if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === 'undefined') return ['hot', IS_ANDROID ? 'Abre en Chrome' : 'No disponible'];
+  const all = window.speechSynthesis.getVoices();
+  if (jaVoice()) return ['ok', 'Instalada'];
+  return all.length ? ['warn', 'Falta instalar'] : ['', 'Revisar con «Probar»'];
+}
+try {
+  if (window.speechSynthesis) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.addEventListener && window.speechSynthesis.addEventListener('voiceschanged', () => { if (location.hash === '#guia-frases') rerender(); });
+  }
+} catch (e) {}
 let hudT;
 function hud(msg) { const h = $('#hud'); h.textContent = msg; h.hidden = false; clearTimeout(hudT); hudT = setTimeout(() => { h.hidden = true; }, 1300); }
 
