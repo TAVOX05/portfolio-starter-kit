@@ -875,6 +875,16 @@ a.r:active, button.r:active { background: var(--fill2); }
 /* HUD */
 .hud { position: fixed; left: 50%; top: 45%; transform: translate(-50%, -50%); z-index: 60; background: var(--bar); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border-radius: 14px; padding: 14px 22px; font-size: 15px; font-weight: 600; box-shadow: 0 6px 30px rgba(0,0,0,.2); }
 
+/* audio */
+.spk { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 0; display: grid; place-items: center; cursor: pointer; background: color-mix(in srgb, var(--tint) 14%, transparent); color: var(--tint); padding: 0; }
+.spk svg, .play svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.spk.on, .play.on { background: var(--tint); color: #fff; }
+.tbtn { background: none; border: 0; color: var(--tint); font-size: 15px; cursor: pointer; padding: 4px 0; }
+.playbar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.play { display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 12px; padding: 14px 10px; font-size: 17px; font-weight: 600; cursor: pointer; background: var(--tint); color: #fff; }
+.play.alt { background: color-mix(in srgb, var(--tint) 15%, transparent); color: var(--tint); }
+.play.alt.on { background: var(--tint); color: #fff; }
+
 /* barra de pestañas */
 .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--bar); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-top: .5px solid var(--barline); padding-bottom: env(safe-area-inset-bottom, 0px); }
 .tabs .wrap { display: grid; grid-template-columns: repeat(5, 1fr); }
@@ -927,35 +937,35 @@ const CITY = {
 // Alojamientos confirmados
 const BASES = {
   tokyo1: { n: 'Airbnb Motoasakusa #401', host: 'Kazu', city: 'TK', lat: 35.7128, lng: 139.7852,
-    addr: '3-20-12 Motoasakusa, Taito City, Tokyo 111-0041', ja: '〒111-0041 東京都台東区元浅草3-20-12',
+    addr: '3-20-12 Motoasakusa, Taito City, Tokyo 111-0041', ja: '〒111-0041 東京都台東区元浅草3-20-12', say: '東京都台東区元浅草、3丁目20番12号',
     in: '20 nov · 16:00+', out: '25 nov · 10:00', nights: 5, status: 'Confirmado',
     note: 'Base real: Motoasakusa, no junto a Ueno Station. Entrada con teclado. Dejar maletas antes de las 16:00 solo si lo aceptan. Estaciones cercanas: Inaricho (Ginza) y Shin-Okachimachi (Oedo/TX).' },
   ubuya: { n: 'Ryokan Ubuya', host: 'JAPANiCAN', city: 'FJ', lat: 35.5135, lng: 138.7745,
-    addr: '10 Asakawa, Fujikawaguchiko, Yamanashi', ja: '山梨県南都留郡富士河口湖町浅川10　うぶや',
+    addr: '10 Asakawa, Fujikawaguchiko, Yamanashi', ja: '山梨県南都留郡富士河口湖町浅川10　うぶや', say: '山梨県富士河口湖町浅川10番地、うぶやです',
     in: '25 nov · 16:00', out: '26 nov · verificar hora', nights: 1, status: 'Pagado ¥139,352',
     note: 'Deluxe japonesa con baño privado al aire libre, 2 camas. Cena buffet + desayuno incluidos (no es kaiseki). Impuestos locales posiblemente aparte.' },
   funatsu: { n: 'Airbnb Funatsu 4805', host: 'Hirabe', city: 'FJ', lat: 35.4993, lng: 138.7665,
-    addr: '4805 Funatsu, Fujikawaguchiko, Yamanashi 401-0301', ja: '〒401-0301 山梨県南都留郡富士河口湖町船津4805',
+    addr: '4805 Funatsu, Fujikawaguchiko, Yamanashi 401-0301', ja: '〒401-0301 山梨県南都留郡富士河口湖町船津4805', say: '山梨県富士河口湖町船津、4805番地',
     in: '26 nov · 15:00+', out: '27 nov · 10:00', nights: 1, status: 'Confirmado / pagado',
     note: 'Cerca de Kawaguchiko Station. Preguntar si guardan maletas antes de las 15:00; si no, consigna de la estación.' },
   kyoto: { n: 'Airbnb Kyoto #401', host: 'Kyosei', city: 'KY', lat: 34.9966, lng: 135.7718,
-    addr: '5-chōme-331 Miyagawasuji, Higashiyama, Kyoto 605-0801', ja: '〒605-0801 京都府京都市東山区宮川筋5丁目331',
+    addr: '5-chōme-331 Miyagawasuji, Higashiyama, Kyoto 605-0801', ja: '〒605-0801 京都府京都市東山区宮川筋5丁目331', say: '京都市東山区宮川筋、5丁目331番地',
     in: '27 nov · 15:00+', out: '1 dic · 12:00', nights: 4, status: 'Confirmado',
     note: 'Base en Higashiyama, cerca de Gion y Kiyomizu-Gojō (Keihan). Desde Kyoto Station: taxi con maletas.' },
   osaka: { n: 'Depto. Shimanouchi', host: 'Toshi', city: 'OS', lat: 34.6733, lng: 135.5085,
-    addr: '1-15-2 Shimanouchi, Chuo-ku, Osaka 542-0082', ja: '〒542-0082 大阪府大阪市中央区島之内1-15-2',
+    addr: '1-15-2 Shimanouchi, Chuo-ku, Osaka 542-0082', ja: '〒542-0082 大阪府大阪市中央区島之内1-15-2', say: '大阪市中央区島之内、1丁目15番2号',
     in: '1 dic · 16:00+', out: '4 dic · 10:00', nights: 3, status: 'Confirmado',
     note: 'Base para Dōtonbori, USJ y Kobe. Estaciones: Nagahoribashi (Sakaisuji) y Nippombashi. Si llegan antes de las 16:00, acordar consigna.' },
   kanazawa: { n: 'Vacation Rent Kanazawa G-02', host: 'Toshio', city: 'KZ', lat: 36.5703, lng: 136.6555,
-    addr: '25 Shimotsutsumichō, Kanazawa, Ishikawa 920-0917', ja: '〒920-0917 石川県金沢市下堤町25',
+    addr: '25 Shimotsutsumichō, Kanazawa, Ishikawa 920-0917', ja: '〒920-0917 石川県金沢市下堤町25', say: '金沢市下堤町、25番地',
     in: '4 dic · 15:00+', out: '6 dic · 10:00', nights: 2, status: 'Confirmado',
     note: 'A 1 min a pie del mercado Ōmichō. No está junto a la estación: taxi con maletas.' },
   takayama: { n: 'Mercure Hida Takayama', host: 'Booking', city: 'HD', lat: 36.1393, lng: 137.2488,
-    addr: '4-311-1 Hanasatomachi, Takayama, Gifu 506-0026', ja: '〒506-0026 岐阜県高山市花里町4-311-1　メルキュール飛騨高山',
+    addr: '4-311-1 Hanasatomachi, Takayama, Gifu 506-0026', ja: '〒506-0026 岐阜県高山市花里町4-311-1　メルキュール飛騨高山', say: '高山市花里町4丁目、メルキュール飛騨高山です',
     in: '6 dic · 15:00+', out: '7 dic · 11:00', nights: 1, status: 'Pagado ¥31,600',
     note: 'Habitación Superior: 1 cama doble + 1 individual, no fumadores. Impuestos locales aparte; revisar desayuno de Sam.' },
   tokyo2: { n: 'Airbnb familiar de Eiji', host: 'Eiji', city: 'TK', lat: 35.7088, lng: 139.7712,
-    addr: '1-1-4 Ikenohata, Taito City, Tokyo 110-0008', ja: '〒110-0008 東京都台東区池之端1-1-4',
+    addr: '1-1-4 Ikenohata, Taito City, Tokyo 110-0008', ja: '〒110-0008 東京都台東区池之端1-1-4', say: '東京都台東区池之端、1丁目1番4号',
     in: '7 dic · 16:00+', out: '9 dic · 10:00', nights: 2, status: 'Confirmado',
     note: 'Base real: Ikenohata, junto al estanque Shinobazu (no exactamente Okachimachi). A 5 min de Keisei Ueno para el Skyliner.' }
 };
@@ -1480,6 +1490,7 @@ const I = {
   doc: sv('<path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4M10 12h5M10 16h5"/>'),
   sos: sv('<path d="M12 5v14M5 12h14"/>'),
   bulb: sv('<path d="M9 17.5h6M10 20.5h4M12 3.5a6 6 0 0 0-3.5 10.9V16h7v-1.6A6 6 0 0 0 12 3.5z"/>'),
+  speaker: sv('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>'),
   bed: sv('<path d="M3 18.5v-11M3 14h18v4.5M21 14v-2.5a3 3 0 0 0-3-3h-7V14"/><circle cx="7" cy="11" r="1.8"/>')
 };
 const ico = (svg, color) => `<span class="ico" style="--b:${color}">${svg}</span>`;
@@ -1714,7 +1725,8 @@ function viewGuia(sub) {
       '<b>Maletas en Shinkansen:</b> si la suma de lados pasa de 160 cm, reserven asiento con espacio para equipaje grande.',
       '<b>Takkyūbin</b> (envío de maletas) desde konbinis o el alojamiento; llegan en 1–2 días. Confirmen antes que el siguiente anfitrión las recibe.',
       '<b>Taxis:</b> la puerta trasera se abre sola. Muestren la dirección en japonés desde Reservas.']));
-  else if (sub === 'frases') body = grp('Toca una frase para mostrarla en grande', PHRASES.map((p, i) => row({ tag: 'button', attrs: `data-phrase="${i}"`, t: esc(p[0]), s: `<span lang="ja" style="color:var(--label);font-weight:600">${esc(p[1])}</span>`, x: esc(p[2]), chev: 1 })).join(''));
+  else if (sub === 'frases') body = grp('Toca la bocina para escucharla', PHRASES.map((p, i) => row({ cls: 'ld', lead: `<button class="spk" type="button" data-say="${esc(p[1].replace('…', ''))}" aria-label="Escuchar ${esc(p[0])}">${I.speaker}</button>`, t: esc(p[0]), s: `<span lang="ja" style="color:var(--label);font-weight:600">${esc(p[1])}</span>`, x: esc(p[2]), tr: `<button class="tbtn" type="button" data-phrase="${i}">Mostrar</button>` })).join(''),
+    'El audio usa la voz japonesa de tu teléfono y funciona sin internet. Si no suena, quita el modo silencio y sube el volumen. Para una voz más natural en iPhone: Ajustes › Accesibilidad › Contenido leído › Voces › Japonés.');
   else if (sub === 'sam') {
     const kid = store.get('kid', { n: 'Sam', p1: '', p2: '' });
     body = grp('Regla del viaje', tipRows(['Si se separan, Sam se queda quieto donde está o va al <b>kōban</b> (caseta de policía) más cercano.', 'Tomen una foto de Sam cada mañana: sirve para describir su ropa.'])) +
@@ -1765,11 +1777,12 @@ function openSheet(title, html) {
   $('#sheetTitle').textContent = title; $('#sheetBody').innerHTML = html;
   $('#scrim').hidden = false; $('#sheet').hidden = false; $('#sheet').scrollTop = 0; $('#sheetClose').focus();
 }
-function closeSheet() { $('#sheet').hidden = true; $('#scrim').hidden = true; }
-const showCard = (say, huge, sub) => `<div class="show"><div class="say" lang="ja">${say}</div><div class="huge" lang="ja">${huge}</div><div class="sub2">${sub}</div></div>`;
+function closeSheet() { $('#sheet').hidden = true; $('#scrim').hidden = true; try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {} }
+const playBar = speech => `<div class="playbar"><button class="play" type="button" data-say="${esc(speech)}">${I.speaker} Escuchar</button><button class="play alt" type="button" data-say="${esc(speech)}" data-slow>Más lento</button></div>`;
+const showCard = (say, huge, sub, speech) => `<div class="show"><div class="say" lang="ja">${say}</div><div class="huge" lang="ja">${huge}</div><div class="sub2">${sub}</div>${speech ? playBar(speech) : ''}</div>`;
 function taxiSheet(k) {
   const b = BASES[k];
-  openSheet('Para el taxista', showCard('この住所までお願いします。', esc(b.ja), esc(b.addr) + '<br>Por favor, a esta dirección.') +
+  openSheet('Para el taxista', showCard('この住所までお願いします。', esc(b.ja), esc(b.addr) + '<br>Por favor, a esta dirección.', 'すみません。この住所までお願いします。' + b.say + '。') +
     grp(null, row({ tag: 'button', cls: 'center', t: 'Copiar dirección en japonés', attrs: `data-copy="${esc(b.ja)}"` })));
   try { navigator.wakeLock && navigator.wakeLock.request('screen').catch(() => {}); } catch (e) {}
 }
@@ -1787,6 +1800,27 @@ function ticketSheet(i) {
   openSheet(t.n, grp(null, row({ t: 'Cuándo', tr: esc(t.when) }) + row({ t: 'Estado', tr: `<span class="pill ${t.st}">${esc(t.stl)}</span>` }), esc(t.info)) +
     grp(null, row({ href: '#dia' + t.day, cls: 'link', t: `Ver Día ${t.day}`, chev: 1 }) + row({ href: gmSearch(t.place), ext: 1, cls: 'link', t: 'Abrir en Google Maps' })));
 }
+let speakBtn = null;
+function speak(text, slow, btn) {
+  const synth = window.speechSynthesis;
+  if (!synth || typeof SpeechSynthesisUtterance === 'undefined') { hud('Este navegador no tiene voz'); return; }
+  const wasThis = speakBtn === btn && synth.speaking;
+  synth.cancel();
+  if (speakBtn) speakBtn.classList.remove('on');
+  speakBtn = null;
+  if (wasThis) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ja-JP';
+  u.rate = slow ? 0.6 : 0.9;
+  const voices = synth.getVoices().filter(v => /^ja/i.test(v.lang));
+  const pick = voices.find(v => /Kyoko|Otoya|O-ren|Hattori|Google/i.test(v.name)) || voices[0];
+  if (pick) u.voice = pick;
+  else if (synth.getVoices().length) hud('Sin voz en japonés: instálala en los ajustes del teléfono');
+  speakBtn = btn; if (btn) btn.classList.add('on');
+  u.onend = u.onerror = () => { if (btn) btn.classList.remove('on'); if (speakBtn === btn) speakBtn = null; };
+  synth.speak(u);
+}
+try { window.speechSynthesis && window.speechSynthesis.getVoices(); } catch (e) {}
 let hudT;
 function hud(msg) { const h = $('#hud'); h.textContent = msg; h.hidden = false; clearTimeout(hudT); hudT = setTimeout(() => { h.hidden = true; }, 1300); }
 
@@ -1820,13 +1854,14 @@ function copyText(txt) {
   try { navigator.clipboard.writeText(txt).then(() => hud('Copiado'), fail); } catch (e) { fail(); }
 }
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-check],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket]');
+  const t = e.target.closest('[data-say],[data-check],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket]');
   if (!t) return;
   const d = t.dataset;
-  if (d.check) { toggleCheck(d.check); rerender(); }
+  if (d.say) speak(d.say, 'slow' in d, t);
+  else if (d.check) { toggleCheck(d.check); rerender(); }
   else if (d.taxi) taxiSheet(d.taxi);
   else if (d.copy) copyText(d.copy);
-  else if (d.phrase) { const p = PHRASES[+d.phrase]; openSheet('Frase', showCard(esc(p[0]), esc(p[1]), `<span style="font-family:var(--mono)">${esc(p[2])}</span>`)); }
+  else if (d.phrase) { const p = PHRASES[+d.phrase]; openSheet('Frase', showCard(esc(p[0]), esc(p[1]), `<span style="font-family:var(--mono)">${esc(p[2])}</span>`, p[1].replace('…', ''))); }
   else if (d.del) { store.set('gastos', store.get('gastos', []).filter(x => String(x.id) !== d.del)); rerender(); }
   else if (d.seg) { const [n, k] = d.seg.split(':'); mem.seg[n] = k; rerender(); }
   else if (d.base) baseSheet(d.base);
@@ -1837,7 +1872,7 @@ document.addEventListener('click', e => {
     const k = store.get('kid', { n: 'Sam', p1: '', p2: '' });
     const b = BASES[baseForNight(jstNow().ymd)];
     openSheet('Tarjeta de ' + (k.n || 'Sam'), showCard('迷子です。両親に電話してください。', esc(k.n || 'Sam'),
-      `Me perdí. Por favor llame a mis papás.<br><b style="font-size:24px;color:var(--label)">${esc(k.p1)}${k.p2 ? '<br>' + esc(k.p2) : ''}</b><br><br><span lang="ja">宿泊先：${esc(b.ja)}</span>`));
+      `Me perdí. Por favor llame a mis papás.<br><b style="font-size:24px;color:var(--label)">${esc(k.p1)}${k.p2 ? '<br>' + esc(k.p2) : ''}</b><br><br><span lang="ja">宿泊先：${esc(b.ja)}</span>`, '迷子です。両親に電話してください。泊まっているところは、' + b.say + 'です。'));
   }
 });
 document.addEventListener('submit', e => {
