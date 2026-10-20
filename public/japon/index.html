@@ -1060,6 +1060,40 @@ body::before, .nav { background: transparent; }
   @keyframes card-in-r { from { opacity: 0; transform: translateX(40%) rotate(4deg) scale(.94); } }
   @keyframes card-in-l { from { opacity: 0; transform: translateX(-40%) rotate(-4deg) scale(.94); } }
 }
+
+/* hora de salir */
+.leave { --lc: var(--tint); background: var(--card); border: .5px solid var(--hair); border-radius: 18px; padding: 14px 16px; display: grid; gap: 4px; box-shadow: inset 4px 0 0 var(--lc), var(--lift); }
+.leave.soon { --lc: var(--orange); } .leave.now, .leave.late { --lc: var(--red); }
+.lv-top { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--label2); }
+.lv-k { flex: none; white-space: nowrap; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--lc); }
+.lv-to { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lv-h { font-size: 26px; font-weight: 700; letter-spacing: -.01em; }
+.lv-s { font-size: 15px; color: var(--label2); }
+.lv-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+@media (prefers-reduced-motion: no-preference) { .leave.now, .leave.late { animation: lvpulse 1.6s ease-in-out infinite; } @keyframes lvpulse { 50% { box-shadow: inset 4px 0 0 var(--lc), 0 0 0 6px color-mix(in srgb, var(--red) 18%, transparent); } } }
+
+/* sellos */
+.stamps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.stamp { background: var(--card); border: .5px solid var(--hair); border-radius: 14px; padding: 12px 6px 10px; display: grid; justify-items: center; gap: 4px; text-align: center; cursor: pointer; color: var(--label); }
+.stamp .ink { width: 68px; height: 68px; border-radius: 50%; display: grid; place-items: center; border: 2px dashed var(--label3); color: var(--label3); font-weight: 800; line-height: 1; margin-bottom: 4px; font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif; }
+.stamp.on .ink { border: 4px double #D7332B; color: #D7332B; transform: rotate(-8deg); background: radial-gradient(circle, color-mix(in srgb, #D7332B 10%, transparent), transparent 70%); }
+.stamp b { font-size: 13px; font-weight: 600; } .stamp small { font-size: 11px; color: var(--label2); line-height: 1.25; }
+.stamp:not(.on) b { color: var(--label2); }
+@media (prefers-reduced-motion: no-preference) { .stamp .ink.slam { animation: slam .5s cubic-bezier(.3,1.6,.5,1) both; } @keyframes slam { 0% { transform: scale(1.9) rotate(-28deg); opacity: 0; } 60% { transform: scale(.9) rotate(-6deg); opacity: 1; } 100% { transform: rotate(-8deg); } } .stamp { transition: transform .3s var(--spring); } .stamp:active { transform: scale(.95); } }
+
+/* chat */
+.chat { display: grid; gap: 10px; }
+.msg { max-width: 86%; padding: 10px 14px; border-radius: 18px; font-size: 16px; line-height: 1.4; word-wrap: break-word; }
+.msg.user { justify-self: end; background: var(--tint); color: #fff; border-bottom-right-radius: 6px; }
+.msg.assistant { justify-self: start; background: var(--card); border: .5px solid var(--hair); border-bottom-left-radius: 6px; }
+.typing { display: inline-flex; gap: 4px; } .typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--label3); animation: typing 1.2s infinite; } .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes typing { 30% { transform: translateY(-4px); background: var(--label2); } }
+.qchips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; } .qchips::-webkit-scrollbar { display: none; }
+.qchips .q { white-space: nowrap; border: 0; cursor: pointer; } .qchips .q::after { content: none; }
+.composer { display: flex; gap: 8px; align-items: flex-end; background: var(--card); border: .5px solid var(--hair); border-radius: 22px; padding: 6px 6px 6px 14px; }
+.composer textarea { flex: 1; min-width: 0; resize: none; border: 0; background: none; font: inherit; font-size: 16px; line-height: 1.35; padding: 7px 0; color: var(--label); max-height: 140px; outline: none; }
+.send { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--tint); color: #fff; font-size: 18px; font-weight: 700; cursor: pointer; }
+.send.stop { background: var(--label2); font-size: 12px; }
 </style>
 
 <canvas id="bgfx" aria-hidden="true"></canvas>
@@ -1855,6 +1889,7 @@ function viewToday(n, hm, preview) {
   const body = `
   ${preview ? grp(null, row({ t: `Vista previa: Día ${n} a las ${hm}`, s: 'Así se verá esta pestaña ese día y a esa hora.' }) + row({ tag: 'button', cls: 'center', t: 'Salir de la vista previa', attrs: 'data-preview-off' })) : ''}
   ${ended ? grp(null, row({ cls: 'ld', lead: ico(I.bed, cityVar(day.city)), t: 'Terminó el plan de hoy', s: tomorrow ? `Mañana: ${tomorrow.items[0].t} · ${esc(tomorrow.items[0].h)}` : '¡Buen viaje de regreso!' }) + (tomorrow ? row({ href: '#dia' + tomorrow.n, cls: 'link', t: `Ver Día ${tomorrow.n}`, chev: 1 }) : '')) : ''}
+  ${leaveHtml(day, hm)}
   ${card}
   ${route ? grp('Ruta rápida', route) : ''}
   ${grp('Plan de hoy', items.map((x, i) => {
@@ -1864,9 +1899,11 @@ function viewToday(n, hm, preview) {
     return row({ cls: 'li' + (on ? ' done' : ''), lead: checkBtn(xid, x.h), t: `<span class="tm">${x.t}</span> ${esc(x.h)}`, tr: tag || `<button class="tbtn" type="button" data-focus="${i}">Ver</button>` });
   }).join(''), null, `${dayProgress(day)[0]} de ${items.length}`)}
   ${advice}
+  ${(() => { const st = STAMPS.filter(x => x.city === day.city); return st.length ? `<section class="grp"><h2 class="gh"><span>Sellos de hoy para Sam</span><span>${st.filter(x => c[x.id]).length}/${st.length}</span></h2><div class="stamps">${st.slice(0, 6).map(stampHtml).join('')}</div><a class="gf" href="#guia-sellos">Ver el pasaporte completo ›</a></section>` : ''; })()}
   ${food}
   ${grp('Accesos rápidos', row({ href: gmDirFromHere('b:' + day.base), ext: 1, cls: 'ld', lead: ico(I.bed, cityVar(day.city)), t: 'Volver al alojamiento', s: esc(base.n) }) +
     row({ tag: 'button', cls: 'ld', lead: ico(I.car, 'var(--orange)'), t: 'Dirección para el taxista', attrs: `data-taxi="${day.base}"`, chev: 1 }) +
+    row({ href: '#guia-claude', cls: 'ld', lead: ico(I.speech, 'var(--purple)'), t: 'Pregúntale a Claude', s: 'Comida, cambios de plan, traducciones', chev: 1 }) +
     row({ href: '#dia' + n, cls: 'ld', lead: ico(I.ticket, 'var(--tint)'), t: 'Día completo: rutas, mapa y tips', chev: 1 }))}`;
   return { title: 'Hoy', cap: `Día ${n} · ${DOWL[p.w]} ${p.d} ${MES[p.m - 1]} · ${CITY[day.city].n}`, lead: roundel(day, 'lg'), body };
 }
@@ -2013,6 +2050,132 @@ function viewPend() {
   return { title: 'Pendientes', cap: 'Reservas y compras antes del viaje', body };
 }
 
+
+/* ---------- Pasaporte de sellos de Sam ---------- */
+const STAMPS = [
+  ['TK', 's-kaminari', '雷門', 'Kaminarimon', 'Foto bajo la gran linterna roja de Sensō-ji'],
+  ['TK', 's-shibuya', '渋谷', 'Cruce de Shibuya', 'Cruzar el cruce más famoso del mundo'],
+  ['TK', 's-gacha', 'ガチャ', 'Gachapon', 'Sacar una cápsula en Akihabara'],
+  ['TK', 's-pika', 'ピカ', 'Pikachu', 'Foto con Pikachu en el Pokémon Center'],
+  ['TK', 's-pcafe', 'カフェ', 'Pokémon Café', 'Comer algo con forma de Pokémon'],
+  ['TK', 's-teamlab', '光', 'teamLab', 'Caminar dentro del agua en teamLab'],
+  ['FJ', 's-fuji', '富士', 'Monte Fuji', 'Ver el Fuji sin nubes'],
+  ['FJ', 's-pagoda', '塔', 'Chūreitō', 'Subir los ~400 escalones'],
+  ['FJ', 's-onsen', '湯', 'Onsen', 'Probar el baño al aire libre de Ubuya'],
+  ['KY', 's-torii', '鳥居', 'Fushimi Inari', 'Contar 50 torii rojos'],
+  ['KY', 's-bamboo', '竹', 'Bambú', 'Caminar por el bosque de bambú'],
+  ['KY', 's-nintendo', '任天堂', 'Nintendo Museum', 'Jugar en el museo de Nintendo'],
+  ['KY', 's-matcha', '抹茶', 'Matcha', 'Probar algo de matcha'],
+  ['OS', 's-tako', '蛸', 'Takoyaki', 'Comer takoyaki en Dōtonbori'],
+  ['OS', 's-mario', '茸', 'Super Nintendo World', 'Golpear un bloque de interrogación'],
+  ['OS', 's-glico', '看板', 'Glico', 'Foto con el corredor de Glico'],
+  ['KB', 's-orca', '鯱', 'Orcas', 'Ver las orcas de Suma Sea World'],
+  ['KB', 's-kobe', '牛', 'Carne de Kobe', 'Probar carne de Kobe'],
+  ['KZ', 's-gold', '金', 'Hoja de oro', 'Comer helado con hoja de oro'],
+  ['KZ', 's-garden', '庭', 'Kenroku-en', 'Ver los pinos con cuerdas (yukitsuri)'],
+  ['HD', 's-snow', '雪', 'Nieve', 'Tocar nieve en Shirakawa-gō'],
+  ['HD', 's-gassho', '合掌', 'Casa gasshō', 'Entrar a una casa de techo de paja'],
+  ['JP', 's-shinkansen', '新幹線', 'Shinkansen', 'Viajar en tren bala'],
+  ['JP', 's-vending', '自販機', 'Expendedora', 'Comprar algo en una máquina'],
+  ['JP', 's-arigato', '感謝', 'Arigatō', 'Decir «arigatō gozaimasu» a 10 personas'],
+  ['JP', 's-konbini', 'コンビニ', 'Konbini', 'Elegir su snack favorito de konbini']
+].map(([city, id, k, t, r]) => ({ city, id, k, t, r }));
+const PRIZES = [[8, 'Sam elige el postre de un día'], [16, 'Sam elige un gachapon extra'], [26, 'Gran premio: Sam elige un souvenir']];
+function stampHtml(s) {
+  const on = !!checks()[s.id];
+  const fs = [0, 30, 23, 18, 15][Math.min(4, [...s.k].length)];
+  return `<button class="stamp${on ? ' on' : ''}" type="button" data-stamp="${s.id}" aria-pressed="${on}" aria-label="${esc(s.t)}: ${esc(s.r)}">
+    <span class="ink${mem.stampPop === s.id ? ' slam' : ''}" style="font-size:${fs}px" lang="ja">${esc(s.k)}</span><b>${esc(s.t)}</b><small>${esc(s.r)}</small></button>`;
+}
+function viewSellos() {
+  const c = checks(), got = STAMPS.filter(s => c[s.id]).length;
+  const groups = [...Object.keys(CITY).filter(k => STAMPS.some(s => s.city === k)), 'JP'];
+  return `<section class="pend-hero"><div class="ring"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="39"/><circle class="fg" cx="50" cy="50" r="39" style="stroke:var(--red);stroke-dashoffset:${245 * (1 - got / STAMPS.length)}"/></svg><b>${got}</b></div>
+    <div><h2>${got} de ${STAMPS.length} sellos</h2><p>Cuando Sam cumpla un reto, toquen su sello para estamparlo.</p></div></section>
+    ${grp('Premios', PRIZES.map(([n, t]) => row({ cls: 'ld' + (got >= n ? '' : ' done'), lead: ico(I.ticket, got >= n ? 'var(--red)' : 'var(--gray)'), t: esc(t), s: got >= n ? '¡Desbloqueado!' : `Faltan ${n - got} sellos`, tr: got >= n ? '<span class="pill hot">Listo</span>' : `${got}/${n}` })).join(''))}
+    ${groups.map(k => `<section class="grp"><h2 class="gh"><span>${k === 'JP' ? 'En todo Japón' : CITY[k].n + ' <span lang="ja">' + CITY[k].jp + '</span>'}</span><span>${STAMPS.filter(s => s.city === k && c[s.id]).length}/${STAMPS.filter(s => s.city === k).length}</span></h2><div class="stamps">${STAMPS.filter(s => s.city === k).map(stampHtml).join('')}</div></section>`).join('')}`;
+}
+
+/* ---------- Hora de salir ---------- */
+const fmtHM = m => { m = ((m % 1440) + 1440) % 1440; return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
+function leaveInfo(day, hm) {
+  for (const [k, it] of day.items.entries()) {
+    if (it.t <= hm) continue;
+    const legs = legsForItem(day, it); if (!legs.length) continue;
+    const l = legs[0];
+    if (k > 0 && (day.items[k - 1].p || []).includes(l.d)) continue; // ya están ahí
+    const mins = l.steps.filter(s => !s.alt).reduce((a, s) => a + (s.min || 0), 0);
+    const leave = toMin(it.t) - mins - 10;
+    return { it, l, mins, leave, left: leave - toMin(hm) };
+  }
+  return null;
+}
+function leaveHtml(day, hm) {
+  const L = leaveInfo(day, hm); if (!L) return '';
+  const a = place(L.l.o), b = place(L.l.d);
+  const st = L.left <= 0 ? 'late' : L.left <= 10 ? 'now' : L.left <= 30 ? 'soon' : '';
+  const head = L.left <= 0 ? '¡Ya deberían salir!' : `Salgan a las ${fmtHM(L.leave)}`;
+  const sub = L.left <= 0 ? `${L.it.h} empieza a las ${L.it.t}` : `en ${fmtMin(L.left)} · ${L.mins} min de trayecto + 10 de margen`;
+  return `<section class="leave ${st}"><div class="lv-top"><span class="lv-k">Hora de salir</span><span class="lv-to">→ ${esc(b.n)}</span></div>
+    <div class="lv-h">${head}</div><div class="lv-s">${esc(sub)}</div>${flowHtml(L.l)}
+    <div class="lv-btns"><a class="lnk" href="${gmRoute(L.l.o, L.l.d, L.l.steps.filter(s => !s.alt).every(s => s.m === 'walk') ? 'walking' : 'transit')}" target="_blank" rel="noopener">Ruta desde ${esc(a.n)}</a><a class="lnk" href="${gmDirFromHere(L.l.d)}" target="_blank" rel="noopener">Desde donde estoy</a></div></section>`;
+}
+
+/* ---------- Asistente Claude ---------- */
+mem.chat = store.get('chat', []);
+mem.sampleReady = false; mem.sample = null;
+(window.claude && window.claude.use ? window.claude.use('sample') : Promise.resolve(null)).then(s => { mem.sample = s; }, () => {}).finally(() => { mem.sampleReady = true; if (location.hash === '#guia-claude') rerender(); });
+function tripContext() {
+  const now = jstNow(), i = dayIndexFor(now.ymd), c = checks();
+  const dayTxt = d => `Día ${d.n} (${fdate(d.date, true)}, ${CITY[d.city].n}, duermen en ${BASES[d.base].n}): ` + d.items.map((it, k) => `${it.t}-${it.e} ${it.h}${it.f ? ' [comer: ' + it.f + ']' : ''}${c['d' + d.n + '-' + k] ? ' (hecho)' : ''}`).join('; ');
+  const focus = mem.preview ? DAYS[mem.preview - 1] : i >= 0 ? DAYS[i] : null;
+  return `Eres el asistente de viaje de una familia mexicana en Japón: 2 adultos y su hijo Sam de 10 años, del 20 nov al 9 dic 2026. Responde en español de México, breve y práctico para leer en el celular (listas cortas, sin tablas). Usa nombres de lugares y estaciones como aparecen en Google Maps. No puedes navegar ni ver el clima en vivo: si algo depende de horarios, precios o clima del día, dilo y sugiere verificarlo. Para traducciones da el japonés, la lectura en romaji y una nota de uso.
+Ahora en Japón: ${fdate(now.ymd, true)} ${now.ymd.slice(0, 4)}, ${now.hm} h.${focus ? '\nDÍA EN CURSO: ' + dayTxt(focus) : ' El viaje aún no empieza.'}
+ITINERARIO COMPLETO:
+${DAYS.map(d => `D${d.n} ${fdate(d.date, true)} ${CITY[d.city].n}: ${d.title} — ${d.items.map(it => it.t + ' ' + it.h).join(' / ')}`).join('\n')}
+ALOJAMIENTOS: ${BASE_ORDER.map(k => `${BASES[k].n} (${BASES[k].addr}; ${BASES[k].in} → ${BASES[k].out})`).join('; ')}
+PENDIENTES POR RESERVAR: ${TODO.filter(t => !c[t.id]).map(t => t.t + (t.date ? ' (' + fdate(t.date) + ')' : '')).join('; ') || 'ninguno'}`;
+}
+const fmtChat = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/^#{1,4}\s*(.+)$/gm, '<b>$1</b>').replace(/^\s*[-*•]\s+/gm, '• ').replace(/\n/g, '<br>');
+const CHAT_CHIPS = ['¿Qué comemos cerca de donde estamos?', 'Llueve: ¿qué cambiamos del plan de hoy?', 'Sam está cansado: plan B tranquilo para hoy', '¿Qué es lo más urgente por reservar?', '¿Qué souvenirs típicos hay en esta ciudad?', 'Traduce al japonés: '];
+function viewClaude() {
+  if (!mem.sampleReady) return grp(null, row({ t: 'Conectando con Claude…' }));
+  if (!mem.sample || mem.sampleOff) return grp(null, row({ cls: 'ld', lead: ico(I.speech, 'var(--gray)'), t: 'El asistente no está disponible aquí', s: esc(mem.sampleOff || 'Funciona al abrir la app desde claude.ai con tu cuenta (en Chrome o en la app de Claude). En la versión web de tu sitio no está disponible.') }));
+  const msgs = mem.chat.map(m => `<div class="msg ${m.role}">${m.role === 'user' ? esc(m.content).replace(/\n/g, '<br>') : fmtChat(m.content)}</div>`).join('');
+  return `${mem.chat.length ? '' : grp(null, row({ cls: 'ld', lead: ico(I.speech, 'var(--purple)'), t: 'Pregúntale lo que sea del viaje', s: 'Conoce su itinerario, alojamientos, pendientes y la hora de Japón. Cada pregunta usa tu cuenta de Claude.' }))}
+  <div class="chat" id="chat">${msgs}${mem.chatBusy ? `<div class="msg assistant" id="streamMsg"><span class="typing"><i></i><i></i><i></i></span></div>` : ''}</div>
+  <div class="qchips">${CHAT_CHIPS.map(q => `<button type="button" class="lnk q" data-ask="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+  <form id="chatForm" class="composer"><textarea id="chatIn" rows="1" placeholder="Escribe tu pregunta…" aria-label="Pregunta para Claude">${esc(mem.draft || '')}</textarea>
+    ${mem.chatBusy ? '<button type="button" class="send stop" data-chat-stop aria-label="Detener">■</button>' : '<button type="submit" class="send" aria-label="Enviar">↑</button>'}</form>
+  ${mem.chat.length && !mem.chatBusy ? `<div class="btns" style="justify-content:center"><button type="button" class="tbtn" data-chat-clear>Borrar conversación</button></div>` : ''}`;
+}
+async function askClaude(q) {
+  q = (q || '').trim();
+  if (!q || mem.chatBusy || !mem.sample) return;
+  mem.chat.push({ role: 'user', content: q }); mem.draft = ''; mem.chatBusy = true;
+  rerender(); scrollChat();
+  mem.chatCtl = new AbortController();
+  const turns = mem.chat.slice(-12); while (turns.length && turns[0].role !== 'user') turns.shift();
+  let answer = '';
+  try {
+    const r = await mem.sample([{ role: 'user', content: tripContext() }, ...turns], {
+      cache: false, modelTier: 'default', effort: 'low', signal: mem.chatCtl.signal,
+      onText: ({ text }) => { answer = text; const el = $('#streamMsg'); if (el) { el.innerHTML = fmtChat(text); scrollChat(); } }
+    });
+    answer = r.text + (r.truncated ? '\n\n(Respuesta cortada: pregunta algo más específico.)' : '');
+  } catch (e) {
+    answer = e.text || '';
+    const why = { not_granted: 'No se dio permiso para usar Claude desde la app.', sampling_disabled: 'Claude no está disponible para esta cuenta.', rate_limited: 'Demasiadas preguntas seguidas o límite de uso alcanzado. Intenta en un rato.', session_expired: 'La sesión expiró: vuelve a entrar a claude.ai.', refused: 'Claude no pudo responder eso; intenta preguntarlo de otra forma.', cancelled: '' }[e.code];
+    if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(e.code)) mem.sampleOff = why || 'El asistente no está disponible en esta vista.';
+    else if (e.code !== 'cancelled') answer += (answer ? '\n\n' : '') + '⚠️ ' + (why || 'Se cortó la conexión. Intenta de nuevo.');
+  }
+  if (answer) mem.chat.push({ role: 'assistant', content: answer });
+  mem.chat = mem.chat.slice(-30); store.set('chat', mem.chat);
+  mem.chatBusy = false; mem.chatCtl = null;
+  if (location.hash === '#guia-claude') { rerender(); scrollChat(); }
+}
+function scrollChat() { const el = $('#chat'); if (el) { const r = el.getBoundingClientRect(); if (r.bottom > innerHeight - 160) window.scrollBy({ top: r.bottom - innerHeight + 200, behavior: 'smooth' }); } }
+
 const GUIA = {
   tren: { n: 'Tren, metro y taxis', i: I.train, c: 'var(--tint)' },
   frases: { n: 'Frases en japonés', i: I.speech, c: 'var(--orange)' },
@@ -2022,13 +2185,15 @@ const GUIA = {
   clima: { n: 'Clima y ropa', i: I.cloud, c: 'var(--c-FJ)' },
   etiqueta: { n: 'Etiqueta', i: I.bow, c: 'var(--purple)' },
   docs: { n: 'Documentos y QR', i: I.doc, c: 'var(--indigo)' },
-  sos: { n: 'Emergencias', i: I.sos, c: 'var(--red)' }
+  sos: { n: 'Emergencias', i: I.sos, c: 'var(--red)' },
+  sellos: { n: 'Pasaporte de Sam', i: I.ticket, c: 'var(--red)' },
+  claude: { n: 'Asistente Claude', i: I.speech, c: 'var(--purple)' }
 };
 function viewGuia(sub) {
   const g = k => row({ href: '#guia-' + k, cls: 'ld', lead: ico(GUIA[k].i, GUIA[k].c), t: GUIA[k].n, tr: k === 'docs' ? `${DOCS.filter(d => checks()[d.id]).length}/${DOCS.length}` : '', chev: 1 });
   if (!sub || !GUIA[sub]) {
     const tonight = baseForNight(jstNow().ymd);
-    const body = grp('En el camino', g('tren') + g('frases') + row({ tag: 'button', cls: 'ld', lead: ico(I.car, 'var(--yellow)'), t: 'Dirección de hoy para el taxi', s: esc(BASES[tonight].n), attrs: `data-taxi="${tonight}"`, chev: 1 }) + g('sam')) +
+    const body = grp('En el camino', g('claude') + g('sellos') + g('tren') + g('frases') + row({ tag: 'button', cls: 'ld', lead: ico(I.car, 'var(--yellow)'), t: 'Dirección de hoy para el taxi', s: esc(BASES[tonight].n), attrs: `data-taxi="${tonight}"`, chev: 1 }) + g('sam')) +
       grp('Dinero', g('gastos') + g('dinero')) +
       grp('Preparación', g('clima') + g('etiqueta') + g('docs') + g('sos')) +
       `<section class="grp"><h2 class="gh"><span>Apariencia</span></h2>${segHtml('theme', [['auto', 'Automático'], ['light', 'Claro'], ['dark', 'Oscuro']], store.get('theme', 'auto'), 'data-theme-set', 'Tema')}</section>`;
@@ -2080,6 +2245,8 @@ function viewGuia(sub) {
   else if (sub === 'docs') body = grp('Para llevar', DOCS.map(todoRow).join(''), null, `${DOCS.filter(d => checks()[d.id]).length} de ${DOCS.length}`);
   else if (sub === 'sos') body = grp('Teléfonos', [['Policía', '110'], ['Ambulancia y bomberos', '119'], ['Japan Visitor Hotline (24 h)', '050-3816-2787'], ['Embajada de México', '+81 3 3581 1131']].map(([t, n]) =>
       row({ tag: 'button', t: esc(t), s: t.startsWith('Embajada') ? '2-15-1 Nagatachō, Chiyoda-ku, Tokio' : '', tr: `<span style="color:var(--tint)">${n}</span>`, attrs: `data-copy="${n}"` })).join(''), 'Toca un número para copiarlo. Guarden también la asistencia de su seguro de viaje.');
+  else if (sub === 'sellos') body = viewSellos();
+  else if (sub === 'claude') body = viewClaude();
   return { title: GUIA[sub].n, back, body };
 }
 
@@ -2432,7 +2599,7 @@ function attachSwipe(card) {
 }
 document.addEventListener('click', e => { if (mem.swallowClick) { e.preventDefault(); e.stopPropagation(); } }, true);
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-say],[data-check],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket],[data-step],[data-focus],[data-food],[data-theme-set]');
+  const t = e.target.closest('[data-say],[data-check],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket],[data-step],[data-focus],[data-food],[data-theme-set],[data-stamp],[data-ask],[data-chat-stop],[data-chat-clear]');
   if (!t) return;
   const d = t.dataset;
   const sg = t.closest('.seg');
@@ -2440,6 +2607,10 @@ document.addEventListener('click', e => {
   if (d.say) speak(d.say, 'slow' in d, t);
   else if (d.check) { toggleCheck(d.check); if (checks()[d.check]) mem.pop = d.check; rerender(); }
   else if (d.themeSet) setTheme(d.themeSet, e);
+  else if (d.stamp) { toggleCheck(d.stamp); mem.stampPop = checks()[d.stamp] ? d.stamp : null; rerender(); mem.stampPop = null; if (checks()[d.stamp]) hud('¡Sello!'); }
+  else if (d.ask != null) { if (d.ask.endsWith(': ')) { const ta = $('#chatIn'); ta.value = d.ask; mem.draft = d.ask; ta.focus(); } else askClaude(d.ask); }
+  else if ('chatStop' in d) { if (mem.chatCtl) mem.chatCtl.abort(); }
+  else if ('chatClear' in d) { mem.chat = []; store.set('chat', []); rerender(); }
   else if (d.taxi) taxiSheet(d.taxi);
   else if (d.copy) copyText(d.copy);
   else if (d.phrase) { const p = PHRASES[+d.phrase]; openSheet('Frase', showCard(esc(p[0]), esc(p[1]), `<span style="font-family:var(--mono)">${esc(p[2])}</span>`, p[1].replace('…', ''))); }
@@ -2465,6 +2636,7 @@ document.addEventListener('click', e => {
   }
 });
 document.addEventListener('submit', e => {
+  if (e.target.id === 'chatForm') { e.preventDefault(); askClaude($('#chatIn').value); return; }
   if (e.target.id !== 'gForm') return;
   e.preventDefault();
   const y = Math.round(+$('#gY').value); if (!y) return;
@@ -2474,13 +2646,15 @@ document.addEventListener('submit', e => {
 });
 document.addEventListener('input', e => {
   const id = e.target.id;
+  if (id === 'chatIn') { mem.draft = e.target.value; e.target.style.height = 'auto'; e.target.style.height = Math.min(140, e.target.scrollHeight) + 'px'; }
   if (id === 'cvJpy' || id === 'cvRate') { const r = +$('#cvRate').value || 0; if (id === 'cvRate') store.set('rate', r); $('#cvMxn').value = ((+$('#cvJpy').value || 0) * r).toFixed(2); }
   if (id === 'cvMxn') { const r = +$('#cvRate').value || 0; $('#cvJpy').value = r ? Math.round((+$('#cvMxn').value || 0) / r) : 0; }
   if (id === 'kidN' || id === 'kidP1' || id === 'kidP2') store.set('kid', { n: $('#kidN').value, p1: $('#kidP1').value, p2: $('#kidP2').value });
 });
 $('#sheetClose').addEventListener('click', closeSheet);
 $('#scrim').addEventListener('click', closeSheet);
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#sheet').hidden) closeSheet(); });
+document.addEventListener('keydown', e => {
+  if (e.target.id === 'chatIn' && e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); askClaude(e.target.value); return; } if (e.key === 'Escape' && !$('#sheet').hidden) closeSheet(); });
 window.addEventListener('scroll', onScroll, { passive: true });
 window.addEventListener('hashchange', navigate);
 $('#themeB').addEventListener('click', e => setTheme(isDark() ? 'light' : 'dark', e));
