@@ -1112,6 +1112,14 @@ body::before, .nav { background: transparent; }
 
 .r.upl { position: relative; }
 .filehit { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2; font-size: 100px; }
+
+.docbar { display: flex; flex-wrap: wrap; gap: 8px; }
+.docbar .lnk { border: 0; cursor: pointer; font: inherit; font-size: 14px; font-weight: 600; padding: 8px 14px; }
+.docbar .lnk::after { content: none; }
+.docbar a.lnk::after { content: " ↗"; }
+.docbar .pick { position: relative; overflow: hidden; }
+.docbar .del { color: var(--red); background: color-mix(in srgb, var(--red) 13%, transparent); }
+.docbar .del.armed { background: var(--red); color: #fff; }
 </style>
 
 <canvas id="bgfx" aria-hidden="true"></canvas>
@@ -2223,7 +2231,7 @@ mem.docs = []; mem.docsReady = false; mem.offline = new Set();
   }, e => { mem.docsErr = e.code; mem.docsReady = true; refreshDocs(); });
   else { mem.docsReady = true; refreshDocs(); }
 })();
-function refreshDocs() { const h = location.hash || '#hoy'; if (['#reservas', '#hoy'].includes(h) && $('#sheet').hidden) rerender(); }
+function refreshDocs() { const h = location.hash || '#hoy'; if (!['#reservas', '#hoy'].includes(h)) return; if ($('#sheet').hidden) rerender(); else mem.docsDirty = true; }
 const fmtSize = b => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
 const docLinkName = l => !l ? '' : l.startsWith('b:') ? (BASES[l.slice(2)] || {}).n : l.startsWith('tk:') ? (TICKETS[+l.slice(3)] || {}).n : '';
 function docRow(d) {
@@ -2248,7 +2256,7 @@ function uploadSheet() {
   openSheet('Agregar documento', `<form id="docForm" class="grp">
     <div class="list">
       <div class="r upl"><span class="ico" style="--b:var(--tint)">${I_DOC}</span><span class="m"><span class="t" id="docFileName">Toca aquí para elegir PDF o imagen</span><span class="s" id="docFileInfo">PDF, JPG o PNG · máx. 20 MB</span></span>
-        <input id="docFile" class="filehit" type="file" accept=".pdf,application/pdf,image/*" multiple aria-label="Elegir PDF o imagen"></div>
+        <input id="docFile" class="filehit" type="file" accept="${ACCEPT}" multiple aria-label="Elegir PDF o imagen"></div>
       <div class="r field"><label for="docName">Nombre</label><input id="docName" type="text" placeholder="Pase de abordar NRT"></div>
       <div class="r field"><label for="docCat">Categoría</label><select id="docCat">${DOC_CATS.map(c => `<option value="${c[0]}">${c[1]}</option>`).join('')}</select></div>
       <div class="r field"><label for="docLink">Reserva</label><select id="docLink">${links.map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('')}</select></div>
@@ -2256,6 +2264,13 @@ function uploadSheet() {
     <p class="gf" id="docMsg">Al ligarlo a una reserva aparece también en su ficha y en Hoy ese día.</p>
     <div class="list">${row({ tag: 'button', cls: 'center', t: 'Subir', attrs: 'type="submit" id="docGo"' }).replace(' type="button"', '')}</div></form>`);
 }
+const ACCEPT = '.pdf,application/pdf,image/*';
+function fileType(f) {
+  const ext = (f.name.split('.').pop() || '').toLowerCase();
+  const type = f.type || { pdf: 'application/pdf', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif' }[ext] || '';
+  return /^(application\/pdf|image\/(jpeg|png|webp|gif))$/.test(type) ? type : null;
+}
+const upErr = (e, f) => ({ too_large: `«${f.name}» pesa más de 20 MB.`, unsupported_type: `«${f.name}» no es PDF ni imagen.`, quota_or_state: 'Se llenó el espacio de la app.', rate_limited: 'Demasiadas subidas seguidas; espera un momento.' }[e && e.code] || `No se pudo subir «${f.name}». Intenta de nuevo.`);
 async function uploadDocs() {
   const files = [...($('#docFile').files || [])];
   const msg = $('#docMsg'), go = $('#docGo');
@@ -2265,9 +2280,8 @@ async function uploadDocs() {
   let ok = 0;
   for (const [k, f] of files.entries()) {
     msg.textContent = `Subiendo ${k + 1} de ${files.length}…`;
-    const ext = (f.name.split('.').pop() || '').toLowerCase();
-    const type = f.type || { pdf: 'application/pdf', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif' }[ext] || '';
-    if (!/^(application\/pdf|image\/(jpeg|png|webp|gif))$/.test(type)) { msg.textContent = `«${f.name}» no es PDF, JPG ni PNG. Si es una foto HEIC, haz una captura de pantalla y súbela.`; go.disabled = false; return; }
+    const type = fileType(f);
+    if (!type) { msg.textContent = `«${f.name}» no es PDF, JPG ni PNG. Si es una foto HEIC, haz una captura de pantalla y súbela.`; go.disabled = false; return; }
     try {
       const r = await mem.assets.upload(f, type !== f.type ? { type } : undefined);
       const name = files.length === 1 && $('#docName').value.trim() ? $('#docName').value.trim() : f.name.replace(/\.[^.]+$/, '');
@@ -2275,7 +2289,7 @@ async function uploadDocs() {
       await idb.set(r.id, f); mem.offline.add(r.id);
       ok++;
     } catch (e) {
-      msg.textContent = { too_large: `«${f.name}» pesa más de 20 MB.`, unsupported_type: `«${f.name}» no es PDF ni imagen.`, quota_or_state: 'Se llenó el espacio de la app.', rate_limited: 'Demasiadas subidas seguidas; espera un momento.' }[e.code] || `No se pudo subir «${f.name}». Intenta de nuevo.`;
+      msg.textContent = upErr(e, f);
       go.disabled = false; return;
     }
   }
@@ -2300,10 +2314,15 @@ function loadPdfJs() {
 async function openDoc(id) {
   const d = mem.docs.find(x => x.id === id); if (!d) return;
   mem.delArm = null;
-  openSheet(d.name, `<div class="docview" id="docview"><p class="gf">Abriendo…</p></div>` +
-    grp(null, row({ href: '/_blob/' + d.assetId, ext: 1, cls: 'link', t: 'Abrir en otra pestaña' }) +
-      (mem.assets ? row({ tag: 'button', cls: 'danger', t: 'Borrar documento', attrs: `data-doc-del="${d.id}"` }) : ''),
-      [((DOC_CATS.find(c => c[0] === d.cat) || [])[1]), docLinkName(d.link), fmtSize(d.size || 0)].filter(Boolean).map(esc).join(' · ')));
+  const meta = [((DOC_CATS.find(c => c[0] === d.cat) || [])[1]), docLinkName(d.link), fmtSize(d.size || 0)].filter(Boolean).map(esc).join(' · ');
+  openSheet(d.name, `<div class="docbar">
+      ${mem.assets ? `<span class="lnk pick">Reemplazar<input id="repFile" class="filehit" type="file" accept="${ACCEPT}" data-rep="${d.id}" aria-label="Reemplazar archivo"></span>
+      <button type="button" class="lnk" data-doc-edit="${d.id}">Editar</button>` : ''}
+      <a class="lnk" href="/_blob/${d.assetId}" target="_blank" rel="noopener">Otra pestaña</a>
+      ${mem.assets ? `<button type="button" class="lnk del" data-doc-del="${d.id}">Borrar</button>` : ''}
+    </div>
+    <p class="gf" id="repInfo">${meta}</p>
+    <div class="docview" id="docview"><p class="gf">Abriendo…</p></div>`);
   const box = $('#docview');
   try {
     const blob = await getBlob(d.assetId);
@@ -2322,17 +2341,53 @@ async function openDoc(id) {
     }
     if (pdf.numPages > 30) box.insertAdjacentHTML('beforeend', '<p class="gf">Se muestran las primeras 30 páginas.</p>');
   } catch (e) {
-    if (box.isConnected) box.innerHTML = `<p class="gf">No se pudo abrir aquí${navigator.onLine === false ? ': no hay internet y este documento no está guardado en el teléfono' : ''}. Prueba «Abrir en otra pestaña».</p>`;
+    if (box.isConnected) box.innerHTML = `<p class="gf">No se pudo abrir aquí${navigator.onLine === false ? ': no hay internet y este documento no está guardado en el teléfono' : ''}. Prueba el botón «Otra pestaña».</p>`;
   }
 }
 async function deleteDoc(id, btn) {
-  if (mem.delArm !== id) { mem.delArm = id; btn.querySelector('.t').textContent = 'Toca otra vez para borrar'; return; }
+  const lbl = btn.querySelector('.t') || btn;
+  if (mem.delArm !== id) { mem.delArm = id; lbl.textContent = '¿Seguro? Toca otra vez'; btn.classList.add('armed'); return; }
   const d = mem.docs.find(x => x.id === id); if (!d) return;
-  btn.querySelector('.t').textContent = 'Borrando…';
-  try { await mem.assets.delete(d.assetId); } catch (e) { if (e.code !== 'not_found') { btn.querySelector('.t').textContent = 'No se pudo borrar'; return; } }
+  lbl.textContent = 'Borrando…';
+  try { await mem.assets.delete(d.assetId); } catch (e) { if (e.code !== 'not_found') { lbl.textContent = 'No se pudo borrar'; return; } }
   try { await mem.db.doc('docs/' + id).delete(); } catch (e) {}
   await idb.del(d.assetId); mem.offline.delete(d.assetId);
+  mem.docs = mem.docs.filter(x => x.id !== id); mem.docsDirty = true;
   closeSheet(); hud('Documento borrado');
+}
+async function replaceDoc(id, f) {
+  const d = mem.docs.find(x => x.id === id), info = $('#repInfo');
+  if (!d || !f) return;
+  const type = fileType(f);
+  if (!type) { info.textContent = `«${f.name}» no es PDF, JPG ni PNG.`; return; }
+  info.textContent = 'Subiendo el archivo nuevo…';
+  try {
+    const r = await mem.assets.upload(f, type !== f.type ? { type } : undefined);
+    const patch = { assetId: r.id, type: r.contentType, size: r.sizeBytes, updatedAt: new Date().toISOString() };
+    await mem.db.doc('docs/' + id).update(patch);
+    const old = d.assetId;
+    Object.assign(d, patch);
+    await idb.set(r.id, f); mem.offline.add(r.id);
+    try { await mem.assets.delete(old); } catch (e) {}
+    await idb.del(old); mem.offline.delete(old);
+    hud('Archivo reemplazado'); mem.docsDirty = true;
+    openDoc(id);
+  } catch (e) { info.textContent = upErr(e, f); }
+}
+function editSheet(id) {
+  const d = mem.docs.find(x => x.id === id); if (!d) return;
+  const links = [['', 'Ninguna'], ...BASE_ORDER.map(k => ['b:' + k, BASES[k].n]), ...TICKETS.map((t, i) => ['tk:' + i, t.n])];
+  openSheet('Editar documento', `<form id="docEditForm" class="grp" data-id="${d.id}"><div class="list">
+    <div class="r field"><label for="edName">Nombre</label><input id="edName" type="text" value="${esc(d.name)}"></div>
+    <div class="r field"><label for="edCat">Categoría</label><select id="edCat">${DOC_CATS.map(c => `<option value="${c[0]}"${c[0] === d.cat ? ' selected' : ''}>${c[1]}</option>`).join('')}</select></div>
+    <div class="r field"><label for="edLink">Reserva</label><select id="edLink">${links.map(([v, l]) => `<option value="${v}"${v === (d.link || '') ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></div>
+  </div><p class="gf" id="edMsg"></p><div class="list">${row({ tag: 'button', cls: 'center', t: 'Guardar cambios', attrs: 'type="submit"' }).replace(' type="button"', '')}</div></form>`);
+}
+async function saveEdit(form) {
+  const id = form.dataset.id, d = mem.docs.find(x => x.id === id); if (!d) return;
+  const patch = { name: $('#edName').value.trim() || d.name, cat: $('#edCat').value, link: $('#edLink').value };
+  try { await mem.db.doc('docs/' + id).update(patch); Object.assign(d, patch); mem.docsDirty = true; closeSheet(); hud('Cambios guardados'); }
+  catch (e) { $('#edMsg').textContent = 'No se pudieron guardar los cambios. Intenta de nuevo.'; }
 }
 async function saveAllOffline(btn) {
   const l = mem.docs.filter(d => !mem.offline.has(d.assetId));
@@ -2440,9 +2495,10 @@ function closeSheet(instant) {
   const sh = $('#sheet'), sc = $('#scrim');
   try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
   if (sh.hidden) return;
-  if (instant === true || RM) { sh.hidden = true; sc.hidden = true; return; }
+  const after = () => { if (mem.docsDirty && instant !== true) { mem.docsDirty = false; rerender(); } };
+  if (instant === true || RM) { sh.hidden = true; sc.hidden = true; if (instant === true) mem.docsDirty = false; after(); return; }
   sh.classList.add('closing'); sc.classList.add('closing');
-  setTimeout(() => { sh.hidden = true; sc.hidden = true; sh.classList.remove('closing'); sc.classList.remove('closing'); }, 270);
+  setTimeout(() => { sh.hidden = true; sc.hidden = true; sh.classList.remove('closing'); sc.classList.remove('closing'); after(); }, 270);
 }
 const playBar = speech => `<div class="playbar"><button class="play" type="button" data-say="${esc(speech)}">${I.speaker} Escuchar</button><button class="play alt" type="button" data-say="${esc(speech)}" data-slow>Más lento</button></div>`;
 const showCard = (say, huge, sub, speech) => `<div class="show"><div class="say" lang="ja">${say}</div><div class="huge" lang="ja">${huge}</div><div class="sub2">${sub}</div>${speech ? playBar(speech) : ''}</div>`;
@@ -2765,7 +2821,7 @@ function attachSwipe(card) {
 }
 document.addEventListener('click', e => { if (mem.swallowClick) { e.preventDefault(); e.stopPropagation(); } }, true);
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-say],[data-check],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket],[data-step],[data-focus],[data-food],[data-theme-set],[data-stamp],[data-ask],[data-chat-stop],[data-chat-clear],[data-doc],[data-doc-add],[data-doc-del],[data-offline-all]');
+  const t = e.target.closest('[data-say],[data-check],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket],[data-step],[data-focus],[data-food],[data-theme-set],[data-stamp],[data-ask],[data-chat-stop],[data-chat-clear],[data-doc],[data-doc-add],[data-doc-del],[data-offline-all],[data-doc-edit]');
   if (!t) return;
   const d = t.dataset;
   const sg = t.closest('.seg');
@@ -2776,6 +2832,7 @@ document.addEventListener('click', e => {
   else if (d.doc) openDoc(d.doc);
   else if ('docAdd' in d) uploadSheet();
   else if (d.docDel) deleteDoc(d.docDel, t);
+  else if (d.docEdit) editSheet(d.docEdit);
   else if ('offlineAll' in d) saveAllOffline(t);
   else if (d.stamp) { toggleCheck(d.stamp); mem.stampPop = checks()[d.stamp] ? d.stamp : null; rerender(); mem.stampPop = null; if (checks()[d.stamp]) hud('¡Sello!'); }
   else if (d.ask != null) { if (d.ask.endsWith(': ')) { const ta = $('#chatIn'); ta.value = d.ask; mem.draft = d.ask; ta.focus(); } else askClaude(d.ask); }
@@ -2807,6 +2864,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('submit', e => {
   if (e.target.id === 'docForm') { e.preventDefault(); uploadDocs(); return; }
+  if (e.target.id === 'docEditForm') { e.preventDefault(); saveEdit(e.target); return; }
   if (e.target.id === 'chatForm') { e.preventDefault(); askClaude($('#chatIn').value); return; }
   if (e.target.id !== 'gForm') return;
   e.preventDefault();
@@ -2816,6 +2874,7 @@ document.addEventListener('submit', e => {
   store.set('gastos', g); rerender(); hud('Gasto agregado');
 });
 document.addEventListener('change', e => {
+  if (e.target.id === 'repFile') { replaceDoc(e.target.dataset.rep, e.target.files[0]); return; }
   if (e.target.id !== 'docFile') return;
   const f = [...e.target.files];
   $('#docFileName').textContent = f.length ? f.length === 1 ? f[0].name : f.length + ' archivos listos' : 'Toca aquí para elegir PDF o imagen';
