@@ -8,14 +8,12 @@ const dir = __dirname
 const read = (f) => fs.readFileSync(path.join(dir, f), 'utf8')
 
 const app = read('app.html')
-  .replace('/*LEAFLET_CSS*/', () => read('leaflet-1.9.4.css'))
-  .replace('/*COAST*/[]', () => read('japan-coast.json').trim())
 
 const title = app.match(/<title>.*?<\/title>/)[0]
 const body = app.replace(title + '\n', '')
 
 const doc = `<!doctype html>
-<html lang="es" data-tiles="osm">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
