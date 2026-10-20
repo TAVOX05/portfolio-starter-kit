@@ -484,6 +484,43 @@ body::before, .nav { background: transparent; }
   @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
   @keyframes glowp { 50% { opacity: .4; } }
 }
+
+/* sellos en familia */
+.stamp .ink { position: relative; }
+.stamp.on .ink { border: 0; color: inherit; background: none; transform: rotate(-8deg); }
+.stamp.on .ink::before { content: ""; position: absolute; inset: 0; border-radius: 50%; padding: 4px; background: var(--ring); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+.stamp.on .ink::after { content: ""; position: absolute; inset: 7px; border-radius: 50%; border: 1.5px solid currentColor; opacity: .35; }
+.stamp .kj { position: relative; z-index: 1; font-weight: 800; }
+.stamp .who { display: flex; gap: 3px; min-height: 16px; margin-top: 2px; }
+.stamp .who i { width: 16px; height: 16px; border-radius: 50%; color: #fff; font-style: normal; font-size: 9px; font-weight: 800; display: grid; place-items: center; }
+.per { display: flex; flex-wrap: wrap; gap: 6px 12px; } .per span { display: inline-flex; align-items: center; gap: 5px; } .per i { width: 10px; height: 10px; border-radius: 50%; }
+.mepick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mepick button { --fc: var(--tint); display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 6px; border-radius: 14px; border: 1.5px solid var(--hair); background: var(--card); font-size: 16px; font-weight: 600; cursor: pointer; color: var(--label); }
+.mepick button span { width: 14px; height: 14px; border-radius: 50%; background: var(--fc); }
+.mepick button[aria-pressed="true"] { border-color: var(--fc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--fc) 25%, transparent); }
+.danger-btn { background: var(--red); color: #fff; }
+
+/* mascota asistente: estados */
+.pet { position: relative; }
+.pet.sm { width: 48px; height: 48px; }
+.pet .tb { position: absolute; top: -10px; right: -14px; display: none; gap: 3px; padding: 6px 8px; border-radius: 14px; background: var(--card); border: .5px solid var(--hair); box-shadow: var(--lift); z-index: 2; }
+.pet.sm .tb { top: -16px; right: -18px; padding: 4px 6px; }
+.pet .tb i { width: 6px; height: 6px; border-radius: 50%; background: var(--pc); }
+.pet.think .tb { display: flex; }
+.pet.talk::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--pc); pointer-events: none; }
+.dock { position: sticky; bottom: calc(92px + env(safe-area-inset-bottom, 0px)); z-index: 5; display: flex; gap: 8px; align-items: flex-end; }
+.dock .composer { flex: 1; min-width: 0; box-shadow: var(--lift); }
+@media (prefers-reduced-motion: no-preference) {
+  .pet .tb i { animation: typing 1.1s infinite; } .pet .tb i:nth-child(2) { animation-delay: .15s; } .pet .tb i:nth-child(3) { animation-delay: .3s; }
+  .pet.think .petsvg { animation: petthink 1.1s ease-in-out infinite; }
+  .pet.talk .petsvg { animation: pettalk .26s ease-in-out infinite alternate; }
+  .pet.talk::after { animation: petring 1s ease-out infinite; }
+  .pet.happy .petsvg { animation: pethop .55s cubic-bezier(.34,1.6,.64,1) 2; }
+  .live-ava .petsvg { animation: pettalk .26s ease-in-out infinite alternate; }
+  @keyframes pettalk { from { transform: translateY(0) scale(1, 1); } to { transform: translateY(-3px) scale(1.03, .95); } }
+  @keyframes petring { from { transform: scale(.9); opacity: .8; } to { transform: scale(1.4); opacity: 0; } }
+  @keyframes pethop { 0% { transform: translateY(0); } 40% { transform: translateY(-12px) rotate(-6deg); } 100% { transform: translateY(0); } }
+}
 </style>
 
 <canvas id="bgfx" aria-hidden="true"></canvas>
@@ -1258,7 +1295,7 @@ function viewToday(n, hm, preview) {
     return row({ cls: 'li' + (on ? ' done' : ''), lead: checkBtn(xid, x.h), t: `<span class="tm">${x.t}</span> ${esc(x.h)}`, tr: tag || `<button class="tbtn" type="button" data-focus="${i}">Ver</button>` });
   }).join(''), null, `${dayProgress(day)[0]} de ${items.length}`)}
   ${advice}
-  ${(() => { const st = STAMPS.filter(x => x.city === day.city); return st.length ? `<section class="grp"><h2 class="gh"><span>Sellos de hoy para Sam</span><span>${st.filter(x => c[x.id]).length}/${st.length}</span></h2><div class="stamps">${st.slice(0, 6).map(stampHtml).join('')}</div><a class="gf" href="#guia-sellos">Ver el pasaporte completo ›</a></section>` : ''; })()}
+  ${(() => { const st = STAMPS.filter(x => x.city === day.city); return st.length ? `<section class="grp"><h2 class="gh"><span>Retos de hoy en familia</span><span>${st.filter(x => stampMarks(x.id).length).length}/${st.length}</span></h2><div class="stamps">${st.slice(0, 6).map(stampHtml).join('')}</div><a class="gf" href="#guia-sellos">Ver el pasaporte completo ›</a></section>` : ''; })()}
   ${food}
   ${grp('Accesos rápidos', row({ href: gmDirFromHere('b:' + day.base), ext: 1, cls: 'ld', lead: ico(I.bed, cityVar(day.city)), t: 'Volver al alojamiento', s: esc(base.n) }) +
     row({ tag: 'button', cls: 'ld', lead: ico(I.car, 'var(--orange)'), t: 'Dirección para el taxista', attrs: `data-taxi="${day.base}"`, chev: 1 }) +
@@ -1424,20 +1461,84 @@ const STAMPS = [
   ['JP', 's-arigato', '感謝', 'Arigatō', 'Decir «arigatō gozaimasu» a 10 personas'],
   ['JP', 's-konbini', 'コンビニ', 'Konbini', 'Elegir su snack favorito de konbini']
 ].map(([city, id, k, t, r]) => ({ city, id, k, t, r }));
-const PRIZES = [[8, 'Sam elige el postre de un día'], [16, 'Sam elige un gachapon extra'], [26, 'Gran premio: Sam elige un souvenir']];
+// Sellos familiares compartidos: base de datos "stamps", un documento por sello
+// con la fecha en que cada quien lo marcó ({octavio, selene, sam}). En tiempo real.
+const FAMILY = [['octavio', 'Octavio', '#2F80ED'], ['selene', 'Selene', '#E8457C'], ['sam', 'Sam', '#F59E0B']];
+const famColor = k => (FAMILY.find(f => f[0] === k) || [])[2];
+const famName = k => (FAMILY.find(f => f[0] === k) || [])[1];
+const PRIZES = [[8, 'Sam elige el postre de un día'], [16, 'Sam elige un gachapon extra'], [26, 'Gran premio: cada quien elige un souvenir']];
+mem.stampsDb = null; mem.stampPop = new Set();
+const stampData = id => (mem.stampsDb ? mem.stampsDb[id] : store.get('stampsLocal', {})[id]) || {};
+const stampMarks = id => FAMILY.map(f => f[0]).filter(k => stampData(id)[k]);
+const meKey = () => { const m = store.get('me', null); return FAMILY.some(f => f[0] === m) ? m : null; };
+function startStamps(db) {
+  if (!db) return;
+  db.collection('stamps').onSnapshot(snap => {
+    const next = {};
+    snap.docs.filter(d => d.exists).forEach(d => { next[d.id] = d.data() || {}; });
+    if (mem.stampsDb) STAMPS.forEach(s => { const a = Object.keys(mem.stampsDb[s.id] || {}).length, b = Object.keys(next[s.id] || {}).length; if (b > a) mem.stampPop.add(s.id); });
+    mem.stampsDb = next;
+    const h = location.hash || '#hoy';
+    if ((h === '#guia-sellos' || h === '#hoy') && $('#sheet').hidden) rerender();
+  }, () => {});
+}
+async function writeStamp(id, data) {
+  if (mem.db) {
+    const ref = mem.db.doc('stamps/' + id);
+    if (Object.keys(data).length) await ref.set(data); else await ref.delete();
+  } else { const all = store.get('stampsLocal', {}); if (Object.keys(data).length) all[id] = data; else delete all[id]; store.set('stampsLocal', all); }
+}
 function stampHtml(s) {
-  const on = !!checks()[s.id];
+  const marks = stampMarks(s.id), cols = marks.map(famColor);
   const fs = [0, 30, 23, 18, 15][Math.min(4, [...s.k].length)];
-  return `<button class="stamp${on ? ' on' : ''}" type="button" data-stamp="${s.id}" aria-pressed="${on}" aria-label="${esc(s.t)}: ${esc(s.r)}">
-    <span class="ink${mem.stampPop === s.id ? ' slam' : ''}" style="font-size:${fs}px" lang="ja">${esc(s.k)}</span><b>${esc(s.t)}</b><small>${esc(s.r)}</small></button>`;
+  const ring = cols.length ? `conic-gradient(${cols.map((c, i) => `${c} ${i / cols.length * 100}% ${(i + 1) / cols.length * 100}%`).join(',')})` : '';
+  const ink = cols.length === 1 ? `color:${cols[0]}` : cols.length > 1 ? `background-image:linear-gradient(135deg,${cols.join(',')});-webkit-background-clip:text;background-clip:text;color:transparent` : '';
+  return `<button class="stamp${marks.length ? ' on' : ''}" type="button" data-stamp="${s.id}" aria-label="${esc(s.t)}: ${esc(s.r)}${marks.length ? '. Marcado por ' + marks.map(famName).join(', ') : ''}">
+    <span class="ink${mem.stampPop.has(s.id) ? ' slam' : ''}"${ring ? ` style="--ring:${ring}"` : ''}><span class="kj" lang="ja" style="font-size:${fs}px;${ink}">${esc(s.k)}</span></span>
+    <b>${esc(s.t)}</b><small>${esc(s.r)}</small>
+    <span class="who">${marks.map(k => `<i style="background:${famColor(k)}">${famName(k)[0]}</i>`).join('')}</span></button>`;
+}
+function meSeg() {
+  return `<div class="mepick">${FAMILY.map(([k, n, c]) => `<button type="button" data-me="${k}" aria-pressed="${meKey() === k}" style="--fc:${c}"><span></span>${n}</button>`).join('')}</div>`;
 }
 function viewSellos() {
-  const c = checks(), got = STAMPS.filter(s => c[s.id]).length;
+  const got = STAMPS.filter(s => stampMarks(s.id).length).length;
+  const per = FAMILY.map(([k, n, c]) => [n, c, STAMPS.filter(s => stampData(s.id)[k]).length]);
   const groups = [...Object.keys(CITY).filter(k => STAMPS.some(s => s.city === k)), 'JP'];
-  return `<section class="pend-hero"><div class="ring"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="39"/><circle class="fg" cx="50" cy="50" r="39" style="stroke:var(--red);stroke-dashoffset:${245 * (1 - got / STAMPS.length)}"/></svg><b>${got}</b></div>
-    <div><h2>${got} de ${STAMPS.length} sellos</h2><p>Cuando Sam cumpla un reto, toquen su sello para estamparlo.</p></div></section>
-    ${grp('Premios', PRIZES.map(([n, t]) => row({ cls: 'ld' + (got >= n ? '' : ' done'), lead: ico(I.ticket, got >= n ? 'var(--red)' : 'var(--gray)'), t: esc(t), s: got >= n ? '¡Desbloqueado!' : `Faltan ${n - got} sellos`, tr: got >= n ? '<span class="pill hot">Listo</span>' : `${got}/${n}` })).join(''))}
-    ${groups.map(k => `<section class="grp"><h2 class="gh"><span>${k === 'JP' ? 'En todo Japón' : CITY[k].n + ' <span lang="ja">' + CITY[k].jp + '</span>'}</span><span>${STAMPS.filter(s => s.city === k && c[s.id]).length}/${STAMPS.filter(s => s.city === k).length}</span></h2><div class="stamps">${STAMPS.filter(s => s.city === k).map(stampHtml).join('')}</div></section>`).join('')}`;
+  const out = `<section class="pend-hero"><div class="ring"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="39"/><circle class="fg" cx="50" cy="50" r="39" style="stroke:var(--red);stroke-dashoffset:${245 * (1 - got / STAMPS.length)}"/></svg><b>${got}</b></div>
+    <div><h2>${got} de ${STAMPS.length} retos en familia</h2><p class="per">${per.map(([n, c, v]) => `<span><i style="background:${c}"></i>${n} ${v}</span>`).join('')}</p></div></section>
+    <section class="grp"><h2 class="gh"><span>¿Quién está marcando en este teléfono?</span></h2>${meSeg()}<p class="gf">Cada quien marca con su color. Si varios cumplen el mismo reto, el sello combina sus colores. Se ve en tiempo real en los teléfonos de todos.${mem.db ? '' : ' (Aquí se guardan solo en este teléfono: ábranla desde claude.ai para compartir.)'}</p></section>
+    ${grp('Premios en familia', PRIZES.map(([n, t]) => row({ cls: 'ld' + (got >= n ? '' : ' done'), lead: ico(I.ticket, got >= n ? 'var(--red)' : 'var(--gray)'), t: esc(t), s: got >= n ? '¡Desbloqueado!' : `Faltan ${n - got} retos`, tr: got >= n ? '<span class="pill hot">Listo</span>' : `${got}/${n}` })).join(''))}
+    ${groups.map(k => `<section class="grp"><h2 class="gh"><span>${k === 'JP' ? 'En todo Japón' : CITY[k].n + ' <span lang="ja">' + CITY[k].jp + '</span>'}</span><span>${STAMPS.filter(s => s.city === k && stampMarks(s.id).length).length}/${STAMPS.filter(s => s.city === k).length}</span></h2><div class="stamps">${STAMPS.filter(s => s.city === k).map(stampHtml).join('')}</div></section>`).join('')}`;
+  return out;
+}
+function mePickSheet(then) {
+  mem.afterMe = then;
+  openSheet('¿Quién marca?', `<p class="gf" style="padding:0 4px">Elige quién usa este teléfono para marcar sellos. Se recuerda aquí.</p>${meSeg()}`);
+}
+function stampTap(id) {
+  const me = meKey();
+  if (!me) return mePickSheet(id);
+  const s = STAMPS.find(x => x.id === id), data = { ...stampData(id) };
+  if (!data[me]) {
+    data[me] = new Date().toISOString();
+    mem.stampPop.add(id);
+    if (mem.stampsDb) mem.stampsDb[id] = data;
+    writeStamp(id, data).catch(() => hud('No se pudo guardar el sello'));
+    rerender(); hud(`¡Sello de ${famName(me)}!`);
+    return;
+  }
+  const others = stampMarks(id).filter(k => k !== me);
+  openSheet('Quitar sello', `<div class="show"><div class="say">${esc(s.t)}</div><div class="huge" lang="ja" style="color:${famColor(me)}">${esc(s.k)}</div>
+    <div class="sub2">¿Quitar el sello de <b>${famName(me)}</b> de este reto?${others.length ? `<br>Los de ${others.map(famName).join(' y ')} se quedan.` : ''}</div></div>
+    <div class="playbar"><button type="button" class="play alt" data-sheet-close>Cancelar</button><button type="button" class="play danger-btn" data-unstamp="${id}">Quitar mi sello</button></div>`);
+}
+async function unstamp(id) {
+  const me = meKey(), data = { ...stampData(id) };
+  delete data[me];
+  if (mem.stampsDb) { if (Object.keys(data).length) mem.stampsDb[id] = data; else delete mem.stampsDb[id]; }
+  closeSheet(true); rerender();
+  try { await writeStamp(id, data); hud('Sello quitado'); } catch (e) { hud('No se pudo quitar el sello'); }
 }
 
 /* ---------- Hora de salir ---------- */
@@ -1470,7 +1571,6 @@ function leaveHtml(day, hm) {
    teléfono. Usa el modelo rápido de Claude (modelTier "quick"): es el que
    menos gasta del límite de uso de cada cuenta, también en el plan gratuito,
    y responde en uno o dos segundos. El contexto que se envía es compacto. */
-const PROFILES = { sam: { n: 'Sam', kid: true, pet: 'neon' }, selene: { n: 'Selene', pet: 'inari' }, octavio: { n: 'Octavio', pet: 'hachi' } };
 const PETS = {
   maneki: { n: 'Maneki', what: 'gatito de la suerte', c: '#FF6B8A', voice: 'Eres alegre y cariñoso, y a veces terminas una frase con «nya~».', hi: '¡Nya~! Soy Maneki, tu gatito de la suerte. ¿A dónde vamos hoy?',
     svg: '<path d="M22 40 L28 14 L44 30Z M78 40 L72 14 L56 30Z" fill="#fff" stroke="#2b2b33" stroke-width="2.5" stroke-linejoin="round"/><path d="M27 33 L30 20 L38 29Z M73 33 L70 20 L62 29Z" fill="#FFB3C1"/><ellipse cx="50" cy="56" rx="34" ry="30" fill="#fff" stroke="#2b2b33" stroke-width="2.5"/><path d="M58 30 q8 2 10 10" stroke="#FF8A3D" stroke-width="5" fill="none" stroke-linecap="round"/><g class="eye"><path d="M34 54 q5 -6 10 0 M56 54 q5 -6 10 0" stroke="#2b2b33" stroke-width="3" fill="none" stroke-linecap="round"/></g><path d="M47 62 l3 3 l3 -3z" fill="#FF6B8A"/><path d="M44 68 q6 5 12 0" stroke="#2b2b33" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="31" cy="64" r="4.5" fill="#FFB3C1"/><circle cx="69" cy="64" r="4.5" fill="#FFB3C1"/><path d="M18 60 h10 M18 66 h10 M72 60 h10 M72 66 h10" stroke="#2b2b33" stroke-width="1.6" stroke-linecap="round"/><path d="M26 82 q24 10 48 0" stroke="#E5322D" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="50" cy="88" r="5" fill="#FFCC33" stroke="#2b2b33" stroke-width="1.6"/>' },
@@ -1486,65 +1586,65 @@ const PETS = {
     svg: '<path d="M50 8 C82 8 90 40 88 60 C86 82 70 92 50 92 C30 92 14 82 12 60 C10 40 18 8 50 8Z" fill="#E5322D" stroke="#2b2b33" stroke-width="2.5"/><ellipse cx="50" cy="48" rx="26" ry="24" fill="#FFF3E6"/><path d="M30 36 q8 -6 16 0 M54 36 q8 -6 16 0" stroke="#2b2b33" stroke-width="3.5" fill="none" stroke-linecap="round"/><g class="eye"><circle cx="38" cy="46" r="5" fill="#2b2b33"/><circle cx="62" cy="46" r="5" fill="#2b2b33"/></g><path d="M42 60 q8 6 16 0" stroke="#2b2b33" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M38 66 q-6 4 -10 2 M62 66 q6 4 10 2" stroke="#2b2b33" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M34 80 q16 -8 32 0" stroke="#FFCC33" stroke-width="4" fill="none" stroke-linecap="round"/>' }
 };
 const petSvg = (k, cls = '') => `<svg class="petsvg ${cls}" viewBox="0 0 100 100" aria-hidden="true">${PETS[k].svg}</svg>`;
-const chatProfile = () => { const p = store.get('chatProfile', 'sam'); return PROFILES[p] ? p : 'sam'; };
-const petOf = p => { const k = store.get('pet:' + p, PROFILES[p].pet); return PETS[k] ? k : PROFILES[p].pet; };
-const chatOf = p => store.get('chat:' + p, []);
-mem.sampleReady = false; mem.sample = null;
+// La mascota y la conversación se guardan en este navegador (la sesión de cada quien).
+const petOf = () => { const k = store.get('pet', 'maneki'); return PETS[k] ? k : 'maneki'; };
+const chatOf = () => store.get('chat2', []);
+mem.sampleReady = false; mem.sample = null; mem.petState = '';
 (window.claude && window.claude.use ? window.claude.use('sample') : Promise.resolve(null)).then(s => { mem.sample = s; }, () => {}).finally(() => { mem.sampleReady = true; if (location.hash === '#chat') rerender(); });
-function tripContext(p) {
-  const now = jstNow(), i = dayIndexFor(now.ymd), c = checks();
-  const prof = PROFILES[p], pet = PETS[petOf(p)];
+function tripContext() {
+  const now = jstNow(), i = dayIndexFor(now.ymd), c = checks(), pet = PETS[petOf()];
   const dayTxt = d => `Día ${d.n} (${fdate(d.date, true)}, ${CITY[d.city].n}, duermen en ${BASES[d.base].n}): ` + d.items.map((it, k) => `${it.t}-${it.e} ${it.h}${it.f ? ' [comer: ' + it.f + ']' : ''}${c['d' + d.n + '-' + k] ? ' (hecho)' : ''}`).join('; ');
   const focus = mem.preview ? DAYS[mem.preview - 1] : i >= 0 ? DAYS[i] : null;
-  const who = prof.kid
-    ? 'Hablas con Sam, un niño de 10 años: frases cortas, palabras sencillas, mucho entusiasmo y datos curiosos. Nada que dé miedo. Si dice que se perdió o tiene un problema de seguridad, dile que se quede quieto, busque a sus papás o un kōban (caseta de policía) y muestre su tarjeta de la app. No le pidas datos personales.'
-    : `Hablas con ${prof.n}, una de las personas adultas del viaje; sé práctico y concreto.`;
-  return `Eres ${pet.n}, ${pet.what}, la mascota de viaje de ${prof.n}. ${pet.voice} ${who}
-Contexto: una familia mexicana (Octavio, Selene y su hijo Sam de 10 años) viaja por Japón del 20 nov al 9 dic 2026. Responde en español de México, breve (máximo unas 120 palabras salvo que pidan más), para leer en el celular, con listas cortas y sin tablas. Usa nombres de lugares y estaciones como en Google Maps. No puedes navegar ni ver clima, horarios o precios en vivo: si algo depende de eso, dilo y sugiere verificarlo. Para traducir da el japonés, el romaji y una nota corta.
+  return `Eres ${pet.n}, ${pet.what}, la mascota asistente de viaje de una familia mexicana: Octavio, Selene y su hijo Sam de 10 años, en Japón del 20 nov al 9 dic 2026. ${pet.voice}
+Te puede escribir cualquiera de los tres. Si el mensaje parece de Sam (un niño), usa frases cortas, palabras sencillas, entusiasmo y datos curiosos, nada que dé miedo; si dice que se perdió, que se quede quieto, busque a sus papás o un kōban y muestre su tarjeta de la app. Con adultos sé práctico y concreto.
+Responde en español de México, breve (máximo unas 120 palabras salvo que pidan más), para leer en el celular, con listas cortas y sin tablas. Usa nombres de lugares y estaciones como en Google Maps. No puedes navegar ni ver clima, horarios o precios en vivo: si algo depende de eso, dilo y sugiere verificarlo. Para traducir da el japonés, el romaji y una nota corta.
 Ahora en Japón: ${fdate(now.ymd, true)} ${now.ymd.slice(0, 4)}, ${now.hm} h.${focus ? '\nDÍA EN CURSO: ' + dayTxt(focus) : ' El viaje aún no empieza.'}
 ITINERARIO: ${DAYS.map(d => `D${d.n} ${fdate(d.date)} ${CITY[d.city].n}: ${d.title}`).join(' | ')}
-ALOJAMIENTOS: ${BASE_ORDER.map(k => `${BASES[k].n}, ${BASES[k].addr} (${BASES[k].in} → ${BASES[k].out})`).join(' | ')}${prof.kid ? '' : '\nPENDIENTES: ' + (TODO.filter(t => !c[t.id]).map(t => t.t).join('; ') || 'ninguno')}`;
+ALOJAMIENTOS: ${BASE_ORDER.map(k => `${BASES[k].n}, ${BASES[k].addr} (${BASES[k].in} → ${BASES[k].out})`).join(' | ')}
+PENDIENTES: ${TODO.filter(t => !c[t.id]).map(t => t.t).join('; ') || 'ninguno'}`;
 }
 const fmtChat = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/^#{1,4}\s*(.+)$/gm, '<b>$1</b>').replace(/^\s*[-*•]\s+/gm, '• ').replace(/\n/g, '<br>');
-const CHIPS = {
-  kid: ['Dime un dato curioso de Japón', '¿Qué sello puedo conseguir hoy?', 'Enséñame una palabra en japonés', '¿Qué hay de Pokémon en Japón?', 'Cuéntame un chiste', '¿Qué comida rara debería probar?'],
-  adult: ['¿Qué comemos cerca de donde estamos?', 'Llueve: ¿qué cambiamos del plan de hoy?', 'Sam está cansado: plan B tranquilo', '¿Qué es lo más urgente por reservar?', '¿Qué souvenirs típicos hay aquí?', 'Traduce al japonés: ']
-};
+const CHIPS = ['¿Qué comemos cerca de donde estamos?', 'Dime un dato curioso de Japón', 'Llueve: ¿qué cambiamos del plan de hoy?', 'Enséñame una palabra en japonés', '¿Qué sello podemos conseguir hoy?', '¿Qué es lo más urgente por reservar?', 'Traduce al japonés: '];
+// Mascota animada: think = pensando (globo de puntos), talk = respondiendo (ondas), happy = terminó
+const petEl = (k, size = '') => `<span class="pet ${size} ${mem.petState}" style="--pc:${PETS[k].c}"><span class="tb" aria-hidden="true"><i></i><i></i><i></i></span>${petSvg(k)}</span>`;
+function setPetState(s) {
+  mem.petState = s;
+  document.querySelectorAll('.pet.live').forEach(el => { el.classList.remove('think', 'talk', 'happy'); if (s) el.classList.add(s); });
+}
 function viewChat() {
-  const p = chatProfile(), prof = PROFILES[p], pk = petOf(p), pet = PETS[pk], chat = chatOf(p);
-  const head = `${segHtml('profile', Object.entries(PROFILES).map(([k, v]) => [k, v.n]), p, 'data-profile', 'Quién pregunta')}
-  <section class="petcard" style="--pc:${pet.c}"><div class="pet${mem.chatBusy ? ' think' : ''}">${petSvg(pk)}</div>
-    <div class="m"><div class="pn">${esc(pet.n)}</div><div class="pw">${esc(pet.what)} de ${esc(prof.n)}</div><button type="button" class="lnk" data-pet-pick>Cambiar mascota</button></div></section>`;
+  const pk = petOf(), pet = PETS[pk], chat = chatOf();
+  const head = `<section class="petcard" style="--pc:${pet.c}">${petEl(pk, 'live')}
+    <div class="m"><div class="pn">${esc(pet.n)}</div><div class="pw">Tu ${esc(pet.what)}</div><button type="button" class="lnk" data-pet-pick>Cambiar mascota</button></div></section>`;
   if (!mem.sampleReady) return { title: 'Chat', cap: 'Tu mascota de viaje', body: head + grp(null, row({ t: 'Conectando con Claude…' })) };
-  if (!mem.sample || mem.sampleOff) return { title: 'Chat', cap: 'Tu mascota de viaje', body: head + grp(null, row({ cls: 'ld', lead: ico(I.speech, 'var(--gray)'), t: 'El chat no está disponible aquí', s: esc(mem.sampleOff || 'Funciona al abrir la app desde claude.ai con la cuenta de quien pregunta (en Chrome o en la app de Claude).') })) };
-  const bubble = m => m.role === 'user' ? `<div class="msg user">${esc(m.content).replace(/\n/g, '<br>')}</div>` : `<div class="mrow"><span class="ava" style="--pc:${pet.c}">${petSvg(pk)}</span><div class="msg assistant">${fmtChat(m.content)}</div></div>`;
+  if (!mem.sample || mem.sampleOff) return { title: 'Chat', cap: 'Tu mascota de viaje', body: head + grp(null, row({ cls: 'ld', lead: ico(I.speech, 'var(--gray)'), t: 'El chat no está disponible aquí', s: esc(mem.sampleOff || 'Funciona al abrir la app desde claude.ai con tu cuenta (en Chrome o en la app de Claude).') })) };
+  const ava = (live) => `<span class="ava${live ? ' live-ava' : ''}" style="--pc:${pet.c}">${petSvg(pk)}</span>`;
+  const bubble = m => m.role === 'user' ? `<div class="msg user">${esc(m.content).replace(/\n/g, '<br>')}</div>` : `<div class="mrow">${ava()}<div class="msg assistant">${fmtChat(m.content)}</div></div>`;
   const body = `${head}
-  <div class="chat" id="chat">${bubble({ role: 'assistant', content: pet.hi.replace('viajera', prof.kid ? 'viajero' : 'viajera') })}${chat.map(bubble).join('')}${mem.chatBusy ? `<div class="mrow"><span class="ava" style="--pc:${pet.c}">${petSvg(pk)}</span><div class="msg assistant" id="streamMsg"><span class="typing"><i></i><i></i><i></i></span></div></div>` : ''}</div>
-  <div class="qchips">${CHIPS[prof.kid ? 'kid' : 'adult'].map(q => `<button type="button" class="lnk q" data-ask="${esc(q)}">${esc(q)}</button>`).join('')}</div>
-  <form id="chatForm" class="composer"><textarea id="chatIn" rows="1" placeholder="Escríbele a ${esc(pet.n)}…" aria-label="Mensaje para ${esc(pet.n)}">${esc(mem.draft || '')}</textarea>
-    ${mem.chatBusy ? '<button type="button" class="send stop" data-chat-stop aria-label="Detener">■</button>' : '<button type="submit" class="send" aria-label="Enviar">↑</button>'}</form>
-  <p class="gf">Usa el modelo rápido de Claude, el que menos gasta de tu límite de uso. Cada persona pregunta con su propia cuenta; la conversación se guarda solo en este teléfono.${chat.length && !mem.chatBusy ? ' <button type="button" class="tbtn" data-chat-clear>Borrar conversación</button>' : ''}</p>`;
-  return { title: 'Chat', cap: `Tu mascota de viaje`, body };
+  <div class="chat" id="chat">${bubble({ role: 'assistant', content: pet.hi.replace('viajera', 'viajero') })}${chat.map(bubble).join('')}${mem.chatBusy ? `<div class="mrow">${ava(true)}<div class="msg assistant" id="streamMsg"><span class="typing"><i></i><i></i><i></i></span></div></div>` : ''}</div>
+  <div class="qchips">${CHIPS.map(q => `<button type="button" class="lnk q" data-ask="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+  <div class="dock">${petEl(pk, 'sm live')}<form id="chatForm" class="composer"><textarea id="chatIn" rows="1" placeholder="Escríbele a ${esc(pet.n)}…" aria-label="Mensaje para ${esc(pet.n)}">${esc(mem.draft || '')}</textarea>
+    ${mem.chatBusy ? '<button type="button" class="send stop" data-chat-stop aria-label="Detener">■</button>' : '<button type="submit" class="send" aria-label="Enviar">↑</button>'}</form></div>
+  <p class="gf">Usa el modelo rápido de Claude, el que menos gasta de tu límite de uso. Tu mascota y la conversación se guardan en este teléfono.${chat.length && !mem.chatBusy ? ' <button type="button" class="tbtn" data-chat-clear>Borrar conversación</button>' : ''}</p>`;
+  return { title: 'Chat', cap: 'Tu mascota de viaje', body };
 }
 function petSheet() {
-  const p = chatProfile(), cur = petOf(p);
-  openSheet('Mascota de ' + PROFILES[p].n, `<div class="petgrid">${Object.entries(PETS).map(([k, v]) => `<button type="button" class="petopt${k === cur ? ' on' : ''}" data-pet="${k}" style="--pc:${v.c}" aria-pressed="${k === cur}"><span class="pet">${petSvg(k)}</span><b>${esc(v.n)}</b><small>${esc(v.what)}</small></button>`).join('')}</div>`);
+  const cur = petOf();
+  openSheet('Elige tu mascota', `<div class="petgrid">${Object.entries(PETS).map(([k, v]) => `<button type="button" class="petopt${k === cur ? ' on' : ''}" data-pet="${k}" style="--pc:${v.c}" aria-pressed="${k === cur}"><span class="pet" style="--pc:${v.c}">${petSvg(k)}</span><b>${esc(v.n)}</b><small>${esc(v.what)}</small></button>`).join('')}</div>`);
 }
 async function askClaude(q) {
   q = (q || '').trim();
-  const p = chatProfile();
   if (!q || mem.chatBusy || !mem.sample) return;
-  const chat = chatOf(p);
-  chat.push({ role: 'user', content: q }); store.set('chat:' + p, chat);
-  mem.draft = ''; mem.chatBusy = true;
+  const chat = chatOf();
+  chat.push({ role: 'user', content: q }); store.set('chat2', chat);
+  mem.draft = ''; mem.chatBusy = true; mem.petState = 'think';
   rerender(); scrollChat();
   mem.chatCtl = new AbortController();
   const turns = chat.slice(-8); while (turns.length && turns[0].role !== 'user') turns.shift();
-  let answer = '';
+  let answer = '', talking = false;
   try {
-    const r = await mem.sample([{ role: 'user', content: tripContext(p) }, ...turns], {
+    const r = await mem.sample([{ role: 'user', content: tripContext() }, ...turns], {
       cache: false, modelTier: 'quick', signal: mem.chatCtl.signal,
-      onText: ({ text }) => { answer = text; const el = $('#streamMsg'); if (el) { el.innerHTML = fmtChat(text); scrollChat(); } }
+      onText: ({ text }) => { answer = text; if (!talking) { talking = true; setPetState('talk'); } const el = $('#streamMsg'); if (el) { el.innerHTML = fmtChat(text); scrollChat(); } }
     });
     answer = r.text + (r.truncated ? '\n\n(Respuesta cortada: pregunta algo más específico.)' : '');
   } catch (e) {
@@ -1553,11 +1653,12 @@ async function askClaude(q) {
     if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(e.code)) mem.sampleOff = why || 'El chat no está disponible en esta vista.';
     else if (e.code !== 'cancelled') answer += (answer ? '\n\n' : '') + '⚠️ ' + (why || 'Se cortó la conexión. Intenta de nuevo.');
   }
-  const after = chatOf(p);
+  const after = chatOf();
   if (answer) after.push({ role: 'assistant', content: answer });
-  store.set('chat:' + p, after.slice(-30));
-  mem.chatBusy = false; mem.chatCtl = null;
+  store.set('chat2', after.slice(-30));
+  mem.chatBusy = false; mem.chatCtl = null; mem.petState = answer ? 'happy' : '';
   if (location.hash === '#chat') { rerender(); scrollChat(); }
+  setTimeout(() => setPetState(''), 1400);
 }
 function scrollChat() { const el = $('#chat'); if (el) { const r = el.getBoundingClientRect(); if (r.bottom > innerHeight - 200) window.scrollBy({ top: r.bottom - innerHeight + 240, behavior: 'smooth' }); } }
 
@@ -1578,8 +1679,10 @@ const idb = (() => {
 mem.docs = []; mem.docsReady = false; mem.offline = new Set();
 (async () => {
   const use = n => (window.claude && window.claude.use ? window.claude.use(n).catch(() => null) : Promise.resolve(null));
-  const [db, assets] = await Promise.all([use('db'), use('assets')]);
+  const [db, assets, user] = await Promise.all([use('db'), use('assets'), use('user')]);
   mem.db = db; mem.assets = assets;
+  mem.isOwner = user ? await user.isOwner() : false;
+  startStamps(db);
   mem.offline = new Set(await idb.keys());
   if (db) db.collection('docs').onSnapshot(snap => {
     mem.docs = snap.docs.filter(d => d.exists).map(d => ({ id: d.id, ...d.data() })).sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
@@ -1602,10 +1705,10 @@ function docsGroup() {
   const rows = DOC_CATS.map(([k, label]) => { const l = mem.docs.filter(d => (d.cat || 'otros') === k); return l.length ? `<div class="r subh">${label}</div>` + l.map(docRow).join('') : ''; }).join('');
   const missing = mem.docs.filter(d => !mem.offline.has(d.assetId)).length;
   return grp('Documentos · ' + mem.docs.length,
-    (mem.assets ? row({ tag: 'button', cls: 'ld link', lead: ico(sv('<path d="M12 5v14M5 12h14"/>'), 'var(--tint)'), t: 'Agregar PDF o captura', attrs: 'data-doc-add' }) : '') +
+    (mem.assets && mem.isOwner ? row({ tag: 'button', cls: 'ld link', lead: ico(sv('<path d="M12 5v14M5 12h14"/>'), 'var(--tint)'), t: 'Agregar PDF o captura', attrs: 'data-doc-add' }) : '') +
     (rows || row({ t: 'Aún no hay documentos', s: 'Suban boletos, pases de abordar, reservas y seguros para tenerlos a la mano.' })) +
     (mem.docs.length ? row({ tag: 'button', cls: 'link', t: missing ? `Guardar todo para ver sin internet (${missing})` : 'Todo guardado para ver sin internet ✓', attrs: missing ? 'data-offline-all' : 'disabled' }) : ''),
-    mem.assets ? 'Se guardan en la app y los ve quien tenga acceso a ella. Los que abres quedan guardados en este teléfono.' : 'Para subir documentos necesitas permiso de edición en la app.');
+    mem.isOwner ? 'Solo tú puedes agregar, reemplazar o borrar. Los ve quien tenga acceso a la app y los que abres quedan guardados en este teléfono.' : 'Los administra Octavio. Los que abres quedan guardados en este teléfono para verlos sin internet.');
 }
 function uploadSheet() {
   const links = [['', 'Ninguna'], ...BASE_ORDER.map(k => ['b:' + k, BASES[k].n]), ...TICKETS.map((t, i) => ['tk:' + i, t.n])];
@@ -1672,10 +1775,10 @@ async function openDoc(id) {
   mem.delArm = null;
   const meta = [((DOC_CATS.find(c => c[0] === d.cat) || [])[1]), docLinkName(d.link), fmtSize(d.size || 0)].filter(Boolean).map(esc).join(' · ');
   openSheet(d.name, `<div class="docbar">
-      ${mem.assets ? `<span class="lnk pick">Reemplazar<input id="repFile" class="filehit" type="file" accept="${ACCEPT}" data-rep="${d.id}" aria-label="Reemplazar archivo"></span>
+      ${mem.assets && mem.isOwner ? `<span class="lnk pick">Reemplazar<input id="repFile" class="filehit" type="file" accept="${ACCEPT}" data-rep="${d.id}" aria-label="Reemplazar archivo"></span>
       <button type="button" class="lnk" data-doc-edit="${d.id}">Editar</button>` : ''}
       <a class="lnk" href="/_blob/${d.assetId}" target="_blank" rel="noopener">Otra pestaña</a>
-      ${mem.assets ? `<button type="button" class="lnk del" data-doc-del="${d.id}">Borrar</button>` : ''}
+      ${mem.assets && mem.isOwner ? `<button type="button" class="lnk del" data-doc-del="${d.id}">Borrar</button>` : ''}
     </div>
     <p class="gf" id="repInfo">${meta}</p>
     <div class="docview" id="docview"><p class="gf">Abriendo…</p></div>`);
@@ -1761,7 +1864,7 @@ const GUIA = {
   etiqueta: { n: 'Etiqueta', i: I.bow, c: 'var(--purple)' },
   docs: { n: 'Documentos y QR', i: I.doc, c: 'var(--indigo)' },
   sos: { n: 'Emergencias', i: I.sos, c: 'var(--red)' },
-  sellos: { n: 'Pasaporte de Sam', i: I.ticket, c: 'var(--red)' },
+  sellos: { n: 'Sellos en familia', i: I.ticket, c: 'var(--red)' },
   claude: { n: 'Chat con tu mascota', i: I.speech, c: 'var(--purple)' }
 };
 function viewGuia(sub) {
@@ -1965,6 +2068,7 @@ function afterRender(opts) {
   const nc = view.querySelector('.nowc');
   if (nc) { if (mem.swipeIn && !RM) nc.classList.add(mem.swipeIn > 0 ? 'in-next' : 'in-prev'); attachSwipe(nc); }
   mem.swipeIn = 0;
+  mem.stampPop.clear();
 }
 const depth = h => /^dia\d|^guia-/.test(h) ? 2 : 1;
 function navigate() {
@@ -2177,7 +2281,7 @@ function attachSwipe(card) {
 }
 document.addEventListener('click', e => { if (mem.swallowClick) { e.preventDefault(); e.stopPropagation(); } }, true);
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-say],[data-check],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket],[data-step],[data-focus],[data-food],[data-theme-set],[data-stamp],[data-ask],[data-chat-stop],[data-chat-clear],[data-doc],[data-doc-add],[data-doc-del],[data-offline-all],[data-doc-edit],[data-profile],[data-pet-pick],[data-pet]');
+  const t = e.target.closest('[data-say],[data-check],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket],[data-step],[data-focus],[data-food],[data-theme-set],[data-stamp],[data-ask],[data-chat-stop],[data-chat-clear],[data-doc],[data-doc-add],[data-doc-del],[data-offline-all],[data-doc-edit],[data-pet-pick],[data-pet],[data-me],[data-unstamp],[data-sheet-close]');
   if (!t) return;
   const d = t.dataset;
   const sg = t.closest('.seg');
@@ -2189,14 +2293,16 @@ document.addEventListener('click', e => {
   else if ('docAdd' in d) uploadSheet();
   else if (d.docDel) deleteDoc(d.docDel, t);
   else if (d.docEdit) editSheet(d.docEdit);
-  else if (d.profile) { if (mem.chatBusy && mem.chatCtl) mem.chatCtl.abort(); store.set('chatProfile', d.profile); mem.draft = ''; rerender(); }
   else if ('petPick' in d) petSheet();
-  else if (d.pet) { store.set('pet:' + chatProfile(), d.pet); closeSheet(true); rerender(); const pe = $('.petcard .pet'); if (pe) pe.classList.add('hello'); hud('¡Hola, soy ' + PETS[d.pet].n + '!'); }
+  else if (d.pet) { store.set('pet', d.pet); closeSheet(true); rerender(); const pe = $('.petcard .pet'); if (pe) pe.classList.add('hello'); hud('¡Hola, soy ' + PETS[d.pet].n + '!'); }
+  else if (d.me) { store.set('me', d.me); const nx = mem.afterMe; mem.afterMe = null; if (!$('#sheet').hidden) closeSheet(true); rerender(); hud('Marcando como ' + famName(d.me)); if (nx) stampTap(nx); }
+  else if (d.unstamp) unstamp(d.unstamp);
+  else if ('sheetClose' in d) closeSheet();
   else if ('offlineAll' in d) saveAllOffline(t);
-  else if (d.stamp) { toggleCheck(d.stamp); mem.stampPop = checks()[d.stamp] ? d.stamp : null; rerender(); mem.stampPop = null; if (checks()[d.stamp]) hud('¡Sello!'); }
+  else if (d.stamp) stampTap(d.stamp);
   else if (d.ask != null) { if (d.ask.endsWith(': ')) { const ta = $('#chatIn'); ta.value = d.ask; mem.draft = d.ask; ta.focus(); } else askClaude(d.ask); }
   else if ('chatStop' in d) { if (mem.chatCtl) mem.chatCtl.abort(); }
-  else if ('chatClear' in d) { store.set('chat:' + chatProfile(), []); rerender(); }
+  else if ('chatClear' in d) { store.set('chat2', []); rerender(); }
   else if (d.taxi) taxiSheet(d.taxi);
   else if (d.copy) copyText(d.copy);
   else if (d.phrase) { const p = PHRASES[+d.phrase]; openSheet('Frase', showCard(esc(p[0]), esc(p[1]), `<span style="font-family:var(--mono)">${esc(p[2])}</span>`, p[1].replace('…', ''))); }
