@@ -427,6 +427,21 @@ body::before, .nav { background: transparent; }
 .composer textarea { flex: 1; min-width: 0; resize: none; border: 0; background: none; font: inherit; font-size: 16px; line-height: 1.35; padding: 7px 0; color: var(--label); max-height: 140px; outline: none; }
 .send { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--tint); color: #fff; font-size: 18px; font-weight: 700; cursor: pointer; }
 .send.stop { background: var(--label2); font-size: 12px; }
+
+/* barras más transparentes */
+:root { --surf: rgba(255,255,255,.52); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --surf: rgba(16,16,24,.46); } }
+:root[data-theme="dark"] { --surf: rgba(16,16,24,.46); }
+.tabs, .themeb, body.scrolled .nav, body.scrolled::before { -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%); }
+
+/* documentos */
+.r.subh { min-height: 0; padding: 10px 16px 4px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--label2); }
+.r.subh + .r::before { display: none; }
+.r.upl { cursor: pointer; }
+.r.upl .t { color: var(--tint); }
+.r.danger .t { color: var(--red); }
+.docview { display: grid; gap: 10px; background: var(--card); border-radius: 14px; padding: 10px; min-height: 120px; }
+.docview canvas, .docview img { width: 100%; height: auto; border-radius: 6px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
 </style>
 
 <canvas id="bgfx" aria-hidden="true"></canvas>
@@ -1236,6 +1251,8 @@ function viewToday(n, hm, preview) {
   ${food}
   ${grp('Accesos rápidos', row({ href: gmDirFromHere('b:' + day.base), ext: 1, cls: 'ld', lead: ico(I.bed, cityVar(day.city)), t: 'Volver al alojamiento', s: esc(base.n) }) +
     row({ tag: 'button', cls: 'ld', lead: ico(I.car, 'var(--orange)'), t: 'Dirección para el taxista', attrs: `data-taxi="${day.base}"`, chev: 1 }) +
+    docsFor(['b:' + day.base, ...TICKETS.map((tk, ti) => tk.day === n ? 'tk:' + ti : null).filter(Boolean), ...(n === 1 || n === 20 ? ['vuelo'] : [])]).map(docRow).join('') +
+    mem.docs.filter(dd => n === 1 || n === 20 ? dd.cat === 'vuelo' && !dd.link : false).map(docRow).join('') +
     row({ href: '#guia-claude', cls: 'ld', lead: ico(I.speech, 'var(--purple)'), t: 'Pregúntale a Claude', s: 'Comida, cambios de plan, traducciones', chev: 1 }) +
     row({ href: '#dia' + n, cls: 'ld', lead: ico(I.ticket, 'var(--tint)'), t: 'Día completo: rutas, mapa y tips', chev: 1 }))}`;
   return { title: 'Hoy', cap: `Día ${n} · ${DOWL[p.w]} ${p.d} ${MES[p.m - 1]} · ${CITY[day.city].n}`, lead: roundel(day, 'lg'), body };
@@ -1346,6 +1363,7 @@ function viewReservas() {
   const done = TODO.filter(t => c[t.id]).length;
   const stColor = { ok: 'var(--green)', warn: 'var(--orange)', hot: 'var(--red)' };
   const body = `
+  ${docsGroup()}
   ${grp(null, row({ href: '#pendientes', cls: 'ld', lead: ico(I.check, 'var(--green)'), t: 'Pendientes por reservar', s: `${done} de ${TODO.length} listos`, chev: 1 }))}
   ${grp('Entradas y reservas', TICKETS.map((t, i) => row({ tag: 'button', cls: 'ld', lead: ico(I.ticket, stColor[t.st]), t: esc(t.n), s: esc(t.when), tr: `<span class="pill ${t.st}">${esc(t.stl)}</span>`, attrs: `data-ticket="${i}"`, chev: 1 })).join(''))}
   ${grp('Alojamientos · 19 noches', BASE_ORDER.map(k => { const b = BASES[k]; return row({ tag: 'button', cls: 'lr', lead: `<div class="st" style="--c:${cityVar(b.city)}"><i>${b.city}</i><b>${b.nights}n</b></div>`, t: esc(b.n), s: esc(b.in + ' → ' + b.out), attrs: `data-base="${k}"`, chev: 1 }); }).join(''), 'Toca un alojamiento para ver la dirección en japonés y mostrarla al taxista.')}
@@ -1509,6 +1527,146 @@ async function askClaude(q) {
 }
 function scrollChat() { const el = $('#chat'); if (el) { const r = el.getBoundingClientRect(); if (r.bottom > innerHeight - 160) window.scrollBy({ top: r.bottom - innerHeight + 200, behavior: 'smooth' }); } }
 
+
+/* ---------- Documentos: PDFs y capturas en Reservas ----------
+   Archivos en el almacén de la app (assets) y su ficha en la base de datos
+   (db, colección "docs"). Al abrir un documento se guarda una copia en el
+   teléfono (IndexedDB) para verlo sin internet. Los PDFs se dibujan dentro
+   de la app con pdf.js, que se carga solo al abrir el primero. */
+const DOC_CATS = [['vuelo', 'Vuelos', 'var(--tint)'], ['hotel', 'Alojamiento', 'var(--indigo)'], ['entradas', 'Entradas', 'var(--green)'], ['transporte', 'Transporte', 'var(--orange)'], ['seguro', 'Seguro y salud', 'var(--red)'], ['otros', 'Otros', 'var(--gray)']];
+const I_DOC = sv('<path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4"/>');
+const idb = (() => {
+  let p;
+  const open = () => p || (p = new Promise((res, rej) => { const r = indexedDB.open('jp26docs', 1); r.onupgradeneeded = () => r.result.createObjectStore('f'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }));
+  const tx = async (mode, fn) => { try { const d = await open(); return await new Promise(res => { const t = d.transaction('f', mode); const q = fn(t.objectStore('f')); t.oncomplete = () => res(q && q.result); t.onerror = () => res(null); }); } catch (e) { return null; } };
+  return { get: k => tx('readonly', s => s.get(k)), set: (k, v) => tx('readwrite', s => s.put(v, k)), del: k => tx('readwrite', s => s.delete(k)), keys: async () => (await tx('readonly', s => s.getAllKeys())) || [] };
+})();
+mem.docs = []; mem.docsReady = false; mem.offline = new Set();
+(async () => {
+  const use = n => (window.claude && window.claude.use ? window.claude.use(n).catch(() => null) : Promise.resolve(null));
+  const [db, assets] = await Promise.all([use('db'), use('assets')]);
+  mem.db = db; mem.assets = assets;
+  mem.offline = new Set(await idb.keys());
+  if (db) db.collection('docs').onSnapshot(snap => {
+    mem.docs = snap.docs.filter(d => d.exists).map(d => ({ id: d.id, ...d.data() })).sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+    mem.docsReady = true; refreshDocs();
+  }, e => { mem.docsErr = e.code; mem.docsReady = true; refreshDocs(); });
+  else { mem.docsReady = true; refreshDocs(); }
+})();
+function refreshDocs() { const h = location.hash || '#hoy'; if (['#reservas', '#hoy'].includes(h) && $('#sheet').hidden) rerender(); }
+const fmtSize = b => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
+const docLinkName = l => !l ? '' : l.startsWith('b:') ? (BASES[l.slice(2)] || {}).n : l.startsWith('tk:') ? (TICKETS[+l.slice(3)] || {}).n : '';
+function docRow(d) {
+  const cat = DOC_CATS.find(c => c[0] === d.cat) || DOC_CATS[5];
+  const off = mem.offline.has(d.assetId);
+  return row({ tag: 'button', cls: 'ld', lead: ico(d.type === 'application/pdf' ? I_DOC : I.ticket, cat[2]), t: esc(d.name), s: [docLinkName(d.link), fmtSize(d.size || 0)].filter(Boolean).map(esc).join(' · '), tr: off ? '<span class="pill ok">Sin conexión</span>' : '', attrs: `data-doc="${d.id}"`, chev: 1 });
+}
+const docsFor = links => mem.docs.filter(d => links.includes(d.link));
+function docsGroup() {
+  if (!mem.docsReady) return grp('Documentos', row({ t: 'Cargando documentos…' }));
+  if (!mem.db) return grp('Documentos', row({ cls: 'ld', lead: ico(I_DOC, 'var(--gray)'), t: 'Documentos no disponibles aquí', s: 'Se guardan y se ven al abrir la app desde claude.ai.' }));
+  const rows = DOC_CATS.map(([k, label]) => { const l = mem.docs.filter(d => (d.cat || 'otros') === k); return l.length ? `<div class="r subh">${label}</div>` + l.map(docRow).join('') : ''; }).join('');
+  const missing = mem.docs.filter(d => !mem.offline.has(d.assetId)).length;
+  return grp('Documentos · ' + mem.docs.length,
+    (mem.assets ? row({ tag: 'button', cls: 'ld link', lead: ico(sv('<path d="M12 5v14M5 12h14"/>'), 'var(--tint)'), t: 'Agregar PDF o captura', attrs: 'data-doc-add' }) : '') +
+    (rows || row({ t: 'Aún no hay documentos', s: 'Suban boletos, pases de abordar, reservas y seguros para tenerlos a la mano.' })) +
+    (mem.docs.length ? row({ tag: 'button', cls: 'link', t: missing ? `Guardar todo para ver sin internet (${missing})` : 'Todo guardado para ver sin internet ✓', attrs: missing ? 'data-offline-all' : 'disabled' }) : ''),
+    mem.assets ? 'Se guardan en la app y los ve quien tenga acceso a ella. Los que abres quedan guardados en este teléfono.' : 'Para subir documentos necesitas permiso de edición en la app.');
+}
+function uploadSheet() {
+  const links = [['', 'Ninguna'], ...BASE_ORDER.map(k => ['b:' + k, BASES[k].n]), ...TICKETS.map((t, i) => ['tk:' + i, t.n])];
+  openSheet('Agregar documento', `<form id="docForm" class="grp">
+    <div class="list">
+      <label class="r upl" for="docFile"><span class="ico" style="--b:var(--tint)">${I_DOC}</span><span class="m"><span class="t" id="docFileName">Elegir PDF o imagen</span><span class="s">PDF, JPG o PNG · máx. 20 MB</span></span></label>
+      <input id="docFile" type="file" accept="application/pdf,image/png,image/jpeg,image/webp" multiple hidden>
+      <div class="r field"><label for="docName">Nombre</label><input id="docName" type="text" placeholder="Pase de abordar NRT"></div>
+      <div class="r field"><label for="docCat">Categoría</label><select id="docCat">${DOC_CATS.map(c => `<option value="${c[0]}">${c[1]}</option>`).join('')}</select></div>
+      <div class="r field"><label for="docLink">Reserva</label><select id="docLink">${links.map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('')}</select></div>
+    </div>
+    <p class="gf" id="docMsg">Al ligarlo a una reserva aparece también en su ficha y en Hoy ese día.</p>
+    <div class="list">${row({ tag: 'button', cls: 'center', t: 'Subir', attrs: 'type="submit" id="docGo"' }).replace(' type="button"', '')}</div></form>`);
+}
+async function uploadDocs() {
+  const files = [...($('#docFile').files || [])];
+  const msg = $('#docMsg'), go = $('#docGo');
+  if (!files.length) { msg.textContent = 'Elige al menos un archivo.'; return; }
+  go.disabled = true;
+  let ok = 0;
+  for (const [k, f] of files.entries()) {
+    msg.textContent = `Subiendo ${k + 1} de ${files.length}…`;
+    const type = f.type || (/\.pdf$/i.test(f.name) ? 'application/pdf' : '');
+    try {
+      const r = await mem.assets.upload(f, type && type !== f.type ? { type } : undefined);
+      const name = files.length === 1 && $('#docName').value.trim() ? $('#docName').value.trim() : f.name.replace(/\.[^.]+$/, '');
+      await mem.db.collection('docs').add({ name, cat: $('#docCat').value, link: $('#docLink').value, assetId: r.id, type: r.contentType, size: r.sizeBytes, createdAt: new Date().toISOString() });
+      await idb.set(r.id, f); mem.offline.add(r.id);
+      ok++;
+    } catch (e) {
+      msg.textContent = { too_large: `«${f.name}» pesa más de 20 MB.`, unsupported_type: `«${f.name}» no es PDF ni imagen.`, quota_or_state: 'Se llenó el espacio de la app.', rate_limited: 'Demasiadas subidas seguidas; espera un momento.' }[e.code] || `No se pudo subir «${f.name}». Intenta de nuevo.`;
+      go.disabled = false; return;
+    }
+  }
+  closeSheet(); hud(ok === 1 ? 'Documento guardado' : ok + ' documentos guardados'); rerender();
+}
+async function getBlob(assetId) {
+  const c = await idb.get(assetId);
+  if (c) return c;
+  const r = await fetch('/_blob/' + assetId);
+  if (!r.ok) throw new Error('http ' + r.status);
+  const b = await r.blob();
+  await idb.set(assetId, b); mem.offline.add(assetId);
+  return b;
+}
+let pdfjsP;
+function loadPdfJs() {
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  const add = src => new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+  // El worker se carga como script normal: pdf.js lo usa en el hilo principal.
+  return pdfjsP || (pdfjsP = add('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js').then(() => add('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js')).then(() => window.pdfjsLib));
+}
+async function openDoc(id) {
+  const d = mem.docs.find(x => x.id === id); if (!d) return;
+  mem.delArm = null;
+  openSheet(d.name, `<div class="docview" id="docview"><p class="gf">Abriendo…</p></div>` +
+    grp(null, row({ href: '/_blob/' + d.assetId, ext: 1, cls: 'link', t: 'Abrir en otra pestaña' }) +
+      (mem.assets ? row({ tag: 'button', cls: 'danger', t: 'Borrar documento', attrs: `data-doc-del="${d.id}"` }) : ''),
+      [((DOC_CATS.find(c => c[0] === d.cat) || [])[1]), docLinkName(d.link), fmtSize(d.size || 0)].filter(Boolean).map(esc).join(' · ')));
+  const box = $('#docview');
+  try {
+    const blob = await getBlob(d.assetId);
+    if (!box.isConnected) return;
+    if (!/pdf/.test(d.type || blob.type)) { box.innerHTML = `<img src="${URL.createObjectURL(blob)}" alt="${esc(d.name)}">`; return; }
+    const lib = await loadPdfJs();
+    const pdf = await lib.getDocument({ data: new Uint8Array(await blob.arrayBuffer()) }).promise;
+    box.innerHTML = '';
+    const w = box.clientWidth || 340, dpr = Math.min(2, window.devicePixelRatio || 1);
+    for (let i = 1; i <= Math.min(pdf.numPages, 30); i++) {
+      if (!box.isConnected) return;
+      const page = await pdf.getPage(i), v1 = page.getViewport({ scale: 1 }), vp = page.getViewport({ scale: w / v1.width * dpr });
+      const cv = document.createElement('canvas'); cv.width = vp.width; cv.height = vp.height; cv.setAttribute('aria-label', `${d.name}, página ${i}`);
+      box.appendChild(cv);
+      await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+    }
+    if (pdf.numPages > 30) box.insertAdjacentHTML('beforeend', '<p class="gf">Se muestran las primeras 30 páginas.</p>');
+  } catch (e) {
+    if (box.isConnected) box.innerHTML = `<p class="gf">No se pudo abrir aquí${navigator.onLine === false ? ': no hay internet y este documento no está guardado en el teléfono' : ''}. Prueba «Abrir en otra pestaña».</p>`;
+  }
+}
+async function deleteDoc(id, btn) {
+  if (mem.delArm !== id) { mem.delArm = id; btn.querySelector('.t').textContent = 'Toca otra vez para borrar'; return; }
+  const d = mem.docs.find(x => x.id === id); if (!d) return;
+  btn.querySelector('.t').textContent = 'Borrando…';
+  try { await mem.assets.delete(d.assetId); } catch (e) { if (e.code !== 'not_found') { btn.querySelector('.t').textContent = 'No se pudo borrar'; return; } }
+  try { await mem.db.doc('docs/' + id).delete(); } catch (e) {}
+  await idb.del(d.assetId); mem.offline.delete(d.assetId);
+  closeSheet(); hud('Documento borrado');
+}
+async function saveAllOffline(btn) {
+  const l = mem.docs.filter(d => !mem.offline.has(d.assetId));
+  for (const [k, d] of l.entries()) { btn.querySelector('.t').textContent = `Guardando ${k + 1} de ${l.length}…`; try { await getBlob(d.assetId); } catch (e) {} }
+  hud('Listo para ver sin internet'); rerender();
+}
+
 const GUIA = {
   tren: { n: 'Tren, metro y taxis', i: I.train, c: 'var(--tint)' },
   frases: { n: 'Frases en japonés', i: I.speech, c: 'var(--orange)' },
@@ -1623,7 +1781,8 @@ function taxiSheet(k) {
 }
 function baseSheet(k) {
   const b = BASES[k], d = DAYS.find(x => x.base === k);
-  openSheet(b.n, grp(null, row({ t: 'Entrada', tr: esc(b.in) }) + row({ t: 'Salida', tr: esc(b.out) }) + row({ t: 'Noches', tr: b.nights }) + row({ t: 'Anfitrión', tr: esc(b.host) }) + row({ t: 'Estado', tr: `<span class="pill ok">${esc(b.status)}</span>` })) +
+  const bd = docsFor(['b:' + k]);
+  openSheet(b.n, (bd.length ? grp('Documentos', bd.map(docRow).join('')) : '') + grp(null, row({ t: 'Entrada', tr: esc(b.in) }) + row({ t: 'Salida', tr: esc(b.out) }) + row({ t: 'Noches', tr: b.nights }) + row({ t: 'Anfitrión', tr: esc(b.host) }) + row({ t: 'Estado', tr: `<span class="pill ok">${esc(b.status)}</span>` })) +
     grp('Dirección', row({ t: `<span lang="ja">${esc(b.ja)}</span>`, s: esc(b.addr) }) +
       row({ tag: 'button', cls: 'ld', lead: ico(I.car, 'var(--orange)'), t: 'Mostrar al taxista', attrs: `data-taxi="${k}"`, chev: 1 }) +
       row({ tag: 'button', cls: 'link', t: 'Copiar dirección en japonés', attrs: `data-copy="${esc(b.ja)}"` }) +
@@ -1632,7 +1791,8 @@ function baseSheet(k) {
 }
 function ticketSheet(i) {
   const t = TICKETS[i];
-  openSheet(t.n, grp(null, row({ t: 'Cuándo', tr: esc(t.when) }) + row({ t: 'Estado', tr: `<span class="pill ${t.st}">${esc(t.stl)}</span>` }), esc(t.info)) +
+  const td = docsFor(['tk:' + i]);
+  openSheet(t.n, (td.length ? grp('Documentos', td.map(docRow).join('')) : '') + grp(null, row({ t: 'Cuándo', tr: esc(t.when) }) + row({ t: 'Estado', tr: `<span class="pill ${t.st}">${esc(t.stl)}</span>` }), esc(t.info)) +
     grp(null, row({ href: '#dia' + t.day, cls: 'link', t: `Ver Día ${t.day}`, chev: 1 }) + row({ href: gmSearch(t.place), ext: 1, cls: 'link', t: 'Abrir en Google Maps' })));
 }
 let speakBtn = null;
@@ -1932,7 +2092,7 @@ function attachSwipe(card) {
 }
 document.addEventListener('click', e => { if (mem.swallowClick) { e.preventDefault(); e.stopPropagation(); } }, true);
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-say],[data-check],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket],[data-step],[data-focus],[data-food],[data-theme-set],[data-stamp],[data-ask],[data-chat-stop],[data-chat-clear]');
+  const t = e.target.closest('[data-say],[data-check],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket],[data-step],[data-focus],[data-food],[data-theme-set],[data-stamp],[data-ask],[data-chat-stop],[data-chat-clear],[data-doc],[data-doc-add],[data-doc-del],[data-offline-all]');
   if (!t) return;
   const d = t.dataset;
   const sg = t.closest('.seg');
@@ -1940,6 +2100,10 @@ document.addEventListener('click', e => {
   if (d.say) speak(d.say, 'slow' in d, t);
   else if (d.check) { toggleCheck(d.check); if (checks()[d.check]) mem.pop = d.check; rerender(); }
   else if (d.themeSet) setTheme(d.themeSet, e);
+  else if (d.doc) openDoc(d.doc);
+  else if ('docAdd' in d) uploadSheet();
+  else if (d.docDel) deleteDoc(d.docDel, t);
+  else if ('offlineAll' in d) saveAllOffline(t);
   else if (d.stamp) { toggleCheck(d.stamp); mem.stampPop = checks()[d.stamp] ? d.stamp : null; rerender(); mem.stampPop = null; if (checks()[d.stamp]) hud('¡Sello!'); }
   else if (d.ask != null) { if (d.ask.endsWith(': ')) { const ta = $('#chatIn'); ta.value = d.ask; mem.draft = d.ask; ta.focus(); } else askClaude(d.ask); }
   else if ('chatStop' in d) { if (mem.chatCtl) mem.chatCtl.abort(); }
@@ -1969,6 +2133,7 @@ document.addEventListener('click', e => {
   }
 });
 document.addEventListener('submit', e => {
+  if (e.target.id === 'docForm') { e.preventDefault(); uploadDocs(); return; }
   if (e.target.id === 'chatForm') { e.preventDefault(); askClaude($('#chatIn').value); return; }
   if (e.target.id !== 'gForm') return;
   e.preventDefault();
@@ -1976,6 +2141,12 @@ document.addEventListener('submit', e => {
   const g = store.get('gastos', []);
   g.push({ id: Date.now(), y, c: $('#gC').value, n: $('#gN').value.trim(), d: jstNow().ymd });
   store.set('gastos', g); rerender(); hud('Gasto agregado');
+});
+document.addEventListener('change', e => {
+  if (e.target.id !== 'docFile') return;
+  const f = [...e.target.files];
+  $('#docFileName').textContent = f.length ? f.length === 1 ? f[0].name : f.length + ' archivos' : 'Elegir PDF o imagen';
+  if (f.length === 1 && !$('#docName').value) $('#docName').value = f[0].name.replace(/\.[^.]+$/, '');
 });
 document.addEventListener('input', e => {
   const id = e.target.id;
