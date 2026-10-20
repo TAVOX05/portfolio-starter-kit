@@ -383,22 +383,40 @@ body.scrolled .nav { border-bottom-color: var(--hair); }
 .hud { background: var(--surf); border: .5px solid var(--hair); }
 body::before, .nav { background: transparent; }
 
-/* tarjetas deslizables de Hoy */
-.deck { position: relative; isolation: isolate; padding-bottom: 14px; }
-.deck .nowc { position: relative; z-index: 2; touch-action: pan-y; user-select: none; -webkit-user-select: none; will-change: transform; }
-.deck .nowc.drag { cursor: grabbing; }
-.ghost { position: absolute; z-index: 1; border-radius: 20px; background: var(--card); border: .5px solid var(--hair); }
-.ghost.g1 { inset: 10px 12px 6px; transform: translateY(8px); opacity: .7; }
-.ghost.g2 { inset: 20px 24px 0; transform: translateY(14px); opacity: .4; }
+/* tarjetas deslizables de Hoy: un mazo de verdad.
+   --p (0→1) es cuánto «entra» una tarjeta: mueve, escala y revela su información de arriba abajo;
+   --d (0→1) la manda un lugar más atrás cuando regresas a la anterior. Ambas se animan con transición. */
+@property --p { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --d { syntax: '<number>'; inherits: true; initial-value: 0; }
+.deck { position: relative; isolation: isolate; padding-bottom: 16px; }
+.deck > .nowc { --p: 1; position: relative; z-index: 3; touch-action: pan-y; user-select: none; -webkit-user-select: none; will-change: transform; transform-origin: 50% 100%; }
+.deck > .nowc.drag { cursor: grabbing; }
+/* al tomarla se «levanta»: más sombra, para separarla de la que está debajo */
+@media (prefers-reduced-motion: no-preference) { .deck > .nowc:not(.under):not(.under2):not(.prevc) { transition: box-shadow .25s ease; } }
+.deck > .nowc.drag, .deck > .nowc.prevc { box-shadow: inset 0 4px 0 var(--c), inset 0 1px 0 var(--glass-hi), 0 26px 50px -18px rgba(0,0,0,.4), 0 6px 14px -6px rgba(0,0,0,.18); }
+.deck > .nowc.under, .deck > .nowc.under2 { position: absolute; top: 0; left: 0; right: 0; bottom: 16px; overflow: hidden; pointer-events: none; }
+.deck > .nowc.under { --p: 0; z-index: 2; transform: translateY(calc((1 - var(--p)) * 12px + var(--d) * 12px)) scale(calc(.94 + var(--p) * .06 - var(--d) * .06)); opacity: calc(1 - var(--d) * .45); }
+.deck > .nowc.under2 { --p: 0; z-index: 1; transform: translateY(calc(24px - var(--p) * 12px)) scale(calc(.88 + var(--p) * .06)); opacity: calc(.5 + var(--p) * .5 - var(--d) * .5); }
+.deck > .nowc.under2 > * { visibility: hidden; }
+.deck > .nowc.prevc { --p: 0; position: absolute; top: 0; left: 0; right: 0; z-index: 4; visibility: hidden; pointer-events: none; }
+/* la información entra en cascada: cada renglón aparece un poco después del anterior */
+.deck > .nowc > * { --o: clamp(0, calc(var(--p) * 1.9 - var(--k, 0) * .11), 1); opacity: var(--o); transform: translateY(calc((1 - var(--o)) * 12px)); }
+.nowc > :nth-child(2) { --k: 1; } .nowc > :nth-child(3) { --k: 2; } .nowc > :nth-child(4) { --k: 3; } .nowc > :nth-child(5) { --k: 4; }
+.nowc > :nth-child(6) { --k: 5; } .nowc > :nth-child(7) { --k: 6; } .nowc > :nth-child(8) { --k: 7; } .nowc > :nth-child(9) { --k: 8; } .nowc > :nth-child(10) { --k: 9; }
 .dots { display: flex; justify-content: center; gap: 6px; margin-top: -6px; }
-.dots span { width: 7px; height: 7px; border-radius: 4px; background: var(--label3); transition: width .4s cubic-bezier(.34,1.45,.64,1), background-color .3s; }
+.dots span { width: 7px; height: 7px; border-radius: 4px; background: var(--label3); transition: width .45s cubic-bezier(.22,1,.36,1), background-color .3s; }
 .dots span.cur { background: color-mix(in srgb, var(--red) 55%, transparent); }
 .dots span.on { width: 20px; background: var(--tint); }
 @media (prefers-reduced-motion: no-preference) {
-  .nowc.in-next { animation: card-in-r .55s cubic-bezier(.34,1.3,.64,1) both; }
-  .nowc.in-prev { animation: card-in-l .55s cubic-bezier(.34,1.3,.64,1) both; }
-  @keyframes card-in-r { from { opacity: 0; transform: translateX(40%) rotate(4deg) scale(.94); } }
-  @keyframes card-in-l { from { opacity: 0; transform: translateX(-40%) rotate(-4deg) scale(.94); } }
+  /* saltos (volver a lo de ahora, abrir desde el plan): entra deslizando y revela su información */
+  .deck > .nowc.in-next { animation: card-in-r .6s cubic-bezier(.22,1,.36,1) both, card-reveal .8s cubic-bezier(.22,1,.36,1) both; }
+  .deck > .nowc.in-prev { animation: card-in-l .6s cubic-bezier(.22,1,.36,1) both, card-reveal .8s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes card-in-r { from { opacity: 0; transform: translateX(32px) scale(.97); } }
+  @keyframes card-in-l { from { opacity: 0; transform: translateX(-32px) scale(.97); } }
+  @keyframes card-reveal { from { --p: 0; } to { --p: 1; } }
+  /* después de pasar de tarjeta, la nueva del fondo aparece suave */
+  .deck.settle > .nowc.under2 { animation: deck-u2 .45s ease both; }
+  @keyframes deck-u2 { from { opacity: 0; transform: translateY(30px) scale(.86); } }
 }
 
 /* hora de salir */
@@ -1372,10 +1390,14 @@ function viewToday(n, hm, preview) {
   const morning = hm < '12:00';
   const tomorrow = DAYS[n];
 
-  // tarjeta principal
-  const card = `<div class="deck">${fi < items.length - 1 ? '<span class="ghost g1"></span>' : ''}${fi < items.length - 2 ? '<span class="ghost g2"></span>' : ''}<section class="nowc" style="--c:${cityVar(day.city)}" data-day="${n}" data-i="${fi}" data-max="${items.length}" aria-roledescription="tarjeta deslizable">
-    <div class="nowh"><span class="stl ${sk}">${label}</span><span class="pos">${fi + 1} de ${items.length}</span>
-      <span class="stp"><button type="button" data-step="-1" aria-label="Actividad anterior" ${fi === 0 ? 'disabled' : ''}>‹</button><button type="button" data-step="1" aria-label="Actividad siguiente" ${fi === items.length - 1 ? 'disabled' : ''}>›</button></span></div>
+  // tarjeta principal: un mazo con la anterior (fuera, a la izquierda), la actual y las dos siguientes debajo
+  const cardAt = (i, role) => {
+    const it = items[i], [sk, sl, sd] = itemStatus(it, hm);
+    const label = sk === 'next' && i !== auto ? 'Más tarde' : sk === 'past' && i === auto ? 'Último del día' : sl;
+    const id = 'd' + n + '-' + i, done = !!c[id], top = role === 'top';
+    return `<section class="nowc${top ? '' : ' ' + role}" style="--c:${cityVar(day.city)}" ${top ? `data-day="${n}" data-i="${i}" data-auto="${auto}" data-max="${items.length}" aria-roledescription="tarjeta deslizable"` : 'inert aria-hidden="true"'}>
+    <div class="nowh"><span class="stl ${sk}">${label}</span><span class="pos">${i + 1} de ${items.length}</span>
+      <span class="stp"><button type="button" data-step="-1" aria-label="Actividad anterior" ${i === 0 ? 'disabled' : ''}>‹</button><button type="button" data-step="1" aria-label="Actividad siguiente" ${i === items.length - 1 ? 'disabled' : ''}>›</button></span></div>
     <div class="when">${it.t} – ${it.e} · ${sd}</div>
     <h2>${esc(it.h)}</h2>
     ${it.d ? `<p class="d">${esc(it.d)}</p>` : ''}
@@ -1384,8 +1406,10 @@ function viewToday(n, hm, preview) {
     ${(it.p || []).length ? `<div class="chips">${it.p.map(k => `<a href="${gmSearch(k)}" target="_blank" rel="noopener">${esc(place(k).n)}</a>`).join('')}</div>` : ''}
     <div class="playbar">${(it.p || []).length ? `<a class="play" href="${gmDirFromHere(it.p[it.p.length - 1])}" target="_blank" rel="noopener">Cómo llegar</a>` : `<a class="play" href="#dia${n}">Ver el día</a>`}
       <button class="play alt${done ? ' on' : ''}" type="button" data-check="${id}">${done ? 'Hecho ✓' : 'Marcar hecho'}</button></div>
-    ${fi !== auto ? `<button class="tbtn" type="button" data-step="0">Volver a lo de ahora</button>` : ''}
-  </section></div>
+    ${i !== auto ? `<button class="tbtn" type="button" data-step="0">Volver a lo de ahora</button>` : ''}
+  </section>`;
+  };
+  const card = `<div class="deck">${fi > 0 ? cardAt(fi - 1, 'prevc') : ''}${fi < items.length - 2 ? cardAt(fi + 2, 'under2') : ''}${fi < items.length - 1 ? cardAt(fi + 1, 'under') : ''}${cardAt(fi, 'top')}</div>
   <div class="dots" aria-hidden="true">${items.map((_, i) => `<span class="${i === fi ? 'on' : ''}${i === auto ? ' cur' : ''}"></span>`).join('')}</div>`;
 
   // ruta rápida
@@ -2315,9 +2339,13 @@ function afterRender(opts) {
   view.querySelectorAll('.seg[data-to]').forEach(sg => requestAnimationFrame(() => requestAnimationFrame(() => sg.style.setProperty('--i', sg.dataset.to))));
   mem.segFrom = null;
   if (mem.pop) { const b = view.querySelector(`.chk[data-check="${mem.pop}"]`); if (b) b.classList.add('pop'); mem.pop = null; }
-  const nc = view.querySelector('.nowc');
-  if (nc) { if (mem.swipeIn && !RM) nc.classList.add(mem.swipeIn > 0 ? 'in-next' : 'in-prev'); attachSwipe(nc); }
-  mem.swipeIn = 0;
+  const nc = view.querySelector('.deck > .nowc:not([inert])');
+  if (nc) {
+    if (mem.swipeIn && !RM) nc.classList.add(mem.swipeIn > 0 ? 'in-next' : 'in-prev');
+    if (mem.deckSettle && !RM) nc.parentElement.classList.add('settle');
+    attachSwipe(nc);
+  }
+  mem.swipeIn = 0; mem.deckSettle = false;
   mem.stampPop.clear();
 }
 const depth = h => /^dia\d|^guia-/.test(h) ? 2 : 1;
@@ -3167,37 +3195,99 @@ function copyText(txt) {
   const fail = () => openSheet('Copiar', showCard('', esc(txt), 'Mantén presionado el texto para copiarlo.'));
   try { navigator.clipboard.writeText(txt).then(() => hud('Copiado'), fail); } catch (e) { fail(); }
 }
-// Swipe de la tarjeta de Hoy: sigue al dedo, se inclina, resiste en los extremos y sale volando
+// Mazo de Hoy: la tarjeta de arriba sigue al dedo y la siguiente, que ya está debajo con su información,
+// sube, crece y revela su contenido conforme arrastras; la anterior entra desde la izquierda. Al soltar,
+// el movimiento termina con física (rápido si lo lanzas), la altura se ajusta suave y se confirma sin parpadeo.
 function attachSwipe(card) {
-  const n = +card.dataset.day, i = +card.dataset.i, max = +card.dataset.max;
-  let x0 = null, y0 = 0, t0 = 0, dx = 0, lock = null;
-  const reset = () => { card.style.transition = 'transform .55s cubic-bezier(.34,1.45,.64,1)'; card.style.transform = ''; };
-  card.addEventListener('pointerdown', e => { if (e.button > 0) return; x0 = e.clientX; y0 = e.clientY; t0 = performance.now(); dx = 0; lock = null; });
+  const deck = card.parentElement, n = +card.dataset.day, i = +card.dataset.i;
+  const next = deck.querySelector('.nowc.under'), next2 = deck.querySelector('.nowc.under2'), prev = deck.querySelector('.nowc.prevc');
+  let x0 = null, y0 = 0, dx = 0, lock = null, raf = 0, busy = false, pts = [];
+  const W = () => card.getBoundingClientRect().width || 360;
+  const EASE = 'cubic-bezier(.22,1,.36,1)';
+  const setT = (el, list, dur, ease = EASE) => { if (el) el.style.transition = list ? list.map(q => `${q} ${dur}s ${ease}`).join(',') : 'none'; };
+  const paint = () => {
+    raf = 0;
+    const w = W();
+    if (dx <= 0 || !prev) {
+      const edge = dx < 0 ? !next : dx > 0;
+      const d = edge ? dx * .22 : dx, pr = next && dx < 0 ? Math.min(1, -dx / (w * .8)) : 0;
+      card.style.transform = `translateX(${d}px) rotate(${d * .03}deg)`;
+      card.style.setProperty('--p', 1);
+      if (next) { next.style.setProperty('--p', pr); next.style.setProperty('--d', 0); }
+      if (next2) { next2.style.setProperty('--p', pr); next2.style.setProperty('--d', 0); }
+      if (prev) prev.style.visibility = 'hidden';
+    } else {
+      const pr = Math.min(1, dx / (w * .8));
+      prev.style.visibility = 'visible';
+      prev.style.transform = `translateX(${-(w + 28) * (1 - pr)}px) rotate(${-6 * (1 - pr)}deg)`;
+      prev.style.setProperty('--p', pr);
+      card.style.transform = `translateY(${pr * 12}px) scale(${1 - pr * .06})`;
+      card.style.setProperty('--p', 1 - pr * .9);
+      if (next) next.style.setProperty('--d', pr);
+      if (next2) next2.style.setProperty('--d', pr);
+    }
+  };
+  const all = [card, next, next2, prev];
+  const finish = (dir, fast) => {
+    busy = true;
+    if (RM) { mem.focus = { n, i: i + dir }; rerender(); return; }
+    const dur = fast ? .32 : .46, w = W();
+    // la altura del mazo pasa suave a la de la tarjeta que llega
+    const incoming = dir > 0 ? next : prev;
+    if (incoming) {
+      let h;
+      if (dir > 0) { incoming.style.bottom = 'auto'; h = incoming.offsetHeight; incoming.style.bottom = ''; } else h = incoming.offsetHeight;
+      deck.style.height = deck.offsetHeight + 'px'; void deck.offsetHeight;
+      deck.style.transition = `height ${dur}s ${EASE}`; deck.style.height = (h + 16) + 'px';
+      if (dir < 0) { card.style.overflow = 'hidden'; card.style.height = card.offsetHeight + 'px'; void card.offsetHeight; }
+      // los puntos avanzan ya
+      const dots = deck.nextElementSibling;
+      if (dots && dots.classList.contains('dots')) { dots.children[i] && dots.children[i].classList.remove('on'); dots.children[i + dir] && dots.children[i + dir].classList.add('on'); }
+      if (dir > 0) {
+        setT(card, ['transform', 'opacity'], dur * .9, 'cubic-bezier(.3,.1,.6,1)');
+        card.style.transform = `translateX(${-(w * 1.15)}px) rotate(-11deg)`; card.style.opacity = '0';
+        setT(next, ['--p'], dur); next.style.setProperty('--p', 1);
+        if (next2) { setT(next2, ['--p'], dur); next2.style.setProperty('--p', 1); }
+      } else {
+        setT(prev, ['transform', '--p'], dur); prev.style.visibility = 'visible'; prev.style.transform = 'translateX(0) rotate(0deg)'; prev.style.setProperty('--p', 1);
+        setT(card, ['transform', '--p', 'height'], dur); card.style.transform = 'translateY(12px) scale(.94)'; card.style.setProperty('--p', 0); card.style.height = h + 'px';
+        if (next) { setT(next, ['--d'], dur); next.style.setProperty('--d', 1); }
+        if (next2) { setT(next2, ['--d'], dur); next2.style.setProperty('--d', 1); }
+      }
+      try { navigator.vibrate && navigator.vibrate(8); } catch (err) {}
+      setTimeout(() => { mem.focus = { n, i: i + dir }; mem.deckSettle = true; rerender(); }, dur * 1000 + 20);
+    }
+  };
+  const cancel = () => {
+    const sp = 'cubic-bezier(.34,1.4,.64,1)';
+    setT(card, ['transform', '--p'], .5, sp); card.style.transform = ''; card.style.setProperty('--p', 1);
+    if (next) { setT(next, ['--p', '--d'], .45); next.style.setProperty('--p', 0); next.style.setProperty('--d', 0); }
+    if (next2) { setT(next2, ['--p', '--d'], .45); next2.style.setProperty('--p', 0); next2.style.setProperty('--d', 0); }
+    if (prev) { setT(prev, ['transform', '--p'], .38); prev.style.transform = `translateX(${-(W() + 28)}px) rotate(-6deg)`; prev.style.setProperty('--p', 0); setTimeout(() => { if (!busy) prev.style.visibility = 'hidden'; }, 400); }
+  };
+  card._go = dir => { if (busy || (dir > 0 && !next) || (dir < 0 && !prev)) return false; if (dir < 0) { prev.style.visibility = 'visible'; prev.style.transform = `translateX(${-(W() + 28)}px) rotate(-6deg)`; void prev.offsetWidth; } finish(dir, false); return true; };
+  card.addEventListener('pointerdown', e => { if (e.button > 0 || busy) return; x0 = e.clientX; y0 = e.clientY; dx = 0; lock = null; pts = [[performance.now(), e.clientX]]; });
   card.addEventListener('pointermove', e => {
-    if (x0 == null) return;
+    if (x0 == null || busy) return;
     const mx = e.clientX - x0, my = e.clientY - y0;
     if (!lock) {
-      if (Math.abs(mx) > 8 && Math.abs(mx) > Math.abs(my)) { lock = 'x'; try { card.setPointerCapture(e.pointerId); } catch (err) {} card.style.transition = 'none'; card.classList.add('drag'); }
+      if (Math.abs(mx) > 8 && Math.abs(mx) > Math.abs(my)) { lock = 'x'; try { card.setPointerCapture(e.pointerId); } catch (err) {} all.forEach(el => setT(el, null)); card.classList.add('drag'); }
       else if (Math.abs(my) > 8) lock = 'y';
     }
     if (lock !== 'x') return;
-    dx = mx;
-    const edge = (dx > 0 && i === 0) || (dx < 0 && i === max - 1);
-    const d = edge ? dx * .22 : dx;
-    card.style.transform = `translateX(${d}px) rotate(${d * .025}deg)`;
+    dx = mx; pts.push([performance.now(), e.clientX]); if (pts.length > 6) pts.shift();
+    if (!raf) raf = requestAnimationFrame(paint);
   });
   const end = () => {
     if (x0 == null) return;
     const was = lock === 'x'; x0 = null; card.classList.remove('drag');
-    if (!was) return;
+    if (!was || busy) return;
     mem.swallowClick = true; setTimeout(() => { mem.swallowClick = false; }, 80);
-    const v = Math.abs(dx) / Math.max(1, performance.now() - t0), dir = dx < 0 ? 1 : -1, ni = i + dir;
-    if ((Math.abs(dx) > 70 || v > .5) && ni >= 0 && ni < max) {
-      card.style.transition = 'transform .26s cubic-bezier(.4,0,.6,1), opacity .26s';
-      card.style.transform = `translateX(${-dir * 115}%) rotate(${-dir * 9}deg)`;
-      card.style.opacity = '0';
-      setTimeout(() => { mem.focus = { n, i: ni }; mem.swipeIn = dir; rerender(); }, 210);
-    } else reset();
+    if (raf) { cancelAnimationFrame(raf); raf = 0; paint(); }
+    const [ta, xa] = pts[0], [tb, xb] = pts[pts.length - 1], v = (xb - xa) / Math.max(16, tb - ta);
+    const dir = dx < 0 ? 1 : -1, fast = Math.abs(v) > .45 && Math.sign(v) === Math.sign(dx);
+    const ok = dir > 0 ? !!next : !!prev;
+    if (ok && (Math.abs(dx) > W() * .28 || fast)) finish(dir, fast); else cancel();
   };
   card.addEventListener('pointerup', end);
   card.addEventListener('pointercancel', end);
@@ -3240,9 +3330,10 @@ document.addEventListener('click', e => {
   else if ('preview' in d) { mem.preview = +$('#pv').value; mem.previewHm = $('#pvh').value || '10:00'; mem.focus = null; route(); window.scrollTo(0, 0); }
   else if (d.step != null) {
     const n = mem.preview || DAYS[dayIndexFor(jstNow().ymd)].n;
-    if (+d.step === 0) mem.focus = null;
-    else { const cur = $('.nowc .pos').textContent.split(' ')[0] - 1; mem.focus = { n, i: Math.max(0, Math.min(DAYS[n - 1].items.length - 1, cur + +d.step)) }; mem.swipeIn = +d.step; }
-    rerender();
+    const top = $('.deck > .nowc:not([inert])');
+    if (+d.step === 0) { mem.focus = null; mem.swipeIn = top && +top.dataset.i > +top.dataset.auto ? -1 : 1; rerender(); }
+    else if (top && top._go && top._go(+d.step)) { /* el mazo se anima y confirma solo */ }
+    else if (top) { const cur = +top.dataset.i; mem.focus = { n, i: Math.max(0, Math.min(DAYS[n - 1].items.length - 1, cur + +d.step)) }; rerender(); }
   }
   else if (d.focus != null) { mem.swipeIn = 1; mem.focus = { n: mem.preview || DAYS[dayIndexFor(jstNow().ymd)].n, i: +d.focus }; route(); window.scrollTo(0, 0); }
   else if (d.food) { mem.foodMode = d.food; rerender(); }
