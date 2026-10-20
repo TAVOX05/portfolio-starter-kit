@@ -521,6 +521,31 @@ body::before, .nav { background: transparent; }
   @keyframes petring { from { transform: scale(.9); opacity: .8; } to { transform: scale(1.4); opacity: 0; } }
   @keyframes pethop { 0% { transform: translateY(0); } 40% { transform: translateY(-12px) rotate(-6deg); } 100% { transform: translateY(0); } }
 }
+
+/* animaciones propias de los Pokémon */
+.petsvg .ear, .petsvg .flame, .petsvg .cheek, .petsvg .zz text { transform-box: fill-box; }
+.petsvg .ear-l { transform-origin: 85% 100%; } .petsvg .ear-r { transform-origin: 15% 100%; }
+.petsvg .flame { transform-origin: 50% 100%; }
+.ava .zz { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .pet .petsvg .ear-l { animation: earl 5.5s ease-in-out infinite; }
+  .pet .petsvg .ear-r { animation: earr 5.5s ease-in-out infinite .4s; }
+  .pet.talk .petsvg .ear-l, .pet.talk .petsvg .ear-r { animation-duration: .9s; }
+  .pet.talk .petsvg .cheek { animation: spark .22s ease-in-out infinite alternate; }
+  .petsvg .flame { animation: flick .45s ease-in-out infinite alternate; }
+  .pet .petsvg .zz text { animation: zzz 2.8s ease-in-out infinite; } .pet .petsvg .zz text + text { animation-delay: 1.4s; }
+  @keyframes earl { 0%, 84%, 100% { transform: none; } 88% { transform: rotate(-10deg); } 93% { transform: rotate(5deg); } }
+  @keyframes earr { 0%, 84%, 100% { transform: none; } 88% { transform: rotate(10deg); } 93% { transform: rotate(-5deg); } }
+  @keyframes spark { from { filter: none; } to { filter: brightness(1.35) drop-shadow(0 0 2.5px #FFE14A); } }
+  @keyframes flick { from { transform: scale(1, 1) rotate(-3deg); } to { transform: scale(1.08, .9) rotate(4deg); } }
+  @keyframes zzz { 0% { opacity: 0; transform: translate(0, 4px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(5px, -9px); } }
+}
+
+/* borde tipo sticker para que las siluetas oscuras no se pierdan en modo oscuro */
+:root { --pet-edge: rgba(255,255,255,0); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --pet-edge: rgba(255,255,255,.6); } }
+:root[data-theme="dark"] { --pet-edge: rgba(255,255,255,.6); }
+.petsvg { filter: drop-shadow(0 0 .7px var(--pet-edge)) drop-shadow(0 0 .7px var(--pet-edge)); }
 </style>
 
 <canvas id="bgfx" aria-hidden="true"></canvas>
@@ -1571,6 +1596,97 @@ function leaveHtml(day, hm) {
    teléfono. Usa el modelo rápido de Claude (modelTier "quick"): es el que
    menos gasta del límite de uso de cada cuenta, también en el plan gratuito,
    y responde en uno o dos segundos. El contexto que se envía es compacto. */
+// Pokémon dibujados para la app: degradados compartidos (POKE_DEFS, se insertan una vez) + cuerpo de cada uno.
+const O = 'stroke="#2A1F2D" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"';
+const POKE_DEFS = `
+<radialGradient id="pkY" cx="42%" cy="34%" r="70%"><stop offset="0" stop-color="#FFF08A"/><stop offset=".55" stop-color="#FBD43A"/><stop offset="1" stop-color="#E9AE14"/></radialGradient>
+<radialGradient id="pkR" cx="40%" cy="35%" r="65%"><stop offset="0" stop-color="#FF8A78"/><stop offset="1" stop-color="#D9302A"/></radialGradient>
+<radialGradient id="evB" cx="42%" cy="32%" r="72%"><stop offset="0" stop-color="#DDA266"/><stop offset=".6" stop-color="#BE7A3E"/><stop offset="1" stop-color="#94592A"/></radialGradient>
+<radialGradient id="evC" cx="50%" cy="20%" r="80%"><stop offset="0" stop-color="#FFF8E8"/><stop offset="1" stop-color="#E8D2A6"/></radialGradient>
+<radialGradient id="snB" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#4E93B5"/><stop offset=".6" stop-color="#2F6E8F"/><stop offset="1" stop-color="#1F4D66"/></radialGradient>
+<radialGradient id="snC" cx="50%" cy="30%" r="75%"><stop offset="0" stop-color="#FFF6E2"/><stop offset="1" stop-color="#E9D3A8"/></radialGradient>
+<radialGradient id="geB" cx="42%" cy="30%" r="75%"><stop offset="0" stop-color="#9C7BD6"/><stop offset=".55" stop-color="#6F4DAA"/><stop offset="1" stop-color="#47307A"/></radialGradient>
+<radialGradient id="geE" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#FF6A6A"/><stop offset="1" stop-color="#C8161D"/></radialGradient>
+<radialGradient id="jiB" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#FFE0EC"/><stop offset=".5" stop-color="#F9B3CD"/><stop offset="1" stop-color="#E5849F"/></radialGradient>
+<radialGradient id="jiE" cx="45%" cy="35%" r="65%"><stop offset="0" stop-color="#8FE0FF"/><stop offset=".6" stop-color="#2E9BD8"/><stop offset="1" stop-color="#1B5E9E"/></radialGradient>
+<radialGradient id="chB" cx="42%" cy="30%" r="75%"><stop offset="0" stop-color="#FFB46A"/><stop offset=".55" stop-color="#F7883A"/><stop offset="1" stop-color="#D9621C"/></radialGradient>
+<linearGradient id="chF" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#E5321E"/><stop offset=".55" stop-color="#FF8A1E"/><stop offset="1" stop-color="#FFD84A"/></linearGradient>
+<linearGradient id="shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>`;
+
+const eye = (cx, cy, rx, ry, iris, irisCol) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#1E1520"/>` +
+  (iris ? `<ellipse cx="${cx}" cy="${cy + ry * .35}" rx="${rx * .7}" ry="${ry * .45}" fill="${irisCol}" opacity=".85"/>` : '') +
+  `<ellipse cx="${cx - rx * .3}" cy="${cy - ry * .38}" rx="${rx * .42}" ry="${ry * .36}" fill="#fff"/><circle cx="${cx + rx * .35}" cy="${cy + ry * .38}" r="${rx * .18}" fill="#fff" opacity=".9"/>`;
+
+const POKE_BODY = {
+  pikachu: `
+  <g class="ear ear-l"><path d="M34 40 C27 27 17 13 11 4 C24 7 39 19 46 32Z" fill="url(#pkY)" ${O}/><path d="M11 4 C14 9 17 13 20 17 C24 15 27 12 29 10 C23 7 16 5 11 4Z" fill="#2A1F2D"/></g>
+  <g class="ear ear-r"><path d="M66 40 C73 27 83 13 89 4 C76 7 61 19 54 32Z" fill="url(#pkY)" ${O}/><path d="M89 4 C86 9 83 13 80 17 C76 15 73 12 71 10 C77 7 84 5 89 4Z" fill="#2A1F2D"/></g>
+  <path d="M50 27 C71 27 86 40 87 58 C88 77 71 90 50 90 C29 90 12 77 13 58 C14 40 29 27 50 27Z" fill="url(#pkY)" ${O}/>
+  <path d="M82 66 C78 80 64 88 50 88 C40 88 31 85 25 80 C40 84 66 82 82 66Z" fill="#C98E0C" opacity=".35"/>
+  <path d="M30 36 C38 31 48 30 56 31 C46 33 38 37 32 42Z" fill="url(#shine)"/>
+  <g class="eye">${eye(35, 55, 6, 6.8)}${eye(65, 55, 6, 6.8)}</g>
+  <g class="cheek"><ellipse cx="22" cy="68" rx="8.5" ry="7.5" fill="url(#pkR)"/><ellipse cx="78" cy="68" rx="8.5" ry="7.5" fill="url(#pkR)"/><ellipse cx="20" cy="65.5" rx="2.6" ry="1.8" fill="#fff" opacity=".7"/><ellipse cx="76" cy="65.5" rx="2.6" ry="1.8" fill="#fff" opacity=".7"/></g>
+  <path d="M48.3 62 L51.7 62 L50 63.6Z" fill="#2A1F2D" stroke="#2A1F2D" stroke-width="1" stroke-linejoin="round"/>
+  <path d="M44 67 C45.5 70 48.5 70 50 66.8 C51.5 70 54.5 70 56 67" fill="none" stroke="#2A1F2D" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M46.5 69.5 C47.5 76 52.5 76 53.5 69.5 C52 70.8 48 70.8 46.5 69.5Z" fill="#9C2E3E" stroke="#2A1F2D" stroke-width="1.4" stroke-linejoin="round"/><path d="M48 73.5 C49 75 51 75 52 73.5 C51 72.8 49 72.8 48 73.5Z" fill="#FF8FA0"/>`,
+
+  eevee: `
+  <g class="ear ear-l"><path d="M37 41 C27 31 12 17 3 8 C20 7 37 16 47 30Z" fill="url(#evB)" ${O}/><path d="M34 35 C26 28 16 19 10 13 C22 13 34 20 41 28Z" fill="#5A3519"/></g>
+  <g class="ear ear-r"><path d="M63 41 C73 31 88 17 97 8 C80 7 63 16 53 30Z" fill="url(#evB)" ${O}/><path d="M66 35 C74 28 84 19 90 13 C78 13 66 20 59 28Z" fill="#5A3519"/></g>
+  <path d="M50 27 C68 27 80 39 80 55 C80 70 68 80 50 80 C32 80 20 70 20 55 C20 39 32 27 50 27Z" fill="url(#evB)" ${O}/>
+  <path d="M43 29 L47 36 L50 28 L53 36 L57 29 C54 27 46 27 43 29Z" fill="#B06E36" ${O} stroke-width="1.6"/>
+  <path d="M31 36 C37 31 45 29 52 30 C44 32 37 36 33 41Z" fill="url(#shine)"/>
+  <g class="eye">${eye(37, 54, 6.4, 8, true, '#7A4524')}${eye(63, 54, 6.4, 8, true, '#7A4524')}</g>
+  <ellipse cx="27" cy="64" rx="4.5" ry="2.6" fill="#E98A72" opacity=".55"/><ellipse cx="73" cy="64" rx="4.5" ry="2.6" fill="#E98A72" opacity=".55"/>
+  <path d="M48.4 62.5 L51.6 62.5 L50 64.2Z" fill="#2A1F2D" stroke="#2A1F2D" stroke-width="1" stroke-linejoin="round"/>
+  <path d="M45.5 66.5 C47.5 69 52.5 69 54.5 66.5" fill="none" stroke="#2A1F2D" stroke-width="1.8" stroke-linecap="round"/>
+  <g transform="translate(5 11) scale(.9)"><path d="M17 74 C21 67 27 70 29 75 C31 67 39 68 41 75 C43 67 51 67 53 75 C55 67 63 68 65 75 C67 69 75 67 83 74 C90 82 82 96 68 95 C60 99 40 99 32 95 C18 96 10 82 17 74Z" fill="url(#evC)" ${O}/>
+  <path d="M30 85 C38 90 62 90 70 85" fill="none" stroke="#D9BE8C" stroke-width="1.6" stroke-linecap="round"/></g>`,
+
+  snorlax: `
+  <path d="M22 34 L26 18 L37 28Z M78 34 L74 18 L63 28Z" fill="url(#snB)" ${O}/><path d="M25 29 L27 22 L32 27Z M75 29 L73 22 L68 27Z" fill="#163A4E"/>
+  <path d="M50 22 C74 22 90 38 90 60 C90 80 72 93 50 93 C28 93 10 80 10 60 C10 38 26 22 50 22Z" fill="url(#snB)" ${O}/>
+  <path d="M50 39 C55 33 63 32 70 36 C81 42 85 56 81 69 C77 82 65 89 50 89 C35 89 23 82 19 69 C15 56 19 42 30 36 C37 32 45 33 50 39Z" fill="url(#snC)" ${O} stroke-width="1.8"/>
+  <path d="M28 30 C36 25 46 24 54 25 C44 27 36 31 30 36Z" fill="url(#shine)" opacity=".6"/>
+  <g class="eye"><path d="M30 57 C34 59.5 39 59.5 43 57" fill="none" stroke="#2A1F2D" stroke-width="2.6" stroke-linecap="round"/><path d="M57 57 C61 59.5 66 59.5 70 57" fill="none" stroke="#2A1F2D" stroke-width="2.6" stroke-linecap="round"/></g>
+  <ellipse cx="27" cy="66" rx="5" ry="3" fill="#F2A08C" opacity=".5"/><ellipse cx="73" cy="66" rx="5" ry="3" fill="#F2A08C" opacity=".5"/>
+  <path d="M32 69 C40 81 60 81 68 69 C60 74 40 74 32 69Z" fill="#7A2E3A" ${O} stroke-width="1.8"/>
+  <path d="M38 72.5 L40.5 66.5 L43 73.2Z M57 73.2 L59.5 66.5 L62 72.5Z" fill="#fff" stroke="#2A1F2D" stroke-width="1.3" stroke-linejoin="round"/>
+  <g class="zz" fill="#2F6E8F" font-family="system-ui,sans-serif" font-weight="800"><text x="80" y="20" font-size="11">z</text><text x="88" y="10" font-size="8">z</text></g>`,
+
+  gengar: `
+  <g class="body"><path d="M18 70 C12 62 11 52 14 45 L4 37 L19 36 C22 29 26 25 30 22 L27 8 L39 17 C43 15.5 47 15 50 15 L55 3 L61 16 C65 17 69 19 72 22 L80 11 L80 26 C84 30 86 36 87 42 L97 38 L89 51 C90 59 89 66 85 72 C79 85 66 93 50 93 C34 93 23 84 18 70Z" fill="url(#geB)" ${O}/>
+  <path d="M84 70 C78 84 66 91 50 91 C38 91 29 86 23 79 C40 86 70 84 84 70Z" fill="#2E1E52" opacity=".35"/>
+  <path d="M30 30 C37 25 45 23 52 23 C44 26 37 30 32 35Z" fill="url(#shine)" opacity=".5"/>
+  <g class="eye"><path d="M26 44 L46 51 L42 59 C33 61 26 55 26 44Z" fill="url(#geE)" ${O} stroke-width="1.8"/><path d="M74 44 L54 51 L58 59 C67 61 74 55 74 44Z" fill="url(#geE)" ${O} stroke-width="1.8"/><ellipse cx="38" cy="54" rx="2.6" ry="2.2" fill="#2A0C10"/><ellipse cx="62" cy="54" rx="2.6" ry="2.2" fill="#2A0C10"/><circle cx="37" cy="53" r=".9" fill="#fff"/><circle cx="61" cy="53" r=".9" fill="#fff"/></g>
+  <path d="M22 63 C32 82 68 82 78 63 C66 71 34 71 22 63Z" fill="#fff" ${O} stroke-width="2"/>
+  <path d="M30 68.5 L31 73 M37 70.5 L37.6 76.5 M44 71.5 L44.3 78 M50 71.8 L50 78.5 M56 71.5 L55.7 78 M63 70.5 L62.4 76.5 M70 68.5 L69 73" stroke="#9A93A8" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M26 66 C38 73 62 73 74 66" fill="none" stroke="#C9C3D6" stroke-width="1.2"/></g>`,
+
+  jigglypuff: `
+  <g class="ear ear-l"><path d="M22 41 L15 15 L39 28Z" fill="url(#jiB)" ${O}/><path d="M22 34 L18.5 20 L31 27Z" fill="#2A1F2D"/></g>
+  <g class="ear ear-r"><path d="M78 41 L85 15 L61 28Z" fill="url(#jiB)" ${O}/><path d="M78 34 L81.5 20 L69 27Z" fill="#2A1F2D"/></g>
+  <circle cx="50" cy="57" r="35" fill="url(#jiB)" ${O}/>
+  <path d="M50 22 C58 20 64 25 62 31 C60 37 50 37 47 33 C44 29 49 25 53 28" fill="url(#jiB)" ${O} stroke-width="2"/>
+  <path d="M28 36 C34 30 42 27 48 27 C40 31 34 35 30 41Z" fill="url(#shine)"/>
+  <g class="eye"><circle cx="36" cy="56" r="10.5" fill="#fff" ${O} stroke-width="1.8"/><circle cx="64" cy="56" r="10.5" fill="#fff" ${O} stroke-width="1.8"/>
+    <circle cx="37" cy="57.5" r="7.6" fill="url(#jiE)"/><circle cx="63" cy="57.5" r="7.6" fill="url(#jiE)"/><circle cx="37" cy="58" r="3.6" fill="#0E2A47"/><circle cx="63" cy="58" r="3.6" fill="#0E2A47"/>
+    <ellipse cx="34" cy="53.5" rx="3" ry="2.6" fill="#fff"/><ellipse cx="60" cy="53.5" rx="3" ry="2.6" fill="#fff"/><circle cx="40" cy="61" r="1.3" fill="#fff"/><circle cx="66" cy="61" r="1.3" fill="#fff"/></g>
+  <ellipse cx="24" cy="70" rx="5" ry="3" fill="#FF7FA6" opacity=".55"/><ellipse cx="76" cy="70" rx="5" ry="3" fill="#FF7FA6" opacity=".55"/>
+  <path d="M45 74 C47 77.5 53 77.5 55 74" fill="none" stroke="#2A1F2D" stroke-width="1.9" stroke-linecap="round"/>`,
+
+  charmander: `
+  <g class="flame"><path d="M86 34 C76 30 76 18 82 10 C83 16 87 17 88 13 C94 19 95 30 86 34Z" fill="url(#chF)" ${O} stroke-width="1.6"/><path d="M86 30 C82 28 82 22 85 18 C86 21 88 22 89 20 C91 24 90 29 86 30Z" fill="#FFF3A0"/></g>
+  <path d="M51 20 C72 20 86 35 86 53 C86 71 73 84 53 84 C33 84 15 73 15 54 C15 35 30 20 51 20Z" fill="url(#chB)" ${O}/>
+  <path d="M82 62 C78 76 66 83 53 83 C43 83 34 80 27 75 C42 80 70 78 82 62Z" fill="#B5470F" opacity=".3"/>
+  <path d="M30 30 C37 25 45 23 53 23 C44 26 37 30 32 35Z" fill="url(#shine)"/>
+  <path d="M28 70 C40 81 66 81 78 67 C73 79 63 85 53 85 C41 85 33 80 28 70Z" fill="#FFD79A" ${O} stroke-width="1.6"/>
+  <g class="eye">${eye(35, 50, 6.4, 8.2, true, '#2F5FA0')}${eye(65, 50, 6.4, 8.2, true, '#2F5FA0')}</g>
+  <circle cx="46.5" cy="61" r="1.1" fill="#2A1F2D"/><circle cx="53.5" cy="61" r="1.1" fill="#2A1F2D"/>
+  <path d="M39 65 C44 75 58 75 63 64 C56 68 46 68 39 65Z" fill="#9C2E3E" ${O} stroke-width="1.6"/><path d="M45 69.5 C48 72.5 54 72.5 57 69" fill="#FF8FA0"/>
+  <path d="M41 66 L43 69 L44.5 66.6Z" fill="#fff"/>`
+};
+
 const PETS = {
   maneki: { n: 'Maneki', what: 'gatito de la suerte', c: '#FF6B8A', voice: 'Eres alegre y cariñoso, y a veces terminas una frase con «nya~».', hi: '¡Nya~! Soy Maneki, tu gatito de la suerte. ¿A dónde vamos hoy?',
     svg: '<path d="M22 40 L28 14 L44 30Z M78 40 L72 14 L56 30Z" fill="#fff" stroke="#2b2b33" stroke-width="2.5" stroke-linejoin="round"/><path d="M27 33 L30 20 L38 29Z M73 33 L70 20 L62 29Z" fill="#FFB3C1"/><ellipse cx="50" cy="56" rx="34" ry="30" fill="#fff" stroke="#2b2b33" stroke-width="2.5"/><path d="M58 30 q8 2 10 10" stroke="#FF8A3D" stroke-width="5" fill="none" stroke-linecap="round"/><g class="eye"><path d="M34 54 q5 -6 10 0 M56 54 q5 -6 10 0" stroke="#2b2b33" stroke-width="3" fill="none" stroke-linecap="round"/></g><path d="M47 62 l3 3 l3 -3z" fill="#FF6B8A"/><path d="M44 68 q6 5 12 0" stroke="#2b2b33" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="31" cy="64" r="4.5" fill="#FFB3C1"/><circle cx="69" cy="64" r="4.5" fill="#FFB3C1"/><path d="M18 60 h10 M18 66 h10 M72 60 h10 M72 66 h10" stroke="#2b2b33" stroke-width="1.6" stroke-linecap="round"/><path d="M26 82 q24 10 48 0" stroke="#E5322D" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="50" cy="88" r="5" fill="#FFCC33" stroke="#2b2b33" stroke-width="1.6"/>' },
@@ -1583,20 +1699,21 @@ const PETS = {
   neon: { n: 'Neón', what: 'robot cyberpunk de Akihabara', c: '#7B5CFF', voice: 'Hablas con estilo gamer y entusiasta; te encantan los videojuegos, Pokémon, Nintendo y la tecnología de Japón.', hi: '¡Sistema en línea! Soy Neón, tu robot de Akihabara. ¿Lista la misión de hoy?',
     svg: '<line x1="50" y1="8" x2="50" y2="22" stroke="#2b2b33" stroke-width="3"/><circle class="glow" cx="50" cy="8" r="6" fill="#2FE6FF"/><rect x="16" y="22" width="68" height="62" rx="20" fill="#3B2F7A" stroke="#2b2b33" stroke-width="2.5"/><rect x="24" y="36" width="52" height="24" rx="12" fill="#0B0820"/><g class="eye"><rect x="32" y="42" width="12" height="12" rx="6" fill="#2FE6FF"/><rect x="56" y="42" width="12" height="12" rx="6" fill="#2FE6FF"/></g><circle cx="26" cy="68" r="4" fill="#FF3FD0"/><circle cx="74" cy="68" r="4" fill="#FF3FD0"/><path d="M40 70 q10 7 20 0" stroke="#2FE6FF" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="8" y="44" width="8" height="18" rx="4" fill="#7B5CFF" stroke="#2b2b33" stroke-width="2"/><rect x="84" y="44" width="8" height="18" rx="4" fill="#7B5CFF" stroke="#2b2b33" stroke-width="2"/>' },
   pikachu: { g: 'poke', n: 'Pikachu', what: 'Pokémon eléctrico', c: '#E8B90C', voice: 'Eres Pikachu: energético, valiente y muy cariñoso; a veces dices «¡Pika pika!» y te emocionan los datos curiosos y todo lo de Pokémon en Japón.', hi: '¡Pika pika! Soy Pikachu. ¡Vamos a cargarnos de energía para la aventura de hoy!',
-    svg: '<path d="M30 42 L10 6 L42 32Z M70 42 L90 6 L58 32Z" fill="#F6D33C" stroke="#2b2b33" stroke-width="2.5" stroke-linejoin="round"/><path d="M10 6 L18 18 L22 12Z M90 6 L82 18 L78 12Z" fill="#2b2b33"/><ellipse cx="50" cy="60" rx="34" ry="29" fill="#F6D33C" stroke="#2b2b33" stroke-width="2.5"/><g class="eye"><circle cx="37" cy="54" r="5.5" fill="#2b2b33"/><circle cx="63" cy="54" r="5.5" fill="#2b2b33"/><circle cx="38.5" cy="52" r="2" fill="#fff"/><circle cx="64.5" cy="52" r="2" fill="#fff"/></g><circle cx="24" cy="67" r="7.5" fill="#E8483E"/><circle cx="76" cy="67" r="7.5" fill="#E8483E"/><path d="M48 61 l2 2 l2 -2z" fill="#2b2b33"/><path d="M42 67 q4 5 8 0 q4 5 8 0" stroke="#2b2b33" stroke-width="2.3" fill="none" stroke-linecap="round"/>' },
+    svg: POKE_BODY.pikachu },
   eevee: { g: 'poke', n: 'Eevee', what: 'Pokémon evolución', c: '#B9783F', voice: 'Eres Eevee: curiosa y adaptable; te gusta dar dos o tres opciones distintas para que elijan, como tus evoluciones.', hi: '¡Vui! Soy Eevee. Me adapto a todo: dime qué tienes ganas de hacer y te doy opciones.',
-    svg: '<path d="M34 44 L8 10 L46 30Z M66 44 L92 10 L54 30Z" fill="#B9783F" stroke="#2b2b33" stroke-width="2.5" stroke-linejoin="round"/><path d="M30 36 L16 18 L40 31Z M70 36 L84 18 L60 31Z" fill="#6E4524"/><ellipse cx="50" cy="56" rx="30" ry="26" fill="#B9783F" stroke="#2b2b33" stroke-width="2.5"/><path d="M22 74 q6 -6 10 2 q4 -8 10 0 q4 -8 8 0 q4 -8 10 0 q4 -8 10 0 q4 -8 8 -2 q2 12 -28 18 q-30 -6 -28 -18z" fill="#F3E3C3" stroke="#2b2b33" stroke-width="2" stroke-linejoin="round"/><g class="eye"><ellipse cx="38" cy="54" rx="5.5" ry="7" fill="#3A2416"/><ellipse cx="62" cy="54" rx="5.5" ry="7" fill="#3A2416"/><circle cx="39.5" cy="51" r="2.2" fill="#fff"/><circle cx="63.5" cy="51" r="2.2" fill="#fff"/></g><path d="M48 63 l2 2 l2 -2z" fill="#2b2b33"/><path d="M45 67 q5 4 10 0" stroke="#2b2b33" stroke-width="2.2" fill="none" stroke-linecap="round"/>' },
+    svg: POKE_BODY.eevee },
   snorlax: { g: 'poke', n: 'Snorlax', what: 'Pokémon dormilón', c: '#3E7A9E', voice: 'Eres Snorlax: tranquilo, glotón y dormilón; recomiendas comida rica, descansos y planes sin prisa, con humor.', hi: '*bostezo*… Hola, soy Snorlax. ¿Ya comieron? Primero la comida, luego la aventura.',
-    svg: '<path d="M24 30 L28 14 L38 26Z M76 30 L72 14 L62 26Z" fill="#3E7A9E" stroke="#2b2b33" stroke-width="2.5" stroke-linejoin="round"/><path d="M14 58 C14 30 30 22 50 22 C70 22 86 30 86 58 C86 80 70 90 50 90 C30 90 14 80 14 58Z" fill="#3E7A9E" stroke="#2b2b33" stroke-width="2.5"/><path d="M22 62 C22 44 34 38 50 38 C66 38 78 44 78 62 C78 78 66 86 50 86 C34 86 22 78 22 62Z" fill="#F2E3C6"/><g class="eye"><path d="M33 54 h12 M55 54 h12" stroke="#2b2b33" stroke-width="3" stroke-linecap="round"/></g><path d="M34 66 q16 12 32 0" stroke="#2b2b33" stroke-width="2.5" fill="#fff" stroke-linejoin="round"/><path d="M38 67 l3 -5 l3 6 M56 68 l3 -6 l3 5" fill="#fff" stroke="#2b2b33" stroke-width="1.6" stroke-linejoin="round"/>' },
+    svg: POKE_BODY.snorlax },
   gengar: { g: 'poke', n: 'Gengar', what: 'Pokémon fantasma', c: '#6B4C9A', voice: 'Eres Gengar: travieso y bromista, te encanta la noche, las leyendas japonesas de fantasmas (sin dar miedo de verdad) y los lugares con luces de neón.', hi: 'Je je je… Soy Gengar. Conozco los secretos de Tokio de noche. ¿Qué travesura planeamos?',
-    svg: '<path d="M14 62 L8 46 L20 50 L18 32 L30 40 L34 22 L44 34 L50 18 L56 34 L66 22 L70 40 L82 32 L80 50 L92 46 L86 62 C86 82 70 92 50 92 C30 92 14 82 14 62Z" fill="#6B4C9A" stroke="#2b2b33" stroke-width="2.5" stroke-linejoin="round"/><g class="eye"><path d="M28 52 L44 56 L40 62 Q30 62 28 52Z M72 52 L56 56 L60 62 Q70 62 72 52Z" fill="#fff"/><circle cx="38" cy="58" r="2.6" fill="#E5322D"/><circle cx="62" cy="58" r="2.6" fill="#E5322D"/></g><path d="M28 68 Q50 90 72 68 Q50 76 28 68Z" fill="#fff" stroke="#2b2b33" stroke-width="2.2" stroke-linejoin="round"/><path d="M34 72 l2 4 M42 74 l1 5 M50 75 v5 M58 74 l-1 5 M66 72 l-2 4" stroke="#2b2b33" stroke-width="1.4" stroke-linecap="round"/>' },
+    svg: POKE_BODY.gengar },
   jigglypuff: { g: 'poke', n: 'Jigglypuff', what: 'Pokémon cantante', c: '#E57AA3', voice: 'Eres Jigglypuff: dulce y musical; a veces mencionas una cancioncita, recomiendas karaoke y ayudas a calmarse cuando alguien está cansado o de malas.', hi: '¡Jiggly~! Soy Jigglypuff. Te canto una canción y planeamos un día bonito, ¿va?',
-    svg: '<path d="M22 40 L18 16 L40 28Z M78 40 L82 16 L60 28Z" fill="#F6A8C6" stroke="#2b2b33" stroke-width="2.5" stroke-linejoin="round"/><path d="M24 32 L22 21 L33 28Z M76 32 L78 21 L67 28Z" fill="#2b2b33"/><circle cx="50" cy="56" r="34" fill="#F6A8C6" stroke="#2b2b33" stroke-width="2.5"/><path d="M50 24 c-10 -4 -12 10 -2 10 c6 0 6 -8 0 -7" fill="none" stroke="#2b2b33" stroke-width="2.5" stroke-linecap="round"/><g class="eye"><circle cx="37" cy="55" r="9" fill="#fff" stroke="#2b2b33" stroke-width="2"/><circle cx="63" cy="55" r="9" fill="#fff" stroke="#2b2b33" stroke-width="2"/><circle cx="38" cy="56" r="6" fill="#4BA3E3"/><circle cx="62" cy="56" r="6" fill="#4BA3E3"/><circle cx="40" cy="53" r="2.3" fill="#fff"/><circle cx="64" cy="53" r="2.3" fill="#fff"/></g><path d="M46 72 q4 4 8 0" stroke="#2b2b33" stroke-width="2.2" fill="none" stroke-linecap="round"/>' },
+    svg: POKE_BODY.jigglypuff },
   charmander: { g: 'poke', n: 'Charmander', what: 'Pokémon de fuego', c: '#F07A2A', voice: 'Eres Charmander: entusiasta, valiente y con energía de fuego; te encanta la comida caliente (ramen, takoyaki recién hecho) y animar cuando hace frío.', hi: '¡Char char! Soy Charmander. Con este frío, mi colita los mantiene calientitos. ¿A dónde vamos?',
-    svg: '<path d="M82 30 q-8 -10 -2 -22 q4 8 10 10 q-2 8 -8 12z" fill="#FFB020" stroke="#2b2b33" stroke-width="2" stroke-linejoin="round"/><path d="M84 26 q-3 -5 0 -10 q3 5 4 7z" fill="#E5322D"/><path d="M16 56 C16 30 32 18 52 18 C72 18 86 32 86 54 C86 78 70 90 50 90 C30 90 16 78 16 56Z" fill="#F07A2A" stroke="#2b2b33" stroke-width="2.5"/><path d="M30 76 q20 12 40 0 q-4 10 -20 12 q-16 -2 -20 -12z" fill="#FBD38D"/><g class="eye"><ellipse cx="36" cy="50" rx="6" ry="8" fill="#2b2b33"/><ellipse cx="64" cy="50" rx="6" ry="8" fill="#2b2b33"/><circle cx="37.5" cy="46.5" r="2.5" fill="#fff"/><circle cx="65.5" cy="46.5" r="2.5" fill="#fff"/></g><path d="M38 66 q12 10 24 0" stroke="#2b2b33" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M47 60 h2 M53 60 h2" stroke="#2b2b33" stroke-width="2" stroke-linecap="round"/>' },
+    svg: POKE_BODY.charmander },
   daru: { n: 'Daru', what: 'daruma de la buena suerte', c: '#E5322D', voice: 'Eres tranquilo y paciente: das ánimos y ayudas a planear con calma cuando algo sale mal.', hi: 'Hola, soy Daru. Si algo sale mal, respiramos y lo resolvemos juntos. ¿En qué te ayudo?',
     svg: '<path d="M50 8 C82 8 90 40 88 60 C86 82 70 92 50 92 C30 92 14 82 12 60 C10 40 18 8 50 8Z" fill="#E5322D" stroke="#2b2b33" stroke-width="2.5"/><ellipse cx="50" cy="48" rx="26" ry="24" fill="#FFF3E6"/><path d="M30 36 q8 -6 16 0 M54 36 q8 -6 16 0" stroke="#2b2b33" stroke-width="3.5" fill="none" stroke-linecap="round"/><g class="eye"><circle cx="38" cy="46" r="5" fill="#2b2b33"/><circle cx="62" cy="46" r="5" fill="#2b2b33"/></g><path d="M42 60 q8 6 16 0" stroke="#2b2b33" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M38 66 q-6 4 -10 2 M62 66 q6 4 10 2" stroke="#2b2b33" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M34 80 q16 -8 32 0" stroke="#FFCC33" stroke-width="4" fill="none" stroke-linecap="round"/>' }
 };
+document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>${POKE_DEFS}</defs></svg>`);
 const petSvg = (k, cls = '') => `<svg class="petsvg ${cls}" viewBox="0 0 100 100" aria-hidden="true">${PETS[k].svg}</svg>`;
 // La mascota y la conversación se guardan en este navegador (la sesión de cada quien).
 const petOf = () => { const k = store.get('pet', 'maneki'); return PETS[k] ? k : 'maneki'; };
