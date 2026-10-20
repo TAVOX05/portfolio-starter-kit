@@ -581,6 +581,16 @@ body::before, .nav { background: transparent; }
 .gh > span { padding: 2px 8px; }
 .gf { margin: 0 8px; padding: 6px 8px; }
 .gf:empty { display: none; }
+/* todo se acota al ancho de la pantalla: nada empuja el contenido hacia los lados */
+body { overflow-x: clip; }
+main, .grp { grid-template-columns: minmax(0, 1fr); }
+.gh { flex-wrap: wrap; row-gap: 4px; }
+.gh > span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.seg { grid-auto-columns: minmax(0, 1fr); }
+.seg button { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 2px; padding-right: 2px; }
+.tabs a { overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 400px) { .tabs a { font-size: 10px; letter-spacing: -.015em; } }
+@media (max-width: 340px) { .tabs a { font-size: 9.5px; letter-spacing: -.03em; } .tabs a svg { width: 22px; height: 22px; } }
 /* cristal esmerilado: tarjetas y barras translúcidas con desenfoque, borde de luz y brillo arriba */
 /* el cristal va teñido: en claro aclara lo que tiene detrás y en oscuro lo oscurece, así el texto conserva su contraste */
 :root { --card: rgba(255,255,255,.72); --glass: rgba(255,255,255,.7); --surf: rgba(255,255,255,.52); --glass-line: rgba(255,255,255,.6); --glass-hi: rgba(255,255,255,.85); --glass-fx: blur(24px) saturate(190%) brightness(1.45); }
