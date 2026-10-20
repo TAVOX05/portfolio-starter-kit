@@ -1109,6 +1109,9 @@ body::before, .nav { background: transparent; }
 .r.danger .t { color: var(--red); }
 .docview { display: grid; gap: 10px; background: var(--card); border-radius: 14px; padding: 10px; min-height: 120px; }
 .docview canvas, .docview img { width: 100%; height: auto; border-radius: 6px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+
+.r.upl { position: relative; }
+.filehit { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2; font-size: 100px; }
 </style>
 
 <canvas id="bgfx" aria-hidden="true"></canvas>
@@ -2244,8 +2247,8 @@ function uploadSheet() {
   const links = [['', 'Ninguna'], ...BASE_ORDER.map(k => ['b:' + k, BASES[k].n]), ...TICKETS.map((t, i) => ['tk:' + i, t.n])];
   openSheet('Agregar documento', `<form id="docForm" class="grp">
     <div class="list">
-      <label class="r upl" for="docFile"><span class="ico" style="--b:var(--tint)">${I_DOC}</span><span class="m"><span class="t" id="docFileName">Elegir PDF o imagen</span><span class="s">PDF, JPG o PNG · máx. 20 MB</span></span></label>
-      <input id="docFile" type="file" accept="application/pdf,image/png,image/jpeg,image/webp" multiple hidden>
+      <div class="r upl"><span class="ico" style="--b:var(--tint)">${I_DOC}</span><span class="m"><span class="t" id="docFileName">Toca aquí para elegir PDF o imagen</span><span class="s" id="docFileInfo">PDF, JPG o PNG · máx. 20 MB</span></span>
+        <input id="docFile" class="filehit" type="file" accept=".pdf,application/pdf,image/*" multiple aria-label="Elegir PDF o imagen"></div>
       <div class="r field"><label for="docName">Nombre</label><input id="docName" type="text" placeholder="Pase de abordar NRT"></div>
       <div class="r field"><label for="docCat">Categoría</label><select id="docCat">${DOC_CATS.map(c => `<option value="${c[0]}">${c[1]}</option>`).join('')}</select></div>
       <div class="r field"><label for="docLink">Reserva</label><select id="docLink">${links.map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('')}</select></div>
@@ -2256,14 +2259,17 @@ function uploadSheet() {
 async function uploadDocs() {
   const files = [...($('#docFile').files || [])];
   const msg = $('#docMsg'), go = $('#docGo');
-  if (!files.length) { msg.textContent = 'Elige al menos un archivo.'; return; }
+  if (!files.length) { msg.textContent = 'Primero toca «Toca aquí para elegir PDF o imagen».'; return; }
+  if (!mem.assets) { msg.textContent = 'Tu acceso a la app no permite subir archivos. Ábrela con tu cuenta de dueño.'; return; }
   go.disabled = true;
   let ok = 0;
   for (const [k, f] of files.entries()) {
     msg.textContent = `Subiendo ${k + 1} de ${files.length}…`;
-    const type = f.type || (/\.pdf$/i.test(f.name) ? 'application/pdf' : '');
+    const ext = (f.name.split('.').pop() || '').toLowerCase();
+    const type = f.type || { pdf: 'application/pdf', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif' }[ext] || '';
+    if (!/^(application\/pdf|image\/(jpeg|png|webp|gif))$/.test(type)) { msg.textContent = `«${f.name}» no es PDF, JPG ni PNG. Si es una foto HEIC, haz una captura de pantalla y súbela.`; go.disabled = false; return; }
     try {
-      const r = await mem.assets.upload(f, type && type !== f.type ? { type } : undefined);
+      const r = await mem.assets.upload(f, type !== f.type ? { type } : undefined);
       const name = files.length === 1 && $('#docName').value.trim() ? $('#docName').value.trim() : f.name.replace(/\.[^.]+$/, '');
       await mem.db.collection('docs').add({ name, cat: $('#docCat').value, link: $('#docLink').value, assetId: r.id, type: r.contentType, size: r.sizeBytes, createdAt: new Date().toISOString() });
       await idb.set(r.id, f); mem.offline.add(r.id);
@@ -2812,7 +2818,8 @@ document.addEventListener('submit', e => {
 document.addEventListener('change', e => {
   if (e.target.id !== 'docFile') return;
   const f = [...e.target.files];
-  $('#docFileName').textContent = f.length ? f.length === 1 ? f[0].name : f.length + ' archivos' : 'Elegir PDF o imagen';
+  $('#docFileName').textContent = f.length ? f.length === 1 ? f[0].name : f.length + ' archivos listos' : 'Toca aquí para elegir PDF o imagen';
+  $('#docFileInfo').textContent = f.length ? fmtSize(f.reduce((a, x) => a + x.size, 0)) + ' · toca «Subir» abajo' : 'PDF, JPG o PNG · máx. 20 MB';
   if (f.length === 1 && !$('#docName').value) $('#docName').value = f[0].name.replace(/\.[^.]+$/, '');
 });
 document.addEventListener('input', e => {
