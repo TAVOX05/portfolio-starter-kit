@@ -375,6 +375,24 @@ body.scrolled .nav { border-bottom-color: var(--hair); }
 .sheet { border-top: .5px solid var(--hair); }
 .hud { background: var(--surf); border: .5px solid var(--hair); }
 body::before, .nav { background: transparent; }
+
+/* tarjetas deslizables de Hoy */
+.deck { position: relative; isolation: isolate; padding-bottom: 14px; }
+.deck .nowc { position: relative; z-index: 2; touch-action: pan-y; user-select: none; -webkit-user-select: none; will-change: transform; }
+.deck .nowc.drag { cursor: grabbing; }
+.ghost { position: absolute; z-index: 1; border-radius: 20px; background: var(--card); border: .5px solid var(--hair); }
+.ghost.g1 { inset: 10px 12px 6px; transform: translateY(8px); opacity: .7; }
+.ghost.g2 { inset: 20px 24px 0; transform: translateY(14px); opacity: .4; }
+.dots { display: flex; justify-content: center; gap: 6px; margin-top: -6px; }
+.dots span { width: 7px; height: 7px; border-radius: 4px; background: var(--label3); transition: width .4s cubic-bezier(.34,1.45,.64,1), background-color .3s; }
+.dots span.cur { background: color-mix(in srgb, var(--red) 55%, transparent); }
+.dots span.on { width: 20px; background: var(--tint); }
+@media (prefers-reduced-motion: no-preference) {
+  .nowc.in-next { animation: card-in-r .55s cubic-bezier(.34,1.3,.64,1) both; }
+  .nowc.in-prev { animation: card-in-l .55s cubic-bezier(.34,1.3,.64,1) both; }
+  @keyframes card-in-r { from { opacity: 0; transform: translateX(40%) rotate(4deg) scale(.94); } }
+  @keyframes card-in-l { from { opacity: 0; transform: translateX(-40%) rotate(-4deg) scale(.94); } }
+}
 </style>
 
 <canvas id="bgfx" aria-hidden="true"></canvas>
@@ -1118,7 +1136,7 @@ function viewToday(n, hm, preview) {
   const tomorrow = DAYS[n];
 
   // tarjeta principal
-  const card = `<section class="nowc" style="--c:${cityVar(day.city)}">
+  const card = `<div class="deck">${fi < items.length - 1 ? '<span class="ghost g1"></span>' : ''}${fi < items.length - 2 ? '<span class="ghost g2"></span>' : ''}<section class="nowc" style="--c:${cityVar(day.city)}" data-day="${n}" data-i="${fi}" data-max="${items.length}" aria-roledescription="tarjeta deslizable">
     <div class="nowh"><span class="stl ${sk}">${label}</span><span class="pos">${fi + 1} de ${items.length}</span>
       <span class="stp"><button type="button" data-step="-1" aria-label="Actividad anterior" ${fi === 0 ? 'disabled' : ''}>‹</button><button type="button" data-step="1" aria-label="Actividad siguiente" ${fi === items.length - 1 ? 'disabled' : ''}>›</button></span></div>
     <div class="when">${it.t} – ${it.e} · ${sd}</div>
@@ -1130,7 +1148,8 @@ function viewToday(n, hm, preview) {
     <div class="playbar">${(it.p || []).length ? `<a class="play" href="${gmDirFromHere(it.p[it.p.length - 1])}" target="_blank" rel="noopener">Cómo llegar</a>` : `<a class="play" href="#dia${n}">Ver el día</a>`}
       <button class="play alt${done ? ' on' : ''}" type="button" data-check="${id}">${done ? 'Hecho ✓' : 'Marcar hecho'}</button></div>
     ${fi !== auto ? `<button class="tbtn" type="button" data-step="0">Volver a lo de ahora</button>` : ''}
-  </section>`;
+  </section></div>
+  <div class="dots" aria-hidden="true">${items.map((_, i) => `<span class="${i === fi ? 'on' : ''}${i === auto ? ' cur' : ''}"></span>`).join('')}</div>`;
 
   // ruta rápida
   const legs = legsForItem(day, it);
@@ -1531,6 +1550,9 @@ function afterRender(opts) {
   view.querySelectorAll('.seg[data-to]').forEach(sg => requestAnimationFrame(() => requestAnimationFrame(() => sg.style.setProperty('--i', sg.dataset.to))));
   mem.segFrom = null;
   if (mem.pop) { const b = view.querySelector(`.chk[data-check="${mem.pop}"]`); if (b) b.classList.add('pop'); mem.pop = null; }
+  const nc = view.querySelector('.nowc');
+  if (nc) { if (mem.swipeIn && !RM) nc.classList.add(mem.swipeIn > 0 ? 'in-next' : 'in-prev'); attachSwipe(nc); }
+  mem.swipeIn = 0;
 }
 const depth = h => /^dia\d|^guia-/.test(h) ? 2 : 1;
 function navigate() {
@@ -1706,6 +1728,42 @@ function copyText(txt) {
   const fail = () => openSheet('Copiar', showCard('', esc(txt), 'Mantén presionado el texto para copiarlo.'));
   try { navigator.clipboard.writeText(txt).then(() => hud('Copiado'), fail); } catch (e) { fail(); }
 }
+// Swipe de la tarjeta de Hoy: sigue al dedo, se inclina, resiste en los extremos y sale volando
+function attachSwipe(card) {
+  const n = +card.dataset.day, i = +card.dataset.i, max = +card.dataset.max;
+  let x0 = null, y0 = 0, t0 = 0, dx = 0, lock = null;
+  const reset = () => { card.style.transition = 'transform .55s cubic-bezier(.34,1.45,.64,1)'; card.style.transform = ''; };
+  card.addEventListener('pointerdown', e => { if (e.button > 0) return; x0 = e.clientX; y0 = e.clientY; t0 = performance.now(); dx = 0; lock = null; });
+  card.addEventListener('pointermove', e => {
+    if (x0 == null) return;
+    const mx = e.clientX - x0, my = e.clientY - y0;
+    if (!lock) {
+      if (Math.abs(mx) > 8 && Math.abs(mx) > Math.abs(my)) { lock = 'x'; try { card.setPointerCapture(e.pointerId); } catch (err) {} card.style.transition = 'none'; card.classList.add('drag'); }
+      else if (Math.abs(my) > 8) lock = 'y';
+    }
+    if (lock !== 'x') return;
+    dx = mx;
+    const edge = (dx > 0 && i === 0) || (dx < 0 && i === max - 1);
+    const d = edge ? dx * .22 : dx;
+    card.style.transform = `translateX(${d}px) rotate(${d * .025}deg)`;
+  });
+  const end = () => {
+    if (x0 == null) return;
+    const was = lock === 'x'; x0 = null; card.classList.remove('drag');
+    if (!was) return;
+    mem.swallowClick = true; setTimeout(() => { mem.swallowClick = false; }, 80);
+    const v = Math.abs(dx) / Math.max(1, performance.now() - t0), dir = dx < 0 ? 1 : -1, ni = i + dir;
+    if ((Math.abs(dx) > 70 || v > .5) && ni >= 0 && ni < max) {
+      card.style.transition = 'transform .26s cubic-bezier(.4,0,.6,1), opacity .26s';
+      card.style.transform = `translateX(${-dir * 115}%) rotate(${-dir * 9}deg)`;
+      card.style.opacity = '0';
+      setTimeout(() => { mem.focus = { n, i: ni }; mem.swipeIn = dir; rerender(); }, 210);
+    } else reset();
+  };
+  card.addEventListener('pointerup', end);
+  card.addEventListener('pointercancel', end);
+}
+document.addEventListener('click', e => { if (mem.swallowClick) { e.preventDefault(); e.stopPropagation(); } }, true);
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-say],[data-check],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket],[data-step],[data-focus],[data-food],[data-theme-set]');
   if (!t) return;
@@ -1726,10 +1784,10 @@ document.addEventListener('click', e => {
   else if (d.step != null) {
     const n = mem.preview || DAYS[dayIndexFor(jstNow().ymd)].n;
     if (+d.step === 0) mem.focus = null;
-    else { const cur = $('.nowc .pos').textContent.split(' ')[0] - 1; mem.focus = { n, i: Math.max(0, Math.min(DAYS[n - 1].items.length - 1, cur + +d.step)) }; }
+    else { const cur = $('.nowc .pos').textContent.split(' ')[0] - 1; mem.focus = { n, i: Math.max(0, Math.min(DAYS[n - 1].items.length - 1, cur + +d.step)) }; mem.swipeIn = +d.step; }
     rerender();
   }
-  else if (d.focus != null) { mem.focus = { n: mem.preview || DAYS[dayIndexFor(jstNow().ymd)].n, i: +d.focus }; route(); window.scrollTo(0, 0); }
+  else if (d.focus != null) { mem.swipeIn = 1; mem.focus = { n: mem.preview || DAYS[dayIndexFor(jstNow().ymd)].n, i: +d.focus }; route(); window.scrollTo(0, 0); }
   else if (d.food) { mem.foodMode = d.food; rerender(); }
   else if ('previewOff' in d) { mem.preview = 0; mem.focus = null; route(); window.scrollTo(0, 0); }
   else if ('kid' in d) {
