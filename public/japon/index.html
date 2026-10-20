@@ -1329,18 +1329,20 @@ function viewToday(n, hm, preview) {
     : target ? row({ t: 'Sin traslado largo en esta actividad', s: esc(place(target).n) }) + row({ href: gmDirFromHere(target), ext: 1, cls: 'link', t: 'Cómo llegar desde donde estoy' }) : '';
 
   // consejo del día
-  const [rk, rt] = RAIN[day.city];
-  const [hi, lo] = day.wx;
+  const lv = liveDay(day.city, day.date), lh = liveHour(day.city, day.date, hm);
+  const [rk, rt] = lv ? [lv.c >= 71 && lv.c <= 77 || lv.c === 85 || lv.c === 86 ? 'nieve' : lv.p >= 60 ? 'alta' : lv.p >= 30 ? 'moderada' : 'baja', `${WMO[lv.c] || 'Pronóstico'} · ${lv.p}% de probabilidad de lluvia`] : RAIN[day.city];
+  const [hi, lo] = lv ? [lv.hi, lv.lo] : day.wx;
   const ropa = lo <= 1 ? 'Abrigo grueso, gorro, guantes y bufanda. Capa térmica abajo.' : lo <= 5 ? 'Chamarra abrigadora y capas: la mañana es fría.' : 'Chamarra ligera o suéter.';
   const capas = hi - lo >= 8 ? ` Hay ${hi - lo}° de diferencia entre la mañana y el mediodía: vístanse en capas.` : '';
   const advice = grp(morning ? 'Consejo de la mañana' : 'Clima de hoy',
+    (lh ? row({ cls: 'ld', lead: ico(I.cloud, 'var(--c-FJ)'), t: `Ahora: ${lh.t}° · ${WMO[lh.c] || ''}`, s: `Lluvia en esta hora: ${lh.p}%` }) : '') +
     row({ cls: 'ld', lead: ico(I.cloud, 'var(--c-FJ)'), t: `${CITY[day.city].n}: ${hi}° / ${lo}°`, s: esc(ropa + capas) }) +
     row({ cls: 'ld', lead: ico(I.umbrella, rk === 'alta' || rk === 'nieve' ? 'var(--indigo)' : 'var(--gray)'), t: rk === 'alta' ? 'Lleven paraguas' : rk === 'nieve' ? 'Posible nieve: calzado antiderrapante' : rk === 'moderada' ? 'Paraguas plegable por si acaso' : 'Paraguas: probablemente no', s: esc(rt) }) +
     row({ cls: 'ld', lead: ico(I.sunset, 'var(--orange)'), t: `Oscurece ≈ ${day.sun}`, s: 'Lo de exterior conviene antes de esa hora.' }) +
     (DAY_EXTRA[n] ? row({ cls: 'ld', lead: ico(I.bulb, 'var(--yellow)'), t: esc(DAY_EXTRA[n]), sm: 1 }) : '') +
     wxPicker() +
     row({ href: 'https://www.google.com/search?q=' + encodeURIComponent('clima ' + CITY[day.city].n + ' Japón hoy'), ext: 1, cls: 'link', t: 'Ver el pronóstico real de hoy' }),
-    null, 'Promedio de temporada');
+    null, lv ? liveLabel() : 'Promedio de temporada');
 
   // comida cerca
   const fm = mem.foodMode || 'yo';
@@ -1421,7 +1423,8 @@ function viewDay(n, opts = {}) {
         row({ href: gmDay(order), ext: 1, cls: 'link', t: 'Ver todo el día en Google Maps' }));
   } else {
     content = grp('Tips del día', tipRows((day.tips || []).map(esc)), null) +
-      grp('Clima', row({ t: 'Máxima / mínima', tr: `${day.wx[0]}° / ${day.wx[1]}°` }) + row({ t: 'Atardecer', tr: '≈ ' + day.sun }), null, 'Promedio de temporada');
+      (() => { const lv = liveDay(day.city, day.date);
+        return grp('Clima', (lv ? row({ t: WMO[lv.c] || 'Pronóstico', tr: `${lv.p}% lluvia` }) : '') + row({ t: 'Máxima / mínima', tr: lv ? `${lv.hi}° / ${lv.lo}°` : `${day.wx[0]}° / ${day.wx[1]}°` }) + row({ t: 'Atardecer', tr: '≈ ' + day.sun }), null, lv ? liveLabel() : 'Promedio de temporada'); })();
   }
   const nav = opts.today ? '' : grp(null,
     (n > 1 ? row({ href: '#dia' + (n - 1), t: `Día ${n - 1}`, s: esc(DAYS[n - 2].title), chev: 1, cls: 'link' }) : '') +
@@ -1859,6 +1862,7 @@ mem.docs = []; mem.docsReady = false; mem.offline = new Set();
   mem.db = db; mem.assets = assets;
   mem.isOwner = user ? await user.isOwner() : false;
   startStamps(db);
+  if (db) db.doc('weather/now').onSnapshot(sn => { if (!sn.exists) return; mem.live = sn.data(); store.set('live', mem.live); liveChanged(); }, () => {});
   mem.offline = new Set(await idb.keys());
   if (db) db.collection('docs').onSnapshot(snap => {
     mem.docs = snap.docs.filter(d => d.exists).map(d => ({ id: d.id, ...d.data() })).sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
@@ -3029,6 +3033,22 @@ const ICON_SUN = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path 
 const ICON_MOON = '<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>';
 const PHASE_N = { dawn: 'Amanecer', day: 'Día', sunset: 'Atardecer', blue: 'Anochecer', night: 'Noche' };
 const WX_N = { clear: 'Despejado', cloudy: 'Nublado', rain: 'Lluvia', snow: 'Nieve' };
+/* ---------- clima en vivo ----------
+   Una tarea programada baja el pronóstico por hora de Open-Meteo para las ciudades
+   del viaje y lo guarda en la base de la app (weather/now). Sin datos, se usan los
+   promedios de temporada. Se guarda una copia en el teléfono para verla sin internet. */
+mem.live = store.get('live', null);
+const WMO = { 0: 'Despejado', 1: 'Casi despejado', 2: 'Parcialmente nublado', 3: 'Nublado', 45: 'Niebla', 48: 'Niebla', 51: 'Llovizna', 53: 'Llovizna', 55: 'Llovizna fuerte', 56: 'Llovizna helada', 57: 'Llovizna helada', 61: 'Lluvia ligera', 63: 'Lluvia', 65: 'Lluvia fuerte', 66: 'Lluvia helada', 67: 'Lluvia helada', 71: 'Nevada ligera', 73: 'Nevada', 75: 'Nevada fuerte', 77: 'Granizo fino', 80: 'Chubascos ligeros', 81: 'Chubascos', 82: 'Chubascos fuertes', 85: 'Chubascos de nieve', 86: 'Chubascos de nieve', 95: 'Tormenta', 96: 'Tormenta con granizo', 99: 'Tormenta con granizo' };
+const wxOfCode = c => (c >= 71 && c <= 77) || c === 85 || c === 86 ? 'snow' : (c >= 51 && c <= 67) || c >= 80 ? 'rain' : c >= 3 ? 'cloudy' : 'clear';
+function liveCity(city) { const L = mem.live; return L && L.cities && L.cities[city] && Date.now() - Date.parse(L.updatedAt) < 4 * 86400e3 ? L.cities[city] : null; }
+function liveHour(city, ymd, hm) {
+  const C = liveCity(city); if (!C || !hm) return null;
+  const i = Math.floor((Date.parse(`${ymd}T${hm}:00+09:00`) - Date.parse(`${mem.live.start}:00+09:00`)) / 3600e3);
+  return i >= 0 && i < C.t.length ? { t: C.t[i], c: C.c[i], p: C.p[i] } : null;
+}
+function liveDay(city, ymd) { const C = liveCity(city); return (C && C.d.find(x => x.date === ymd)) || null; }
+function liveLabel() { const h = Math.round((Date.now() - Date.parse(mem.live.updatedAt)) / 3600e3); return 'Pronóstico · ' + (h < 1 ? 'recién' : 'hace ' + h + ' h'); }
+function liveChanged() { applyTheme(); const h = location.hash || '#hoy'; if ((h === '#hoy' || /^#dia\d/.test(h)) && $('#sheet').hidden) rerender(); }
 const WX_CITY = { TK: 'clear', FJ: 'clear', KY: 'cloudy', OS: 'clear', KB: 'clear', KZ: 'rain', HD: 'snow' };
 const themeMode = () => { const t = store.get('theme', 'time'); return t === 'auto' ? 'time' : t; };
 const isDark = () => { const t = document.documentElement.dataset.theme; return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
@@ -3046,8 +3066,8 @@ function autoPhase() {
 function autoWeather() {
   const wd = store.get('wxDay', null);
   if (wd && wd.d === jstNow().ymd && WX_N[wd.w]) return wd.w;
-  const day = todayDay();
-  return day ? WX_CITY[day.city] : 'clear';
+  const day = todayDay(), now = jstNow(), lh = day && liveHour(day.city, now.ymd, now.hm);
+  return lh ? wxOfCode(lh.c) : day ? WX_CITY[day.city] : 'clear';
 }
 function computeScene() {
   const ph = store.get('scenePhase', 'auto'), wx = store.get('sceneWx', 'auto'), cy = store.get('sceneCity', 'auto');
