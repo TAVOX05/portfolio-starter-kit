@@ -1632,14 +1632,17 @@ const STAMPS = [
   ['JP', 's-shinkansen', '新幹線', 'Shinkansen', 'Viajar en tren bala'],
   ['JP', 's-vending', '自販機', 'Expendedora', 'Comprar algo en una máquina'],
   ['JP', 's-arigato', '感謝', 'Arigatō', 'Decir «arigatō gozaimasu» a 10 personas'],
-  ['JP', 's-konbini', 'コンビニ', 'Konbini', 'Elegir su snack favorito de konbini']
+  ['JP', 's-konbini', 'コンビニ', 'Konbini', 'Elegir su snack favorito de konbini'],
+  ['JP', 's-konbiniday', '三食', 'Día konbini', 'Desayuno, comida y cena de un día, todo de konbini'],
+  ['JP', 's-wagyu', '和牛', 'Tabehōdai de wagyū', 'Comer en un buffet libre de wagyū: yakiniku o shabu-shabu'],
+  ['JP', 's-stampbook', '帳', 'Libreta de sellos', 'Comprar una libreta de sellos y poner el primer sello']
 ].map(([city, id, k, t, r]) => ({ city, id, k, t, r }));
 // Sellos familiares compartidos: base de datos "stamps", un documento por sello
 // con la fecha en que cada quien lo marcó ({octavio, selene, sam}). En tiempo real.
 const FAMILY = [['octavio', 'Octavio', '#2F80ED'], ['selene', 'Selene', '#E8457C'], ['sam', 'Sam', '#F59E0B']];
 const famColor = k => (FAMILY.find(f => f[0] === k) || [])[2];
 const famName = k => (FAMILY.find(f => f[0] === k) || [])[1];
-const PRIZES = [[8, 'Sam elige el postre de un día'], [16, 'Sam elige un gachapon extra'], [26, 'Gran premio: cada quien elige un souvenir']];
+const PRIZES = [[8, 'Sam elige el postre de un día'], [16, 'Sam elige un gachapon extra'], [STAMPS.length, 'Gran premio: cada quien elige un souvenir']];
 mem.stampsDb = null; mem.stampPop = new Set();
 const stampData = id => (mem.stampsDb ? mem.stampsDb[id] : store.get('stampsLocal', {})[id]) || {};
 const stampMarks = id => FAMILY.map(f => f[0]).filter(k => stampData(id)[k]);
