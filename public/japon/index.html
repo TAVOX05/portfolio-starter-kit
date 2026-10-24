@@ -667,7 +667,19 @@ body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 3
 .badge { color: var(--bt, var(--on)); } .badge svg { stroke: var(--bt, #fff); }
 .seg { background: color-mix(in srgb, var(--label) 7%, var(--chip)); }
 .stp button { background: color-mix(in srgb, var(--label) 6%, var(--chip)); }
-.st i { font-size: 9px; }
+.st:not(.lg) { border-width: 3px; } .st:not(.lg) i { font-size: 10px; line-height: 10px; letter-spacing: 0; } .st:not(.lg) b { line-height: 14px; } .cal i { font-size: 10px; padding: 2px 0 1px; }
+/* móvil: zonas de toque de 44 px sin mover el diseño */
+.chk, .spk, .themeb, .stp button, .tbtn, .lnk, .chips a, .cchips button, .wxb button { position: relative; }
+:is(.chk, .spk, .themeb, .stp button, .tbtn, .lnk, .chips a, .cchips button, .wxb button)::before { content: ""; position: absolute; inset: min(0px, calc(50% - 22px)); }
+.cchips button { padding-block: 9px; }
+.seg button { padding-block: 10px; }
+.chips, .chips2, .lnks { gap: 8px; } .chips a { padding: 6px 11px; } .lnk { padding-block: 7px; }
+.gf a, a.gf { display: inline-block; padding-block: 7px; position: relative; }
+a.gf::before { content: ""; position: absolute; inset: -6px 0; }
+.nav-l a { position: relative; } .nav-l a::after { content: ""; position: absolute; inset: -11px -10px -11px -12px; }
+.r.field input, .r.field select { align-self: stretch; margin-block: -11px; min-height: 44px; }
+html, body { overscroll-behavior-x: none; }
+a, button, input, select, textarea, label { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 </style>
 
 <canvas id="bgfx" aria-hidden="true"></canvas>
@@ -2815,72 +2827,118 @@ const BG = (() => {
       [[.06, 12], [.17, 9], [.88, 11], [.98, 13]].forEach(([fx0, s]) => ginkgo(W * fx0, Y(.93), s * u));
       fx.push({ kind: 'leaves', col: pig(PIG.gold), n: 6, y0: Y(.62), x0: 0, x1: W });
     },
-    KB(K) { // Kobe: Port Tower, el museo marítimo y el monte Rokko en la bruma
+    KB(K) { // Kobe: Port Tower, la noria de Harborland, el puente Akashi Kaikyō y el Rokko con su vista nocturna
       const { u, Y, pig, wash, reserve, ink, mist, ridge, blocks, water, streak, lamp, rectP, dark } = K;
-      wash(ridge(Y(.64), H * .08, .9), M.far, .38, { amt: .02, n: 4 });
-      mist(Y(.67), H * .05, .65);
-      wash(ridge(Y(.72), H * .045, 1.7), M.mid, .26, { amt: .02, n: 4 });
-      blocks(Y(.81), .03, .08, M.far, .24, W * .4, W + 10, .7);
-      for (let i = 0; i < 16; i++) lamp(W * rnd(.03, .97), Y(rnd(.68, .73)), .6, '#FFD9A0', 'window');
+      wash(ridge(Y(.62), H * .09, .9), M.far, .4, { amt: .02, n: 4, shade: 'down' });
+      // laderas del Rokko: de noche, la «vista de 10 millones de dólares»
+      for (let i = 0; i < 70; i++) { const lx = W * rnd(0, 1); lamp(lx, Y(rnd(.6, .7) + Math.abs(lx / W - .5) * .02), rnd(.4, .75), ['#FFD9A0', '#FFE9C4', '#CFE6FF'][i % 3], 'window'); }
+      mist(Y(.68), H * .045, .6);
+      wash(ridge(Y(.735), H * .035, 1.6), M.mid, .24, { amt: .02, n: 4 });
+      // puente Akashi Kaikyō a lo lejos: torres, cable principal colgante, péndolas y tablero
+      const bY = Y(.765), x0 = W * .36, x1 = W * 1.2, t1 = W * .52, t2 = W * .95, th = H * .085, bc = dark ? '#B9C4D8' : mix(M.ink, M.far, .45);
+      const cab = x => { if (x < t1) return bY - th * .25 - (th * .75) * ((x - x0) / (t1 - x0)) ** 1.6; if (x <= t2) { const q = (x - t1) / (t2 - t1); return bY - th + th * .82 * 4 * q * (1 - q); } return bY - th + th * .75 * ((x - t2) / (x1 - t2)); };
+      ink([[x0, bY], [x1, bY]], 1.4, dark ? .55 : .5, { col: bc }); ink([[x0, bY + 1.6], [x1, bY + 1.6]], .6, .3, { col: bc });
+      [t1, t2].forEach(tx => { ink([[tx - .9 * u, bY + 2], [tx - .7 * u, bY - th]], 1.3, .6, { col: bc }); ink([[tx + .9 * u, bY + 2], [tx + .7 * u, bY - th]], 1.3, .6, { col: bc }); for (let f = .25; f < 1; f += .3) ink([[tx - .9 * u, bY - th * f], [tx + .9 * u, bY - th * f]], .7, .45, { col: bc }); lamp(tx, bY - th - 2, 1, '#FF4A3A', 'blink'); });
+      const cp = []; for (let xx = x0; xx <= W + 10; xx += 4) cp.push([xx, cab(xx)]); ink(cp, .9, dark ? .55 : .5, { col: bc });
+      k.save(); k.strokeStyle = bc; k.globalAlpha = .2; k.lineWidth = .5; k.beginPath();
+      for (let xx = x0 + 6; xx < W; xx += 5) { k.moveTo(xx, cab(xx)); k.lineTo(xx, bY); } k.stroke(); k.restore();
+      for (let xx = x0 + 8; xx < W; xx += 11) lamp(xx, cab(xx), .7, '#CFE8FF', 'glow');
+      // frente del puerto
+      blocks(Y(.81), .03, .085, M.far, .22, W * .36, W * .64, .6);
       // Port Tower: hiperboloide rojo con su celosía
-      const tx = W * .28, b = Y(.82), h = H * .34, hw = t => (1.15 + 2.3 * ((t - .64) / .64) ** 2) * u;
+      const tx = W * .22, b = Y(.82), h = H * .32, hw = t => (1.1 + 2.2 * ((t - .64) / .64) ** 2) * u;
       const Lp = [], Rp = [];
       for (let i = 0; i <= 16; i++) { const t = i / 16; Lp.push([tx - hw(t), b - h * t, .15]); Rp.unshift([tx + hw(t), b - h * t, .15]); }
-      wash([...Lp, ...Rp], pig(PIG.ver), dark ? .6 : .55, { amt: .005, n: 5, edge: .45 });
-      for (let i = 0; i < 9; i++) { const t0 = i / 9, t1 = (i + 1) / 9; ink([[tx - hw(t0), b - h * t0], [tx + hw(t1) * .5, b - h * t1]], .5, .25); ink([[tx + hw(t0), b - h * t0], [tx - hw(t1) * .5, b - h * t1]], .5, .25); }
-      reserve(rectP(tx - 2.4 * u, b - h - 1.4 * u, 4.8 * u, 1.4 * u, .1), dark ? .7 : .95);
-      ink([[tx - 2.4 * u, b - h], [tx + 2.4 * u, b - h]], .8, .5); ink([[tx, b - h - 1.4 * u], [tx, b - h - 3.8 * u]], .8, .55);
+      wash([...Lp, ...Rp], pig(PIG.ver), dark ? .6 : .55, { amt: .005, n: 5, edge: .45, shade: 'right' });
+      for (let i = 0; i < 9; i++) { const t0 = i / 9, t1b = (i + 1) / 9; ink([[tx - hw(t0), b - h * t0], [tx + hw(t1b) * .5, b - h * t1b]], .5, .25); ink([[tx + hw(t0), b - h * t0], [tx - hw(t1b) * .5, b - h * t1b]], .5, .25); }
+      reserve(rectP(tx - 2.3 * u, b - h - 1.4 * u, 4.6 * u, 1.4 * u, .1), dark ? .7 : .95);
+      ink([[tx - 2.3 * u, b - h], [tx + 2.3 * u, b - h]], .8, .5); ink([[tx, b - h - 1.4 * u], [tx, b - h - 3.6 * u]], .8, .55);
       for (let i = 1; i < 16; i += 2) { const t = i / 16; lamp(tx - hw(t), b - h * t, .8, '#FF6A5A', 'glow'); lamp(tx + hw(t), b - h * t, .8, '#FF6A5A', 'glow'); }
-      lamp(tx, b - h - 3.8 * u, 1.2, '#FF4A3A', 'blink');
-      // museo marítimo: armazón blanco como velas al viento
-      const m0 = W * .5, m1 = W * .96, mb = Y(.815);
-      reserve([[m0, mb, 0], [m0 + (m1 - m0) * .15, Y(.735), .2], [m0 + (m1 - m0) * .55, Y(.7), .2], [m1, Y(.76), .2], [m1, mb, 0]], dark ? .35 : .9);
-      for (let i = 0; i < 9; i++) {
-        const sx0 = m0 + (m1 - m0) * i / 9, sx1 = sx0 + (m1 - m0) * .2, top = Y(.70 + Math.abs(i - 4.5) * .008);
-        ink([[sx0, mb], [sx0 + (sx1 - sx0) * .3, top + (mb - top) * .25], [sx1, top]], .7, dark ? .45 : .35, { col: dark ? '#DCE3EE' : M.ink });
-        lamp(sx1, top, .7, '#E6F0FF', 'glow');
-      }
-      ink([[m0, mb], [m1, mb]], .8, .4);
+      lamp(tx, b - h - 3.6 * u, 1.2, '#FF4A3A', 'blink');
+      // noria de Harborland: base y patas fijas; el aro y las góndolas giran en la animación
+      const wr = Math.min(13 * u, W * .16), wx = W * .78, wy = Y(.8) - wr - 3 * u, leg = dark ? '#C9D2E2' : mix(M.ink, M.far, .3);
+      ink([[wx - wr * .55, Y(.81)], [wx, wy]], 1.6, .55, { col: leg }); ink([[wx + wr * .55, Y(.81)], [wx, wy]], 1.6, .55, { col: leg });
+      wash(rectP(wx - wr * .8, Y(.8) - 3 * u, wr * 1.6, 3 * u + 4, .2), M.mid, .35, { amt: .01, n: 3 });
+      fx.push({ kind: 'wheel', cx: wx, cy: wy, r: wr });
       water(Y(.82), .45);
       streak(tx, Y(.825), 4 * u, H * .09, pig(PIG.ver), dark ? .3 : .28);
+      streak(wx, Y(.825), wr * 1.4, H * .06, dark ? '#9C8BE0' : M.far, dark ? .25 : .15);
       fx.push({ kind: 'boat', y: Y(.9), x: W * .55, v: 5, w: 11 * u });
+      fx.push({ kind: 'gulls', p: [0, 1, 2].map(i => ({ x: rnd(0, W), y: Y(rnd(.47, .58)), v: rnd(10, 18) * (i % 2 ? 1 : -1), s: rnd(3, 5) * u / 3.9, ph: rnd(0, 6) })) });
     },
-    KZ(K) { // Kanazawa: Kenroku-en, la linterna Kotoji, el pino con yukitsuri y pan de oro
-      const { u, Y, pig, wash, ink, mist, ridge, water, streak, lamp, pine, blob, rectP, dark } = K;
-      wash(ridge(Y(.66), H * .05, 1.8), mix(M.far, PIG.pine, dark ? .15 : .3), .34, { amt: .02, n: 4 });
-      mist(Y(.69), H * .045, .65);
-      water(Y(.8), .42);
-      // pino con yukitsuri: mástil y cuerdas de paja en cono
-      const px = W * .66, pb = Y(.8);
-      pine(px, pb, 30 * u, H * .2, dark ? .6 : .48);
-      const top = [px, Y(.47)];
-      ink([[px, pb - H * .12], top], 1.1, .6, { col: dark ? '#CDBB92' : mix(PIG.wood, M.ink, .3) });
-      k_ropes(top, px, Y(.775), 17 * u, dark ? '#CDBB92' : pig(PIG.straw), dark ? .38 : .7);
-      ink([[top[0] - 1 * u, top[1] + 1.2 * u], [top[0], top[1] - 1 * u], [top[0] + 1 * u, top[1] + 1.2 * u]], 1, .55, { col: dark ? '#CDBB92' : pig(PIG.straw) });
-      pine(W * 1.02, Y(.8), 22 * u, H * .13, dark ? .5 : .4);
-      k_ropes([W * 1.02, Y(.6)], W * 1.02, Y(.785), 12 * u, dark ? '#CDBB92' : pig(PIG.straw), dark ? .3 : .55);
-      // linterna Kotoji: una pata en el agua, otra sobre la piedra
-      const lx = W * .28, B = Y(.83), S = 1.35, stone = pig(PIG.stone), sa = dark ? .6 : .5;
-      k.save(); k.translate(lx, B); k.scale(S, S); k.translate(-lx, -B);
-      const P2 = pts => pts.map(([px, py, v = .1]) => [lx + px * u, B - py * u, v]);
-      blob(lx + 4.6 * u, B - 2.2 * u, 4.4 * u, 2.6 * u, stone, sa * .85, .12);
-      wash(P2([[-5, -.6], [-4, -.6], [-3.4, 8], [-4.3, 8]]), stone, sa, { amt: .01, n: 3, shade: 'right' });
-      wash(P2([[3.6, 4], [4.6, 4], [4.2, 8], [3.3, 8]]), stone, sa, { amt: .01, n: 3, shade: 'right' });
-      wash(P2([[-5.2, 8], [5.2, 8], [5.6, 9.4], [-5.6, 9.4]]), stone, sa, { amt: .01, n: 3 });
-      wash(P2([[-2.3, 9.4], [2.3, 9.4], [2.3, 13.3], [-2.3, 13.3]]), stone, sa, { amt: .01, n: 3, shade: 'right' });
-      wash(P2([[-1, 10.4], [1, 10.4], [1, 12.2], [-1, 12.2]]), dark ? '#FFC870' : M.paper, dark ? .35 : .6, { amt: 0, n: 1, edge: 0, tex: 0, op: 'source-over' });
-      const kasa = P2([[-11.5, 13.9, .1], [-9.4, 13.3, .1], [0, 13.1, .1], [9.4, 13.3, .1], [11.5, 13.9, .1], [6, 16.6, .2], [-6, 16.6, .2]]);
-      wash(kasa, stone, sa + .12, { amt: .01, n: 4, shade: 'down' });
-      ink(kasa.slice(0, 5).map(([px, py]) => [px, py]), 1, .6); ink(P2([[-11.5, 13.9], [-6, 16.6], [6, 16.6], [11.5, 13.9]]).map(([px, py]) => [px, py]), .7, .35);
-      for (let i = 0; i < 5; i++) blob(lx + rnd(-7, 7) * u, B - rnd(14.6, 16) * u, rnd(.8, 1.6) * u, rnd(.4, .7) * u, pig(PIG.moss), dark ? .35 : .3, .2);
-      wash(P2([[-.7, 16.6], [.7, 16.6], [.5, 17.4], [-.5, 17.4]]), stone, sa, { amt: .01, n: 2, tex: 0 });
-      blob(lx, B - 18.4 * u, 1.2 * u, 1.1 * u, stone, sa + .1, .05);
-      k.restore();
-      lamp(lx, B - 11.3 * u * S, 2.2, '#FFC870', 'lantern');
-      streak(lx - 5.3 * u, Y(.835), 2.5 * u, H * .06, stone, .3);
-      // puente Niji-bashi
-      ink([[W * .02, Y(.815)], [W * .1, Y(.8)], [W * .18, Y(.81)]], 2.2, .4, { col: stone }); ink([[W * .02, Y(.822)], [W * .1, Y(.808)], [W * .18, Y(.818)]], .8, .3);
-      // pan de oro en el papel
+    KZ(K) { // Kanazawa: el castillo (Gojikken Nagaya y torres), casas de té de Higashi Chaya, yukitsuri y pan de oro
+      const { u, Y, pig, wash, reserve, ink, mist, ridge, lamp, pine, rectP, dark } = K;
+      wash(ridge(Y(.62), H * .05, 1.4), mix(M.far, PIG.pine, dark ? .15 : .3), .34, { amt: .02, n: 4, shade: 'down' });
+      mist(Y(.65), H * .045, .6);
+      // muralla de piedra del castillo
+      const c0 = W * .3, c1 = W * 1.04, wT = Y(.715), wB = Y(.79), stone = pig(PIG.stone);
+      wash([[c0 - 4 * u, wB, 0], [c0 + 1 * u, wT, .2], [c1, wT, .2], [c1, wB, 0]], stone, dark ? .55 : .42, { amt: .006, n: 4, shade: 'down' });
+      // piedras talladas en hiladas alternas
+      k.save(); k.strokeStyle = rgba(M.ink, dark ? .22 : .16); k.lineWidth = .6; k.beginPath();
+      for (let r = 0, yy = wT; yy < wB; r++, yy += 2.3 * u) { const xs = c0 + 1 * u - 5 * u * ((yy - wT) / (wB - wT)); k.moveTo(xs, yy); k.lineTo(c1, yy); for (let xx = xs + (r % 2 ? 1.6 : 0) * u + rnd(0, 1) * u; xx < c1; xx += rnd(2.6, 4) * u) { k.moveTo(xx, yy); k.lineTo(xx + rnd(-.3, .3) * u, Math.min(wB, yy + 2.3 * u)); } }
+      k.stroke(); k.restore();
+      // Gojikken Nagaya: nave blanca larga de dos pisos con techo de plomo y pared namako-kabe abajo
+      const nT = Y(.665), lead = dark ? '#7E8899' : '#BFC8D0', wallC = dark ? '#3A3F52' : M.paper, nam = dark ? '#262A38' : mix(M.ink, M.far, .55);
+      reserve(rectP(c0 + 3 * u, nT, c1 - c0 - 3 * u, wT - nT, .1), dark ? .75 : .95, wallC);
+      const nm = nT + (wT - nT) * .5;
+      wash(rectP(c0 + 3 * u, nm, c1 - c0 - 3 * u, wT - nm, 0), nam, dark ? .7 : .45, { amt: 0, n: 2, edge: 0, tex: 0 });
+      k.save(); k.beginPath(); k.rect(c0 + 3 * u, nm, c1 - c0 - 3 * u, wT - nm); k.clip(); k.strokeStyle = dark ? 'rgba(200,210,230,.45)' : 'rgba(255,255,255,.9)'; k.lineWidth = .9; k.beginPath();
+      const g = 1.7 * u; for (let xx = c0 - (wT - nm); xx < c1 + (wT - nm); xx += g) { k.moveTo(xx, nm); k.lineTo(xx + (wT - nm), wT); k.moveTo(xx + (wT - nm), nm); k.lineTo(xx, wT); } k.stroke(); k.restore();
+      for (let xx = c0 + 6 * u; xx < c1 - 2 * u; xx += 4.5 * u) { if (!dark) wash(rectP(xx, nT + 1.4 * u, 1.3 * u, 1.3 * u, 0), M.ink, .3, { amt: 0, n: 1, edge: 0, tex: 0 }); lamp(xx + .65 * u, nT + 2 * u, .8, '#FFD58A', 'window'); }
+      wash([[c0 + 1 * u, nT + .4 * u, .1], [c0 + 4 * u, nT - 2.4 * u, .1], [c1 + 2, nT - 2.4 * u, .1], [c1 + 2, nT + .4 * u, .1]], lead, .65, { amt: .006, n: 3, shade: 'down' });
+      ink([[c0 + 1 * u, nT + .4 * u], [c1, nT + .4 * u]], .9, .55); ink([[c0 + 4 * u, nT - 2.4 * u], [c1, nT - 2.4 * u]], .7, .35);
+      // torres (Hishi yagura) en los extremos
+      const tower = (x, s) => {
+        let y = nT + .2 * u;
+        [15, 11.5, 8].forEach((w, i) => {
+          const hw = w * u * s / 2, bh = 4 * u * s;
+          reserve(rectP(x - hw, y - bh, hw * 2, bh, .1), dark ? .75 : .95, wallC);
+          wash(rectP(x - hw, y - bh * .45, hw * 2, bh * .45, 0), nam, dark ? .7 : .45, { amt: 0, n: 1, edge: 0, tex: 0 });
+          ink([[x - hw, y], [x - hw, y - bh]], .6, .3); ink([[x + hw, y], [x + hw, y - bh]], .6, .3);
+          lamp(x, y - bh * .65, .9, '#FFD58A', 'window');
+          y -= bh; const rw = hw + 2.4 * u * s;
+          const eave = [[-rw, -.3], [-rw + 1.4 * u * s, .4], [0, .6], [rw - 1.4 * u * s, .4], [rw, -.3]].map(([ex, ey]) => [x + ex, y + ey * u * s, .1]);
+          wash([...eave, [x + hw * .85, y - 2.2 * u * s, .2], [x - hw * .85, y - 2.2 * u * s, .2]], lead, .7, { amt: .008, n: 3, shade: 'down' });
+          ink(eave.map(([ex, ey]) => [ex, ey]), .9, .55);
+          if (i === 1) { wash([[x - 3.5 * u * s, y - .3 * u * s, .1], [x, y - 3.4 * u * s, .1], [x + 3.5 * u * s, y - .3 * u * s, .1]], lead, .7, { amt: .008, n: 2 }); ink([[x - 3.5 * u * s, y - .3 * u * s], [x, y - 3.4 * u * s], [x + 3.5 * u * s, y - .3 * u * s]], .8, .5); }
+          y -= 2.2 * u * s;
+        });
+      };
+      tower(c0 + 7 * u, 1); tower(W * .9, .9);
+      for (let i = -4; i <= 4; i++) lamp(W * .62 + i * 7 * u, wB, 2.6, '#FFE2B0', 'up');
+      mist(Y(.8), H * .025, .55);
+      // Higashi Chaya: hilera de casas de té de dos pisos, madera rojiza, celosía kimusuko, noren y farolitos
+      const ground = Y(.95), S = 1.3, wood = pig(dark ? '#5A2A20' : '#8A3E2C'), wood2 = pig(dark ? '#4A2219' : '#9C4A35'), tile = dark ? '#1C1D26' : mix(M.ink, M.far, .35);
+      [[-4, 17, 0], [14.5, 15, .6], [31, 16, .2]].forEach(([px, w, dh]) => {
+        const x = px * u * S, ww = w * u * S, f1 = ground - (7 + dh) * u * S, f2 = f1 - 1.4 * u * S - 6 * u * S, lt = .48 * u * S;
+        // planta baja y alta
+        wash(rectP(x, f1, ww, ground - f1 + 30, .2), wood, dark ? .75 : .55, { amt: .006, n: 3, shade: 'right' });
+        wash(rectP(x + .6 * u * S, f2, ww - 1.2 * u * S, f1 - f2, .2), wood2, dark ? .7 : .5, { amt: .006, n: 3, shade: 'right' });
+        // celosía fina de abajo y más abierta arriba
+        k.save(); k.strokeStyle = dark ? 'rgba(255,200,150,.35)' : 'rgba(60,25,15,.42)'; k.lineWidth = .55; k.beginPath();
+        for (let lx = x + 1 * u; lx < x + ww - .6 * u; lx += lt) { k.moveTo(lx, f1 + 1 * u * S); k.lineTo(lx, ground - .3 * u); }
+        for (let lx = x + 1.4 * u * S; lx < x + ww - 1.4 * u * S; lx += lt * 1.8) { k.moveTo(lx, f2 + 1.4 * u * S); k.lineTo(lx, f1 - 1.8 * u * S); }
+        k.stroke(); k.restore();
+        ink([[x + .6 * u * S, f1 - 1.8 * u * S], [x + ww - .6 * u * S, f1 - 1.8 * u * S]], .8, .45);
+        // aleros: el de la planta baja y el techo
+        [[f1, 1.6], [f2, 2.1]].forEach(([ry, o]) => {
+          wash([[x - o * u * S, ry + .4 * u * S, .1], [x + ww + o * u * S, ry + .4 * u * S, .1], [x + ww + .1 * u, ry - 1.5 * u * S, .1], [x - .1 * u, ry - 1.5 * u * S, .1]], tile, dark ? .8 : .6, { amt: .006, n: 3, shade: 'down' });
+          ink([[x - o * u * S, ry + .4 * u * S], [x + ww + o * u * S, ry + .4 * u * S]], 1, .6);
+        });
+        // noren índigo en la puerta y farolito
+        const dx = x + ww * .58, dw = ww * .26;
+        wash([[dx, f1 + .9 * u * S, 0], [dx + dw, f1 + .9 * u * S, 0], [dx + dw, f1 + 3.4 * u * S, .3], [dx, f1 + 3.4 * u * S, .3]], pig('#2E3E66'), dark ? .7 : .6, { amt: .02, n: 2, edge: 0, tex: 0 });
+        ink([[dx + dw / 2, f1 + 1 * u * S], [dx + dw / 2, f1 + 3.4 * u * S]], .6, .35, { col: dark ? '#9FB0D0' : M.paper });
+        lamp(x + ww * .3, f1 + 2.4 * u * S, 2.1, '#FFB36A', 'lantern');
+      });
+      wash(rectP(-10, ground, W * .72, H, .2), stone, dark ? .5 : .3, { amt: .01, n: 3 });
+      // pino con yukitsuri en primer plano
+      const px = W * .93, pb = Y(.97);
+      pine(px, pb, 22 * u, H * .15, dark ? .6 : .48);
+      const top = [px, Y(.69)], rope = dark ? '#CDBB92' : pig(PIG.straw);
+      ink([[px, pb - H * .09], top], 1.1, .6, { col: dark ? '#CDBB92' : mix(PIG.wood, M.ink, .3) });
+      k_ropes(top, px, Y(.94), 12 * u, rope, dark ? .38 : .7);
+      ink([[top[0] - 1 * u, top[1] + 1.2 * u], [top[0], top[1] - 1 * u], [top[0] + 1 * u, top[1] + 1.2 * u]], 1, .55, { col: rope });
       k_gold(14, pig(PIG.gold));
       fx.push({ kind: 'gold', n: 9, col: dark ? '#E9C877' : '#C99A2E' });
     },
@@ -3096,6 +3154,30 @@ const BG = (() => {
     }
     x.globalAlpha = 1;
     for (const f of fx) {
+      if (f.kind === 'wheel') {
+        const { cx, cy, r } = f, a0 = t * .07, n = 24, rim = dark ? 'rgba(210,220,240,.5)' : rgba(M.ink, .45);
+        x.strokeStyle = rim; x.lineWidth = 1.3; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.stroke();
+        x.lineWidth = .6; x.globalAlpha = .55; x.beginPath(); x.arc(cx, cy, r * .93, 0, 7);
+        for (let i = 0; i < n; i += 2) { const a = a0 + i / n * 6.283; x.moveTo(cx, cy); x.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); }
+        x.stroke(); x.globalAlpha = 1;
+        for (let i = 0; i < n; i++) {
+          const a = a0 + i / n * 6.283, gx = cx + Math.cos(a) * r, gy = cy + Math.sin(a) * r;
+          if (lf > .3) glowDot(gx, gy, 1.5, `hsl(${(i * 15 + t * 40) % 360},85%,68%)`, .9 * lf);
+          else { x.fillStyle = rgba(M.ink, .55); x.fillRect(gx - 1.6, gy, 3.2, 3); }
+        }
+        x.globalAlpha = 1; glowDot(cx, cy, 2, lf > .3 ? '#FFE9C4' : rgba(M.ink, .6), lf > .3 ? .9 : .7); x.globalAlpha = 1;
+        continue;
+      }
+      if (f.kind === 'gulls') {
+        x.strokeStyle = dark ? 'rgba(220,228,245,.55)' : rgba(M.ink, .55); x.lineWidth = 1.1; x.lineCap = 'round';
+        for (const g of f.p) {
+          g.x += g.v * dt; if (g.x > W + 30) g.x = -30; if (g.x < -30) g.x = W + 30;
+          const fl = Math.sin(t * 5 + g.ph) * .5 + .5, s = g.s * 3, yy = g.y + Math.sin(t * .7 + g.ph) * 4;
+          x.beginPath(); x.moveTo(g.x - s, yy - s * (.2 + fl * .5)); x.quadraticCurveTo(g.x - s * .4, yy - s * .55, g.x, yy); x.quadraticCurveTo(g.x + s * .4, yy - s * .55, g.x + s, yy - s * (.2 + fl * .5)); x.stroke();
+        }
+        x.lineCap = 'butt';
+        continue;
+      }
       if (f.kind === 'boat') {
         f.x += f.v * dt; if (f.x > W + f.w) f.x = -f.w * 1.5;
         const bx = f.x, by = f.y, w = f.w, ic = dark ? '#05060C' : M.ink;
