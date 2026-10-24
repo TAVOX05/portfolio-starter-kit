@@ -1247,6 +1247,8 @@ const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(
 
 const sv = d => `<svg viewBox="0 0 24 24">${d}</svg>`;
 const I = {
+  gift: sv('<rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M3 9h18M12 9v11M12 9c-2-4-6-4-6-1.5S9 9 12 9zM12 9c2-4 6-4 6-1.5S15 9 12 9z"/>'),
+  moon: sv('<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>'),
   check: sv('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
   car: sv('<path d="M5 16.5h14v-4.5l-2-5H7l-2 5z"/><circle cx="8" cy="16.5" r="1.5"/><circle cx="16" cy="16.5" r="1.5"/><path d="M5 12h14"/>'),
   walk: sv('<circle cx="13" cy="4.5" r="1.8"/><path d="M10 21l2.2-6.5L15 17v4M8 11.5l2.5-3.5 3 .5 2 3.5 2.5 1M12.2 14.5 11 9.5"/>'),
@@ -1440,8 +1442,10 @@ function viewToday(n, hm, preview) {
   const body = `
   ${preview ? grp(null, row({ t: `Vista previa: Día ${n} a las ${hm}` }) + row({ tag: 'button', cls: 'center', t: 'Salir de la vista previa', attrs: 'data-preview-off' })) : ''}
   ${ended ? grp(null, row({ cls: 'ld', lead: ico(I.bed, cityVar(day.city)), t: 'Terminó el plan de hoy', s: tomorrow ? `Mañana: ${tomorrow.items[0].t} · ${esc(tomorrow.items[0].h)}` : '¡Buen viaje de regreso!' }) + (tomorrow ? row({ href: '#dia' + tomorrow.n, cls: 'link', t: `Ver Día ${tomorrow.n}`, chev: 1 }) : '')) : ''}
+  ${ended ? prepHtml(tomorrow, day.base) : ''}
   ${leaveHtml(day, hm)}
   ${card}
+  ${!ended && hm >= '18:00' ? prepHtml(tomorrow, day.base) : ''}
   ${route ? grp('Ruta rápida', route) : ''}
   ${grp('Plan de hoy', items.map((x, i) => {
     const xid = 'd' + n + '-' + i, on = !!c[xid];
@@ -1456,6 +1460,7 @@ function viewToday(n, hm, preview) {
     row({ tag: 'button', cls: 'ld', lead: ico(I.car, 'var(--orange)'), t: 'Dirección para el taxista', attrs: `data-taxi="${day.base}"`, chev: 1 }) +
     docsFor(['b:' + day.base, ...TICKETS.map((tk, ti) => tk.day === n ? 'tk:' + ti : null).filter(Boolean), ...(n === 1 || n === 20 ? ['vuelo'] : [])]).map(docRow).join('') +
     mem.docs.filter(dd => n === 1 || n === 20 ? dd.cat === 'vuelo' && !dd.link : false).map(docRow).join('') +
+    (() => { const l = shopItems().filter(x => !x.bought && x.city === day.city); return l.length ? row({ href: '#guia-compras', cls: 'ld', lead: ico(I.gift, 'var(--pink)'), t: `Souvenirs de ${CITY[day.city].n}: ${l.length} por comprar`, s: esc(l.slice(0, 3).map(x => x.name).join(', ')), chev: 1 }) : ''; })() +
     row({ href: '#chat', cls: 'ld', lead: ico(I.speech, 'var(--purple)'), t: 'Pregúntale a tu mascota', s: 'Comida, cambios de plan, traducciones', chev: 1 }) +
     row({ href: '#dia' + n, cls: 'ld', lead: ico(I.ticket, 'var(--tint)'), t: 'Día completo: rutas, mapa y tips', chev: 1 }))}`;
   return { title: 'Hoy', cap: `Día ${n} · ${DOWL[p.w]} ${p.d} ${MES[p.m - 1]} · ${CITY[day.city].n}`, lead: roundel(day, 'lg'), body };
@@ -1692,6 +1697,38 @@ async function unstamp(id) {
   if (mem.stampsDb) { if (Object.keys(data).length) mem.stampsDb[id] = data; else delete mem.stampsDb[id]; }
   closeSheet(true); rerender();
   try { await writeStamp(id, data); hud('Sello quitado'); } catch (e) { hud('No se pudo quitar el sello'); }
+}
+
+
+/* ---------- preparación de mañana ----------
+   Desde las 18:00 (o cuando ya terminó el plan), Hoy muestra lo que conviene dejar listo
+   para el día siguiente: despertador, maletas si cambian de hotel, boletos y QR, ropa y efectivo. */
+const hmOf = s => (String(s).match(/(\d{1,2}:\d{2})/) || [])[1] || '';
+const CASH_CITY = { FJ: 'En Kawaguchiko y los tours del Fuji muchos lugares solo aceptan efectivo.', HD: 'En Shirakawa-gō y Takayama casi todo es en efectivo.' };
+function prepHtml(tom, nightBase) {
+  if (!tom) return '';
+  const first = tom.items[0], L = leaveInfo(tom, '00:00'), moving = !nightBase || nightBase !== tom.base;
+  const start = Math.min(toMin(first.t), L ? L.leave : Infinity);
+  const wake = start - 60 - (moving && nightBase ? 30 : 0);
+  const pid = k => 'prep' + tom.n + '-' + k;
+  const task = (k, t, s) => row({ cls: 'li' + (checks()[pid(k)] ? ' done' : ''), lead: checkBtn(pid(k), t), t: esc(t), s: esc(s) });
+  const tks = TICKETS.map((t, i) => [t, i]).filter(([t]) => t.day === tom.n);
+  const [rk] = RAIN[tom.city], [hi, lo] = tom.wx;
+  const ropa = lo <= 1 ? 'abrigo grueso, gorro y guantes' : lo <= 5 ? 'chamarra abrigadora y capas' : 'chamarra ligera';
+  const nb = BASES[tom.base], ob = nightBase && BASES[nightBase];
+  return grp('Para mañana',
+    task('wake', `Despertador ≈ ${fmtHM(wake)}`, `${first.t} · ${first.h}${L ? ` · salir a las ${fmtHM(L.leave)}` : ''}`) +
+    (moving ? task('bags', ob ? 'Maletas listas esta noche' : 'Llegada al primer alojamiento', ob ? `Check-out de ${ob.n} a las ${hmOf(ob.out)} · check-in en ${nb.n} desde ${hmOf(nb.in)}` : `Check-in en ${nb.n} desde ${hmOf(nb.in)}`) : '') +
+    tks.map(([t, i]) => task('tk' + i, `Tener a la mano: ${t.n}`, t.info)).join('') +
+    docsFor([...tks.map(([, i]) => 'tk:' + i), ...(moving ? ['b:' + tom.base] : [])]).map(docRow).join('') +
+    (tom.n === 1 ? mem.docs.filter(d => d.cat === 'vuelo').map(docRow).join('') : '') +
+    task('ropa', `Ropa para ${hi}° / ${lo}°: ${ropa}`, rk === 'alta' ? 'Lleven paraguas.' : rk === 'nieve' ? 'Posible nieve: calzado antiderrapante.' : rk === 'moderada' ? 'Paraguas plegable por si acaso.' : CITY[tom.city].n + ' suele estar seco.') +
+    (CASH_CITY[tom.city] && (!nightBase || BASES[nightBase].city !== tom.city) ? task('cash', 'Efectivo en yenes', CASH_CITY[tom.city]) : '') +
+    task('bat', 'Cargar teléfonos y batería externa', 'Google Maps y los QR gastan batería todo el día.') +
+    ALERTS.filter(a => a.d === tom.date).map(a => row({ cls: 'ld', lead: ico(I.bulb, 'var(--yellow)'), t: esc(a.t), sm: 1 })).join('') +
+    (DAY_EXTRA[tom.n] ? row({ cls: 'ld', lead: ico(I.bulb, 'var(--yellow)'), t: esc(DAY_EXTRA[tom.n]), sm: 1 }) : '') +
+    row({ href: '#dia' + tom.n, cls: 'link', t: `Ver el Día ${tom.n} completo`, chev: 1 }),
+    null, `Día ${tom.n} · ${fdate(tom.date, true)}`);
 }
 
 /* ---------- Hora de salir ---------- */
@@ -1942,7 +1979,7 @@ mem.docs = []; mem.docsReady = false; mem.offline = new Set();
   const [db, assets, user] = await Promise.all([use('db'), use('assets'), use('user')]);
   mem.db = db; mem.assets = assets;
   mem.isOwner = user ? await user.isOwner() : false;
-  startStamps(db);
+  startStamps(db); startShop(db);
   mem.offline = new Set(await idb.keys());
   if (db) db.collection('docs').onSnapshot(snap => {
     mem.docs = snap.docs.filter(d => d.exists).map(d => ({ id: d.id, ...d.data() })).sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
@@ -2119,6 +2156,7 @@ const GUIA = {
   sam: { n: 'Si Sam se pierde', i: I.person, c: 'var(--red)' },
   gastos: { n: 'Conversor y gastos', i: I.yen, c: 'var(--green)' },
   dinero: { n: 'Dinero y compras', i: I.card, c: 'var(--teal)' },
+  compras: { n: 'Souvenirs y compras', i: I.gift, c: 'var(--pink)' },
   clima: { n: 'Clima y ropa', i: I.cloud, c: 'var(--c-FJ)' },
   etiqueta: { n: 'Etiqueta', i: I.bow, c: 'var(--purple)' },
   docs: { n: 'Documentos y QR', i: I.doc, c: 'var(--indigo)' },
@@ -2131,7 +2169,7 @@ function viewGuia(sub) {
   if (!sub || !GUIA[sub]) {
     const tonight = baseForNight(jstNow().ymd);
     const body = grp('En el camino', g('claude') + g('sellos') + g('tren') + g('frases') + row({ tag: 'button', cls: 'ld', lead: ico(I.car, 'var(--yellow)'), t: 'Dirección de hoy para el taxi', s: esc(BASES[tonight].n), attrs: `data-taxi="${tonight}"`, chev: 1 }) + g('sam')) +
-      grp('Dinero', g('gastos') + g('dinero')) +
+      grp('Dinero', g('gastos') + g('compras') + g('dinero')) +
       grp('Preparación', g('clima') + g('etiqueta') + g('docs') + g('sos')) +
       `<section class="grp"><h2 class="gh"><span>Apariencia</span><span>Ahora: ${sceneSummary()}</span></h2>
         <div class="apl">Tema</div>${segHtml('theme', [['time', 'Por hora'], ['light', 'Claro'], ['dark', 'Oscuro'], ['system', 'Sistema']], themeMode(), 'data-theme-set', 'Tema')}
@@ -2171,6 +2209,7 @@ function viewGuia(sub) {
         row({ tag: 'button', cls: 'center', t: 'Mostrar tarjeta en pantalla', attrs: 'data-kid' }));
   }
   else if (sub === 'gastos') body = gastosHtml(rate);
+  else if (sub === 'compras') body = comprasHtml();
   else if (sub === 'dinero') body = grp('Efectivo y tarjetas', tipRows([
       'Japón aún usa mucho efectivo, sobre todo en Shirakawa-gō, Takayama, templos y puestos. Los cajeros de <b>7-Eleven</b> aceptan tarjetas extranjeras.',
       'No se deja propina. Se paga en la charola, no en la mano.',
@@ -2206,6 +2245,69 @@ function gastosHtml(rate) {
     grp('Total del viaje', row({ t: `<span class="big">¥${tot.toLocaleString('es-MX')}</span>`, tr: mx(tot) + ' MXN' }) + byCat.map(([c, v]) => row({ t: c, tr: `¥${v.toLocaleString('es-MX')} · ${mx(v)}` })).join('')) +
     (g.length ? grp('Gastos', g.slice().reverse().map(x => row({ t: esc(x.n || x.c), s: `${esc(x.c)} · ${fdate(x.d)}`, tr: `¥${x.y.toLocaleString('es-MX')}<button type="button" data-del="${x.id}" aria-label="Borrar gasto" style="background:none;border:0;color:var(--red);font-size:15px;cursor:pointer;padding:4px">Borrar</button>` })).join(''))
       : '');
+}
+
+
+/* ---------- souvenirs y compras ----------
+   Lista compartida en tiempo real (colección shop): qué comprar, para quién, presupuesto
+   y ciudad. Sin la base de la app se guarda solo en este teléfono. */
+const SOUVENIRS = [
+  ['Tokyo Banana', 'TK', 'Tokyo Station o el aeropuerto'], ['Pokémon Center', 'TK', 'Mega Tokyo (Ikebukuro) o Shibuya PARCO'], ['Kit Kat de sabores japoneses', 'TK', 'Don Quijote o konbinis'],
+  ['Shingen mochi', 'FJ', 'Dulce típico de Yamanashi'],
+  ['Yatsuhashi', 'KY', 'Dulce de canela de Kioto'], ['Matcha y hojicha', 'KY', 'Tiendas de té de Uji o Nishiki'],
+  ['Pokémon Center Osaka DX', 'OS', 'Shinsaibashi PARCO'], ['Recuerdos de Universal', 'OS', 'Universal Studios Japan'],
+  ['Kobe Pudding', 'KB', 'Tiendas de recuerdos de Kobe'], ['Sake de Nada', 'KB', 'El distrito de sake de Kobe'],
+  ['Algo con hoja de oro', 'KZ', 'Dulces y artesanías con oro'],
+  ['Sarubobo', 'HD', 'Amuleto de Takayama'],
+];
+mem.shopDb = null;
+function startShop(db) {
+  if (!db) return;
+  db.collection('shop').onSnapshot(snap => {
+    mem.shopDb = snap.docs.filter(d => d.exists).map(d => ({ id: d.id, ...d.data() }));
+    const h = location.hash || '#hoy';
+    if ((h === '#guia-compras' || h === '#hoy') && $('#sheet').hidden) rerender();
+  }, () => {});
+}
+const shopItems = () => (mem.shopDb || store.get('shopLocal', [])).slice().sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+async function shopWrite(op, id, data) {
+  if (mem.db) {
+    if (op === 'add') await mem.db.collection('shop').add(data);
+    else if (op === 'update') await mem.db.doc('shop/' + id).update(data);
+    else await mem.db.doc('shop/' + id).delete();
+  } else {
+    let l = store.get('shopLocal', []);
+    if (op === 'add') l.push({ id: String(Date.now()), ...data });
+    else if (op === 'update') l = l.map(x => x.id === id ? { ...x, ...data } : x);
+    else l = l.filter(x => x.id !== id);
+    store.set('shopLocal', l); rerender();
+  }
+}
+const yen = v => '¥' + Math.round(v || 0).toLocaleString('es-MX');
+function comprasHtml() {
+  const items = shopItems(), open = items.filter(x => !x.bought), done = items.filter(x => x.bought);
+  const day = todayDay(), here = day ? day.city : null, cityOrder = Object.keys(CITY);
+  const total = items.reduce((a, x) => a + (+x.budget || 0), 0), spent = done.reduce((a, x) => a + (+x.budget || 0), 0);
+  const who = [...new Set([...FAMILY.map(f => f[1]), ...items.map(x => x.who).filter(Boolean)])];
+  const itemRow = x => row({ cls: 'li' + (x.bought ? ' done' : ''),
+    lead: `<button class="chk" type="button" aria-pressed="${!!x.bought}" aria-label="Marcar ${esc(x.name)} como comprado" data-shop-buy="${x.id}">${I.check}</button>`,
+    t: esc(x.name) + (!x.bought && x.city && x.city === here ? ' <span class="pill tint">Aquí hoy</span>' : ''),
+    s: [x.who ? 'Para ' + x.who : '', x.city && CITY[x.city] ? CITY[x.city].n : '', +x.budget ? yen(x.budget) : ''].filter(Boolean).map(esc).join(' · '),
+    tr: `<button class="tbtn" type="button" data-shop-del="${x.id}">${mem.shopArm === x.id ? '¿Borrar?' : 'Quitar'}</button>` });
+  const sorted = open.slice().sort((a, b) => (b.city === here) - (a.city === here) || cityOrder.indexOf(a.city) - cityOrder.indexOf(b.city));
+  const per = who.map(w => [w, items.filter(x => x.who === w)]).filter(([, l]) => l.length);
+  return (items.length ? grp('Resumen', row({ t: `<span class="big">${done.length} de ${items.length}</span>`, tr: 'comprados' }) +
+      (total ? row({ t: 'Presupuesto', tr: yen(total) }) + row({ t: 'Ya comprado', tr: yen(spent) }) : '') +
+      per.map(([w, l]) => row({ t: esc(w), tr: `${l.filter(x => x.bought).length}/${l.length}${l.some(x => +x.budget) ? ' · ' + yen(l.reduce((a, x) => a + (+x.budget || 0), 0)) : ''}` })).join('')) : '') +
+    `<form id="shopForm">${grp('Agregar', `<div class="r field"><label for="shN">Qué</label><input id="shN" type="text" required placeholder="Peluche de Pikachu"></div>
+      <div class="r field"><label for="shW">Para</label><input id="shW" type="text" list="shWho" placeholder="Sam"><datalist id="shWho">${who.map(w => `<option value="${esc(w)}">`).join('')}</datalist></div>
+      <div class="r field"><label for="shB">Presupuesto ¥</label><input id="shB" type="number" inputmode="numeric" min="0" placeholder="3000"></div>
+      <div class="r field"><label for="shC">Dónde</label><select id="shC"><option value="">Cualquier ciudad</option>${cityOrder.map(k => `<option value="${k}"${k === here ? ' selected' : ''}>${CITY[k].n}</option>`).join('')}</select></div>` +
+      row({ tag: 'button', cls: 'center', t: 'Agregar a la lista', attrs: 'type="submit"' }).replace(' type="button"', ''))}</form>` +
+    (sorted.length ? grp('Por comprar', sorted.map(itemRow).join(''), null, String(sorted.length)) : '') +
+    (done.length ? grp('Comprado', done.map(itemRow).join(''), null, String(done.length)) : '') +
+    grp('Ideas por ciudad', SOUVENIRS.map(([n, c, w], i) => row({ t: esc(n), s: `${CITY[c].n} · ${esc(w)}`, tr: items.some(x => x.name === n) ? '<span class="pill ok">En la lista</span>' : `<button class="tbtn" type="button" data-shop-idea="${i}">Agregar</button>` })).join('')) +
+    grp('Tax-free', tipRows(['Lleven el pasaporte. <b>Desde el 1 nov 2026</b> pagas el 10% en la tienda y te lo devuelven al salir de Japón: guarden recibos y no abran los productos hasta salir de Japón.']));
 }
 
 /* ---------- hojas ---------- */
@@ -3284,12 +3386,18 @@ function attachSwipe(card) {
 }
 document.addEventListener('click', e => { if (mem.swallowClick) { e.preventDefault(); e.stopPropagation(); } }, true);
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-say],[data-check],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket],[data-step],[data-focus],[data-food],[data-theme-set],[data-stamp],[data-ask],[data-chat-stop],[data-chat-clear],[data-doc],[data-doc-add],[data-doc-del],[data-offline-all],[data-doc-edit],[data-pet-pick],[data-pet],[data-me],[data-unstamp],[data-sheet-close],[data-scene-phase],[data-scene-wx],[data-wx],[data-scene-city]');
+  const t = e.target.closest('[data-say],[data-check],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket],[data-step],[data-focus],[data-food],[data-theme-set],[data-stamp],[data-ask],[data-chat-stop],[data-chat-clear],[data-doc],[data-doc-add],[data-doc-del],[data-offline-all],[data-doc-edit],[data-pet-pick],[data-pet],[data-me],[data-unstamp],[data-sheet-close],[data-scene-phase],[data-scene-wx],[data-wx],[data-scene-city],[data-shop-buy],[data-shop-del],[data-shop-idea]');
   if (!t) return;
   const d = t.dataset;
   const sg = t.closest('.seg');
   if (sg) mem.segFrom = { key: sg.dataset.key, i: [...sg.querySelectorAll('button')].findIndex(b => b.getAttribute('aria-pressed') === 'true') };
   if (d.say) speak(d.say, 'slow' in d, t);
+  else if (d.shopBuy) { const x = shopItems().find(z => z.id === d.shopBuy); if (x) { if (!x.bought) mem.pop = null; shopWrite('update', x.id, { bought: !x.bought }).catch(() => hud('No se pudo guardar')); } }
+  else if (d.shopDel) {
+    if (mem.shopArm === d.shopDel) { mem.shopArm = null; shopWrite('delete', d.shopDel).then(() => hud('Quitado de la lista'), () => hud('No se pudo quitar')); }
+    else { mem.shopArm = d.shopDel; rerender(); setTimeout(() => { if (mem.shopArm === d.shopDel) { mem.shopArm = null; rerender(); } }, 3000); }
+  }
+  else if (d.shopIdea != null) { const [nm, c] = SOUVENIRS[+d.shopIdea]; shopWrite('add', null, { name: nm, who: '', budget: 0, city: c, bought: false, by: meKey(), createdAt: new Date().toISOString() }).then(() => hud('Agregado a la lista'), () => hud('No se pudo agregar')); }
   else if (d.check) { toggleCheck(d.check); if (checks()[d.check]) mem.pop = d.check; rerender(); }
   else if (d.themeSet) setTheme(d.themeSet, e);
   else if (d.scenePhase) setScenePart('scenePhase', d.scenePhase, e);
@@ -3339,6 +3447,13 @@ document.addEventListener('submit', e => {
   if (e.target.id === 'docForm') { e.preventDefault(); uploadDocs(); return; }
   if (e.target.id === 'docEditForm') { e.preventDefault(); saveEdit(e.target); return; }
   if (e.target.id === 'chatForm') { e.preventDefault(); askClaude($('#chatIn').value); return; }
+  if (e.target.id === 'shopForm') {
+    e.preventDefault();
+    const name = $('#shN').value.trim(); if (!name) return;
+    shopWrite('add', null, { name, who: $('#shW').value.trim(), budget: Math.max(0, Math.round(+$('#shB').value || 0)), city: $('#shC').value, bought: false, by: meKey(), createdAt: new Date().toISOString() })
+      .then(() => { hud('Agregado a la lista'); const f = $('#shopForm'); if (f) f.reset(); }, () => hud('No se pudo agregar'));
+    return;
+  }
   if (e.target.id !== 'gForm') return;
   e.preventDefault();
   const y = Math.round(+$('#gY').value); if (!y) return;
