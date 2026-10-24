@@ -601,9 +601,9 @@ main, .grp { grid-template-columns: minmax(0, 1fr); }
 @media (max-width: 340px) { .tabs a { font-size: 9.5px; letter-spacing: -.03em; } .tabs a svg { width: 22px; height: 22px; } }
 /* cristal esmerilado: tarjetas y barras translúcidas con desenfoque, borde de luz y brillo arriba */
 /* el cristal va teñido: en claro aclara lo que tiene detrás y en oscuro lo oscurece, así el texto conserva su contraste */
-:root { --card: rgba(255,255,255,.72); --glass: rgba(255,255,255,.7); --surf: rgba(255,255,255,.52); --glass-line: rgba(255,255,255,.6); --glass-hi: rgba(255,255,255,.85); --glass-fx: blur(24px) saturate(190%) brightness(1.45); }
-:root[data-theme="dark"] { --card: rgba(24,26,36,.62); --glass: rgba(24,26,36,.6); --surf: rgba(18,20,30,.5); --glass-line: rgba(255,255,255,.1); --glass-hi: rgba(255,255,255,.08); --glass-fx: blur(26px) saturate(120%) brightness(.4); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --card: rgba(24,26,36,.62); --glass: rgba(24,26,36,.6); --surf: rgba(18,20,30,.5); --glass-line: rgba(255,255,255,.1); --glass-hi: rgba(255,255,255,.08); --glass-fx: blur(26px) saturate(120%) brightness(.4); } }
+:root { --card: rgba(255,255,255,.58); --glass: rgba(255,255,255,.7); --surf: rgba(255,255,255,.52); --glass-line: rgba(255,255,255,.6); --glass-hi: rgba(255,255,255,.85); --glass-fx: blur(24px) saturate(190%) brightness(1.45); }
+:root[data-theme="dark"] { --card: rgba(24,26,36,.5); --glass: rgba(24,26,36,.6); --surf: rgba(18,20,30,.5); --glass-line: rgba(255,255,255,.1); --glass-hi: rgba(255,255,255,.08); --glass-fx: blur(26px) saturate(120%) brightness(.4); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --card: rgba(24,26,36,.5); --glass: rgba(24,26,36,.6); --surf: rgba(18,20,30,.5); --glass-line: rgba(255,255,255,.1); --glass-hi: rgba(255,255,255,.08); --glass-fx: blur(26px) saturate(120%) brightness(.4); } }
 .list, .tile, .fchip, .widget, .nowc, .pend-hero, .leave, .stamp, .show, .petcard, .petopt, .composer, .msg.assistant, .docview, .ghost {
   -webkit-backdrop-filter: var(--glass-fx); backdrop-filter: var(--glass-fx);
   border: 1px solid var(--glass-line); box-shadow: inset 0 1px 0 var(--glass-hi), var(--lift); }
@@ -619,7 +619,10 @@ main, .grp { grid-template-columns: minmax(0, 1fr); }
 :root[data-theme="dark"] { --bar-tint: rgba(16,18,26,.46); --bar-rim: rgba(255,255,255,.16); --bar-hi: rgba(255,255,255,.16); --bar-lo: rgba(0,0,0,.3); --bar-sheen: rgba(255,255,255,.09); --bar-pill: rgba(6,8,14,.35); --bar-halo: rgba(0,0,0,.55); --bar-br: .6; --edge-tint: rgba(14,16,24,.72); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bar-tint: rgba(16,18,26,.46); --bar-rim: rgba(255,255,255,.16); --bar-hi: rgba(255,255,255,.16); --bar-lo: rgba(0,0,0,.3); --bar-sheen: rgba(255,255,255,.09); --bar-pill: rgba(6,8,14,.35); --bar-halo: rgba(0,0,0,.55); --bar-br: .6; --edge-tint: rgba(14,16,24,.72); } }
 /* con sol bajo brillante detrás (amanecer y golden hour), el cristal oscuro se tiñe más para que el texto no pierda contraste */
-:root[data-theme="dark"][data-phase="sunset"], :root[data-theme="dark"][data-phase="dawn"] { --card: rgba(24,26,36,.72); --glass: rgba(24,26,36,.7); --glass-fx: blur(26px) saturate(120%) brightness(.3); }
+:root[data-theme="dark"][data-phase="sunset"], :root[data-theme="dark"][data-phase="dawn"] { --card: rgba(24,26,36,.58); --glass: rgba(24,26,36,.7); --glass-fx: blur(26px) saturate(120%) brightness(.3); }
+:root[data-theme="light"][data-phase="sunset"], :root[data-theme="light"][data-phase="dawn"] { --glass-fx: blur(24px) saturate(140%) brightness(1.55); --tint: #153E76; }
+@media (prefers-color-scheme: light) { :root:not([data-theme])[data-phase="sunset"], :root:not([data-theme])[data-phase="dawn"] { --glass-fx: blur(24px) saturate(140%) brightness(1.55); --tint: #153E76; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme])[data-phase="sunset"], :root:not([data-theme])[data-phase="dawn"] { --card: rgba(24,26,36,.58); --glass: rgba(24,26,36,.7); --glass-fx: blur(26px) saturate(120%) brightness(.3); } }
 :root[data-sky="rain"] { --bar-tint: rgba(250,249,246,.55); }
 :root[data-theme="dark"][data-sky="rain"] { --bar-tint: rgba(16,18,26,.55); }
 body::before { left: 0; right: 0; top: 0; bottom: auto; height: calc(env(safe-area-inset-top, 0px) + 88px); z-index: 19; pointer-events: none; opacity: 0; transition: opacity .35s ease;
@@ -647,9 +650,9 @@ body.scrolled::before { opacity: 1; background: linear-gradient(180deg, var(--ed
 /* capa de legibilidad dinámica sobre el fondo: protege la zona del título según el clima y la luz */
 body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 32vh; z-index: -1; pointer-events: none; opacity: var(--scrim, 0); transition: opacity .8s ease;
   background: linear-gradient(180deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 55%, transparent) 50%, transparent 100%); }
-:root[data-sky="rain"] { --glass: rgba(255,255,255,.78); --card: rgba(255,255,255,.8); --surf: rgba(255,255,255,.72); }
-:root[data-theme="dark"][data-sky="rain"] { --glass: rgba(24,26,36,.76); --card: rgba(26,28,38,.78); --surf: rgba(20,22,32,.7); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-sky="rain"] { --glass: rgba(24,26,36,.76); --card: rgba(26,28,38,.78); --surf: rgba(20,22,32,.7); } }
+:root[data-sky="rain"] { --glass: rgba(255,255,255,.78); --card: rgba(255,255,255,.64); --surf: rgba(255,255,255,.72); }
+:root[data-theme="dark"][data-sky="rain"] { --glass: rgba(24,26,36,.76); --card: rgba(26,28,38,.62); --surf: rgba(20,22,32,.7); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-sky="rain"] { --glass: rgba(24,26,36,.76); --card: rgba(26,28,38,.62); --surf: rgba(20,22,32,.7); } }
 .apl { width: fit-content; margin: 4px 8px 0; padding: 2px 8px; }
 /* chips, botones y controles con fondo opaco: su contraste no depende de lo que pase detrás */
 .pill:not(.now), .lnk, .play.alt, .stl.next, .chips a { background: color-mix(in srgb, currentColor 9%, var(--chip)); }
@@ -2734,12 +2737,15 @@ const BG = (() => {
       const mcol = dark ? '#2A3352' : '#8FA2BF';
       wash(fuji(), mcol, dark ? .7 : .45, { amt: .008, n: 5, edge: .35, shade: 'down' });
       if (M.glow) drawSun(K, fuji().map(([px, py]) => [px, py]));
-      const sn = [P0, P1];
-      [.93, .89, .85, .81, .77].forEach((t, i) => { const q = qb(R0, C1, P1, t); sn.push([q[0] - (i % 2 ? 2.2 * u : 0), q[1] + (i % 2 ? -1.2 * u : 0), .6]); });
-      sn.push([fx0 + .6 * u, peak + H * .1, .6]);
-      [.77, .81, .85, .89, .93].forEach((t, i) => { const q = qb(L0, C0, P0, t); sn.push([q[0] + (i % 2 ? 2.2 * u : 0), q[1] + (i % 2 ? -1.2 * u : 0), .6]); });
+      // capa de nieve pareja: sigue la silueta (recortada al cono) y baja en dedos regulares por las cañadas
+      const qL = qb(L0, C0, P0, .8), qR = qb(R0, C1, P1, .8), ys = qL[1], fd = [.8, 1.5, 1.05, 1.9, 1.3, 1.9, 1.05, 1.5, .8];
+      const sn = [[qL[0] - 3 * u, peak - 3 * u, 0], [qR[0] + 3 * u, peak - 3 * u, 0], [qR[0] + 3 * u, ys, 0]];
+      for (let i = 0; i <= 64; i++) { const f = i / 64, x = qR[0] + (qL[0] - qR[0]) * f; sn.push([x, ys - .6 * u + fd.reduce((a, l, j) => a + l * 1.7 * u * Math.exp(-(((f - .08 - j * .105) / .021) ** 2)), 0), .05]); }
+      sn.push([qL[0] - 3 * u, ys, 0]);
+      k.save(); k.beginPath(); fuji().forEach(([px, py], i) => i ? k.lineTo(px, py) : k.moveTo(px, py)); k.closePath(); k.clip();
       // al amanecer y al atardecer la nieve toma el color de la luz (alpenglow, el «Aka-Fuji»)
       reserve(sn, dark ? .55 : .95, M.glow ? mix(dark ? '#C9CFDE' : M.paper, M.glow, dark ? .45 : .35) : dark ? '#C9CFDE' : undefined);
+      k.restore();
       ink(flank(L0, C0, P0).slice(13).map(p => [p[0], p[1]]), .9, .3); ink(flank(R0, C1, P1).slice(13).map(p => [p[0], p[1]]), .9, .3);
       mist(Y(.765), H * .04, .75);
       water(Y(.8), .4);
