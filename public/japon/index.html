@@ -1042,14 +1042,14 @@ const DAYS = [
 
  { n: 10, date: '2026-11-29', city: 'KY', base: 'kyoto', title: 'Arashiyama', wx: [13, 4], sun: '16:45',
    items: [
-    { t: '07:00', e: '08:30', h: 'Bosque de bambú temprano', d: 'Antes de las 8:00 casi no hay gente.', f: 'Café o snack.', p: ['bamboo'], r: 'Desde Higashiyama es más largo que desde Kyoto Station: salir temprano.' },
+    { t: '07:00', e: '08:30', h: 'Bosque de bambú temprano', d: 'Antes de las 8:00 casi no hay gente.', f: 'Café o snack.', p: ['bamboo'], r: 'Taxi directo desde el Airbnb (≈ 30 min, ¥4,000–5,000).' },
     { t: '08:45', e: '10:15', h: 'Tenryū-ji · templo y jardín memorable', d: 'Abre 8:30. Santuario Nonomiya solo de paso.', f: 'Café o postre.', p: ['tenryuji'] },
     { t: '10:30', e: '13:30', h: 'Puente Togetsukyō, río Katsura y comida', d: 'Día visual y familiar.', f: 'Soba, yudōfu o matcha.', p: ['togetsukyo'] },
     { t: '14:00', e: '17:00', h: 'Tiendas, Ōkōchi Sansō opcional o regreso', d: 'No añadir más templos.', f: 'Cena ligera.', p: ['b:kyoto'] },
     { t: '14:00', e: '14:30', h: 'Nintendo Museum: descargar QR', d: 'Los QR de mañana se habilitan desde las 14:00 de hoy.', k: 'res', p: [] }
    ],
    legs: [
-    { o: 'b:kyoto', d: 'bamboo', steps: [W(10, 'A Gion-Shijō y cruzar el puente'), T('hankyu', 'Kyoto-Kawaramachi → Katsura', 10), T('hankyu', 'Katsura → Arashiyama (línea Arashiyama)', 7), W(15, 'Cruzar Togetsukyō hacia el bambú'), X(30, 'Para llegar antes de las 7:30: taxi directo', '≈ ¥4,000–5,000 entre los 3', true)] },
+    { o: 'b:kyoto', d: 'bamboo', steps: [X(30, 'Taxi directo a la entrada del bosque de bambú', '≈ ¥4,000–5,000 entre los 3'), T('hankyu', 'Kyoto-Kawaramachi → Katsura → Arashiyama, y a pie por Togetsukyō', 42, null, true)] },
     { o: 'bamboo', d: 'tenryuji', steps: [W(3, 'Puerta norte de Tenryū-ji')] },
     { o: 'tenryuji', d: 'togetsukyo', steps: [W(8, 'Bajar a la calle principal y al puente')] },
     { o: 'togetsukyo', d: 'b:kyoto', steps: [W(8, 'A Hankyū Arashiyama'), T('hankyu', 'Arashiyama → Katsura → Kyoto-Kawaramachi', 20), W(15, 'Cruzar el río a Miyagawasuji')] }
@@ -1358,6 +1358,8 @@ function place(key) {
 }
 const gmSearch = key => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(place(key).q);
 const gmRoute = (o, d, mode = 'transit') => 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(place(o).q) + '&destination=' + encodeURIComponent(place(d).q) + '&travelmode=' + mode;
+// modo de Google Maps según el trayecto principal: a pie, en taxi (auto) o transporte público
+const legMode = l => { const st = l.steps.filter(s => !s.alt); return st.every(s => s.m === 'walk') ? 'walking' : st.every(s => s.line === 'taxi') ? 'driving' : 'transit'; };
 const gmDay = keys => 'https://www.google.com/maps/dir/' + keys.slice(0, 10).map(k => encodeURIComponent(place(k).q)).join('/') + '/';
 // todas las paradas del día en el orden del plan, siempre de hotel a hotel: sale del alojamiento
 // donde durmieron (el Día 1 del aeropuerto), sigue las actividades por hora y termina en el
@@ -1545,7 +1547,7 @@ function viewToday(n, hm, preview) {
   const route = legs.length
     ? legs.map(l => { const a = place(l.o), b = place(l.d); const tot = l.steps.filter(s => !s.alt).reduce((x, s) => x + (s.min || 0), 0);
         return row({ t: `${esc(a.n)} → ${esc(b.n)}`, extra: flowHtml(l), x: l.steps.filter(s => !s.alt && s.m !== 'walk').map(s => esc(s.t)).join(' · '), tr: `≈ ${tot} min` }) +
-          row({ href: gmRoute(l.o, l.d, l.steps.filter(s => !s.alt).every(s => s.m === 'walk') ? 'walking' : 'transit'), ext: 1, cls: 'link', t: 'Ruta del plan en Google Maps' }); }).join('') +
+          row({ href: gmRoute(l.o, l.d, legMode(l)), ext: 1, cls: 'link', t: 'Ruta del plan en Google Maps' }); }).join('') +
       row({ href: gmDirFromHere(legs[legs.length - 1].d), ext: 1, cls: 'link', t: 'Desde donde estoy ahora' })
     : target ? row({ t: 'Sin traslado largo en esta actividad', s: esc(place(target).n) }) + row({ href: gmDirFromHere(target), ext: 1, cls: 'link', t: 'Cómo llegar desde donde estoy' }) : '';
 
@@ -1983,7 +1985,7 @@ const MORNING = {
   7: { wake: '06:30', leave: '09:00', note: 'Desayuno buffet en Ubuya desde las 07:00 y check-out. Dejen las maletas en los casilleros de la estación Kawaguchiko o pregunten al Airbnb de Funatsu (a 10 min a pie).' },
   8: { wake: '06:00', leave: '07:30', note: 'Check-out a más tardar a las 10:00. Desde la estación Kawaguchiko sale el bus a Mishima (~2 h) y luego el Shinkansen a Kioto: el bus aún no está comprado, confirmen la hora.' },
   9: { wake: '05:00', leave: '06:30', note: 'Kiyomizu-dera abre a las 06:00: temprano se ve sin multitudes. Desayuno después en Sannenzaka.' },
-  10: { wake: '04:45', leave: '06:15', note: 'Para estar en el bambú antes de las 07:30. En taxi directo (~30 min) pueden salir a las 06:30.' },
+  10: { wake: '05:00', leave: '06:30', note: 'Taxi directo (≈ ¥4,000–5,000): a esa hora casi no hay tráfico. Pídanlo con la app GO o tomen uno en Higashiōji-dōri.' },
   11: { wake: '05:00', leave: '06:30', note: 'Desayuno ligero: hay konbini junto a la estación Fushimi-Inari.' },
   12: { wake: '07:30', leave: '11:30', note: 'Mañana para empacar sin prisa; check-out antes de las 12:00. En Osaka la entrada es desde las 16:00: pregunten a Emi si pueden dejar maletas antes.' },
   13: { wake: '05:00', leave: '06:30', note: 'Lleguen antes de la apertura con los 6 boletos a la mano. Desayuno de konbini en el camino.' },
@@ -2001,8 +2003,8 @@ function dayMorning(day) {
   const steps = l.steps.filter(x => !x.alt), alt = l.steps.find(x => x.alt);
   const mins = steps.reduce((a, x) => a + (x.min || 0), 0);
   const stepTxt = x => { const t = x.alt ? x.t.replace(/^(alternativa:\s*|o\s+)/i, '') : x.t;
-    return x.m === 'walk' ? `a pie ${x.min} min${t ? ' (' + t + ')' : ''}` : `${(LINES[x.line] || [x.line])[0]}: ${t}${x.min ? ` (${x.min} min)` : ''}`; };
-  return { ...m, from: m.from || place(l.o).n, to: place(l.d).n, mins, arrive: fmtHM(toMin(m.leave) + mins), icon: steps.every(x => x.m === 'walk') ? I.walk : steps.some(x => x.line === 'taxi') ? I.car : steps.some(x => x.line === 'bus') ? I.bus : I.train, route: steps.map(stepTxt).join(' → '), alt: alt && stepTxt(alt), href: gmRoute(l.o, l.d, steps.every(x => x.m === 'walk') ? 'walking' : 'transit') };
+    return x.m === 'walk' ? `a pie ${x.min} min${t ? ' (' + t + ')' : ''}` : `${t.toLowerCase().startsWith(x.line) ? '' : (LINES[x.line] || [x.line])[0] + ': '}${t}${x.min ? ` (${x.min} min)` : ''}`; };
+  return { ...m, from: m.from || place(l.o).n, to: place(l.d).n, mins, arrive: fmtHM(toMin(m.leave) + mins), icon: steps.every(x => x.m === 'walk') ? I.walk : steps.some(x => x.line === 'taxi') ? I.car : steps.some(x => x.line === 'bus') ? I.bus : I.train, route: steps.map(stepTxt).join(' → '), alt: alt && stepTxt(alt), href: gmRoute(l.o, l.d, legMode(l)) };
 }
 function morningHtml(day) {
   const m = dayMorning(day);
@@ -2034,7 +2036,7 @@ function leaveHtml(day, hm) {
   const sub = L.left <= 0 ? `${L.it.h} empieza a las ${L.it.t}` : `en ${fmtMin(L.left)} · ${L.mins} min de trayecto${L.planned ? '' : ' + 10 de margen'}`;
   return `<section class="leave ${st}"><div class="lv-top"><span class="lv-k">Hora de salir</span><span class="lv-to">→ ${esc(b.n)}</span></div>
     <div class="lv-h">${head}</div><div class="lv-s">${esc(sub)}</div>${flowHtml(L.l)}
-    <div class="lv-btns"><a class="lnk" href="${gmRoute(L.l.o, L.l.d, L.l.steps.filter(s => !s.alt).every(s => s.m === 'walk') ? 'walking' : 'transit')}" target="_blank" rel="noopener">Ruta desde ${esc(a.n)}</a><a class="lnk" href="${gmDirFromHere(L.l.d)}" target="_blank" rel="noopener">Desde donde estoy</a></div></section>`;
+    <div class="lv-btns"><a class="lnk" href="${gmRoute(L.l.o, L.l.d, L.legMode(l))}" target="_blank" rel="noopener">Ruta desde ${esc(a.n)}</a><a class="lnk" href="${gmDirFromHere(L.l.d)}" target="_blank" rel="noopener">Desde donde estoy</a></div></section>`;
 }
 
 /* ---------- Chat con mascota (Claude) ----------
