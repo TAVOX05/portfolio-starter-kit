@@ -1257,11 +1257,23 @@ function place(key) {
 const gmSearch = key => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(place(key).q);
 const gmRoute = (o, d, mode = 'transit') => 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(place(o).q) + '&destination=' + encodeURIComponent(place(d).q) + '&travelmode=' + mode;
 const gmDay = keys => 'https://www.google.com/maps/dir/' + keys.slice(0, 10).map(k => encodeURIComponent(place(k).q)).join('/') + '/';
+// todas las paradas del día en el orden del plan: sale de donde arranca el primer traslado,
+// sigue las actividades por hora y, si el día termina en el alojamiento, regresa ahí
+function dayRoute(day) {
+  const r = [], push = k => { if (k && r[r.length - 1] !== k && (k.startsWith('b:') || !r.includes(k))) r.push(k); };
+  push(day.legs[0] && day.legs[0].o);
+  day.items.forEach(it => (it.p || []).forEach(push));
+  const end = day.legs.length && day.legs[day.legs.length - 1].d;
+  if (end && end.startsWith('b:')) push(end);
+  return r.slice(0, 10);
+}
+const dayRouteRow = day => { const r = dayRoute(day); return r.length > 1 ? row({ href: gmDay(r), ext: 1, cls: 'ld', lead: ico(I.route, 'var(--tint)'), t: 'Ruta de todo el día', s: `${r.length} paradas en orden, en Google Maps` }) : ''; };
 const cityVar = c => 'var(--c-' + c + ')';
 const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
 const sv = d => `<svg viewBox="0 0 24 24">${d}</svg>`;
 const I = {
+  route: sv('<circle cx="6" cy="18.5" r="2.2"/><circle cx="18" cy="5.5" r="2.2"/><path d="M8.2 18.5H16a3.2 3.2 0 0 0 0-6.4H8a3.2 3.2 0 0 1 0-6.6h7.8"/>'),
   gift: sv('<rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M3 9h18M12 9v11M12 9c-2-4-6-4-6-1.5S9 9 12 9zM12 9c2-4 6-4 6-1.5S15 9 12 9z"/>'),
   moon: sv('<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>'),
   check: sv('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
@@ -1461,7 +1473,7 @@ function viewToday(n, hm, preview) {
   ${leaveHtml(day, hm)}
   ${card}
   ${!ended && hm >= '18:00' ? prepHtml(tomorrow, day.base) : ''}
-  ${route ? grp('Ruta rápida', route) : ''}
+  ${route || dayRouteRow(day) ? grp(route ? 'Ruta rápida' : null, (route || '') + dayRouteRow(day)) : ''}
   ${grp('Plan de hoy', items.map((x, i) => {
     const xid = 'd' + n + '-' + i, on = !!c[xid];
     const st = itemStatus(x, hm)[0];
@@ -1520,9 +1532,9 @@ function viewDay(n, opts = {}) {
   } else if (seg === 'rutas') {
     content = day.legs.map(legGroup).join('');
   } else if (seg === 'paradas') {
-    const { order, pts } = dayMapData(day);
+    const { pts } = dayMapData(day);
     content = grp('Paradas del día', pts.map(pt => row({ href: pt.href, ext: 1, cls: 'ld', lead: `<span class="dotn${pt.base ? ' base' : ''}" style="--c:${pt.color}">${pt.label}</span>`, t: esc(pt.n), s: pt.base ? esc(BASES[pt.base].addr) : '' })).join('') +
-        row({ href: gmDay(order), ext: 1, cls: 'link', t: 'Ver todo el día en Google Maps' }));
+        dayRouteRow(day));
   } else {
     content = grp('Tips del día', tipRows((day.tips || []).map(esc)), null) +
       grp('Clima', row({ t: 'Máxima / mínima', tr: `${day.wx[0]}° / ${day.wx[1]}°` }) + row({ t: 'Atardecer', tr: '≈ ' + day.sun }), null, 'Promedio de temporada');
@@ -1538,6 +1550,7 @@ function viewDay(n, opts = {}) {
     <div class="tile"><span>Atardecer</span><b>≈ ${day.sun}</b></div>
     <div class="tile"><span>Avance · ${done} de ${tot}</span><div class="prog"><i style="width:${done / tot * 100}%"></i></div></div>
   </div>
+  ${dayRouteRow(day) ? grp(null, dayRouteRow(day)) : ''}
   ${segHtml('day' + n, [['plan', 'Plan'], ['rutas', 'Rutas'], ['paradas', 'Paradas'], ['tips', 'Tips']].map(([k, l]) => [n + ':' + k, l]), n + ':' + seg, 'data-seg', 'Sección del día')}
   ${content}
   ${nav}`;
@@ -1958,7 +1971,7 @@ async function askClaude(q) {
   let answer = '', talking = false;
   try {
     const r = await mem.sample([{ role: 'user', content: tripContext() }, ...turns], {
-      cache: false, modelTier: 'quick', signal: mem.chatCtl.signal,
+      cache: false, model: 'claude-sonnet-5-5', modelTier: 'default', effort: 'medium', signal: mem.chatCtl.signal,
       onText: ({ text }) => { answer = text; if (!talking) { talking = true; setPetState('talk'); } const el = $('#streamMsg'); if (el) { el.innerHTML = fmtChat(text); scrollChat(); } }
     });
     answer = r.text + (r.truncated ? '\n\n(Respuesta cortada: pregunta algo más específico.)' : '');
