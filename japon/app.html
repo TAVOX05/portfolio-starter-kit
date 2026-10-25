@@ -686,22 +686,21 @@ body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 3
 .sfx-cap b { font-size: 24px; line-height: 30px; font-weight: 700; color: var(--label); }
 .sfx-cap span { font-size: 17px; color: var(--label2); }
 @media (prefers-reduced-motion: reduce) { .sfx-big { transform: rotate(-8deg); opacity: 1; } .sfx-cap { opacity: 1; transform: none; } }
-/* barra de abajo: «Hoy» al centro, grande y elevado, para que se vea por dónde empezar.
+/* barra de abajo: «Hoy» al centro y resaltado, para que se vea por dónde empezar.
    Columnas 1.5 + 1.5 | Hoy | 1 + 1 + 1: las dos mitades miden lo mismo y Hoy queda centrado. */
-.tabs { overflow: visible; }
-.tabs .wrap { grid-template-columns: 1.5fr 1.5fr 76px 1fr 1fr 1fr; }
+.tabs .wrap { grid-template-columns: 1.5fr 1.5fr 64px 1fr 1fr 1fr; }
 .tabs .wrap > a { justify-content: flex-end; }
 .tab-ind { width: var(--tw, 0); transform: translateX(var(--tx, 0)); transition: transform .6s var(--spring), width .6s var(--spring), opacity .25s; }
 .tabs.on-hoy .tab-ind { opacity: 0; }
-.tabs a.tab-hoy { overflow: visible; justify-content: flex-end; color: var(--tint); font-weight: 700; font-size: 11px; padding-top: 0; }
-.tab-hoy .hb { width: 58px; height: 58px; margin: -30px 0 6px; border-radius: 50%; display: grid; place-items: center; color: var(--on);
-  background: radial-gradient(120% 120% at 30% 20%, color-mix(in srgb, var(--tint) 70%, #fff) 0%, var(--tint) 55%, color-mix(in srgb, var(--tint) 80%, #000) 100%);
-  box-shadow: 0 0 0 3.5px var(--bar-ring, color-mix(in srgb, var(--bg) 85%, transparent)), 0 7px 12px -8px color-mix(in srgb, var(--tint) 75%, transparent), inset 0 1px 0 rgba(255,255,255,.45);
-  transition: transform .45s var(--spring), box-shadow .3s; }
-.tabs a.tab-hoy svg { width: 30px; height: 30px; stroke-width: 2; filter: none; transform: none; fill: none; }
-.tab-hoy[aria-current="page"] .hb { transform: scale(1.04); box-shadow: 0 0 0 3.5px var(--bar-ring, color-mix(in srgb, var(--bg) 85%, transparent)), 0 0 0 6px color-mix(in srgb, var(--tint) 24%, transparent), 0 8px 14px -8px color-mix(in srgb, var(--tint) 80%, transparent), inset 0 1px 0 rgba(255,255,255,.45); }
+/* Hoy usa el mismo icono de línea que las demás, pero siempre en color, con su pastilla
+   suave y un poco más grande, para que se note que ahí se empieza */
+.tabs .wrap > a.tab-hoy { color: var(--tint); font-weight: 700; }
+.tab-hoy .hb { display: grid; place-items: center; width: 52px; height: 32px; margin-bottom: 1px; border-radius: 16px;
+  background: color-mix(in srgb, var(--tint) 14%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tint) 26%, transparent);
+  transition: background-color .3s, box-shadow .3s, transform .45s var(--spring); }
+.tabs a.tab-hoy svg { width: 26px; height: 26px; stroke-width: 1.9; }
+.tab-hoy[aria-current="page"] .hb { background: color-mix(in srgb, var(--tint) 24%, transparent); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--tint) 45%, transparent); }
 .tab-hoy:active .hb { transform: scale(.94); }
-@media (prefers-reduced-motion: no-preference) { .tabs:not(.on-hoy) .tab-hoy .hb::after { content: ""; position: absolute; inset: -3px; border-radius: 50%; border: 2px solid var(--tint); animation: hoyping 2.8s ease-out 3; } .tab-hoy .hb { position: relative; } @keyframes hoyping { 0% { transform: scale(1); opacity: .55; } 70%, 100% { transform: scale(1.35); opacity: 0; } } }
 .st:not(.lg) { border-width: 3px; } .st:not(.lg) i { font-size: 10px; line-height: 10px; letter-spacing: 0; } .st:not(.lg) b { line-height: 14px; } .cal i { font-size: 10px; padding: 2px 0 1px; }
 /* móvil: zonas de toque de 44 px sin mover el diseño */
 .chk, .spk, .themeb, .stp button, .tbtn, .lnk, .chips a, .cchips button, .wxb button { position: relative; }
