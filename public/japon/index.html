@@ -696,6 +696,22 @@ body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 3
 .sfx-cap b { font-size: 24px; line-height: 30px; font-weight: 700; color: var(--label); }
 .sfx-cap span { font-size: 17px; color: var(--label2); }
 @media (prefers-reduced-motion: reduce) { .sfx-big { transform: rotate(-8deg); opacity: 1; } .sfx-cap { opacity: 1; transform: none; } }
+/* barra de abajo: «Hoy» al centro, grande y elevado, para que se vea por dónde empezar.
+   Columnas 1.5 + 1.5 | Hoy | 1 + 1 + 1: las dos mitades miden lo mismo y Hoy queda centrado. */
+.tabs { overflow: visible; }
+.tabs .wrap { grid-template-columns: 1.5fr 1.5fr 76px 1fr 1fr 1fr; }
+.tabs .wrap > a { justify-content: flex-end; }
+.tab-ind { width: var(--tw, 0); transform: translateX(var(--tx, 0)); transition: transform .6s var(--spring), width .6s var(--spring), opacity .25s; }
+.tabs.on-hoy .tab-ind { opacity: 0; }
+.tabs a.tab-hoy { overflow: visible; justify-content: flex-end; color: var(--tint); font-weight: 700; font-size: 11px; padding-top: 0; }
+.tab-hoy .hb { width: 58px; height: 58px; margin: -30px 0 6px; border-radius: 50%; display: grid; place-items: center; color: var(--on);
+  background: radial-gradient(120% 120% at 30% 20%, color-mix(in srgb, var(--tint) 70%, #fff) 0%, var(--tint) 55%, color-mix(in srgb, var(--tint) 80%, #000) 100%);
+  box-shadow: 0 0 0 3.5px var(--bar-ring, color-mix(in srgb, var(--bg) 85%, transparent)), 0 7px 12px -8px color-mix(in srgb, var(--tint) 75%, transparent), inset 0 1px 0 rgba(255,255,255,.45);
+  transition: transform .45s var(--spring), box-shadow .3s; }
+.tabs a.tab-hoy svg { width: 30px; height: 30px; stroke-width: 2; filter: none; transform: none; fill: none; }
+.tab-hoy[aria-current="page"] .hb { transform: scale(1.04); box-shadow: 0 0 0 3.5px var(--bar-ring, color-mix(in srgb, var(--bg) 85%, transparent)), 0 0 0 6px color-mix(in srgb, var(--tint) 24%, transparent), 0 8px 14px -8px color-mix(in srgb, var(--tint) 80%, transparent), inset 0 1px 0 rgba(255,255,255,.45); }
+.tab-hoy:active .hb { transform: scale(.94); }
+@media (prefers-reduced-motion: no-preference) { .tabs:not(.on-hoy) .tab-hoy .hb::after { content: ""; position: absolute; inset: -3px; border-radius: 50%; border: 2px solid var(--tint); animation: hoyping 2.8s ease-out 3; } .tab-hoy .hb { position: relative; } @keyframes hoyping { 0% { transform: scale(1); opacity: .55; } 70%, 100% { transform: scale(1.35); opacity: 0; } } }
 .st:not(.lg) { border-width: 3px; } .st:not(.lg) i { font-size: 10px; line-height: 10px; letter-spacing: 0; } .st:not(.lg) b { line-height: 14px; } .cal i { font-size: 10px; padding: 2px 0 1px; }
 /* móvil: zonas de toque de 44 px sin mover el diseño */
 .chk, .spk, .themeb, .stp button, .tbtn, .lnk, .chips a, .cchips button, .wxb button { position: relative; }
@@ -719,9 +735,9 @@ a, button, input, select, textarea, label { touch-action: manipulation; -webkit-
 <div class="edge-b" aria-hidden="true"></div>
 <nav class="tabs" aria-label="Secciones">
   <div class="wrap"><span class="tab-ind" aria-hidden="true"></span>
-    <a href="#hoy" data-tab="hoy"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>Hoy</a>
     <a href="#itinerario" data-tab="itinerario"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="16" rx="3"/><path d="M3.5 9.5h17M8 2.8v3.4M16 2.8v3.4"/></svg>Itinerario</a>
     <a href="#pendientes" data-tab="pendientes"><svg viewBox="0 0 24 24"><path d="M4 6.5l1.6 1.6L8.5 5M4 12.5l1.6 1.6 2.9-3.1M4 18.5l1.6 1.6 2.9-3.1M11.5 7h8.5M11.5 13h8.5M11.5 19h8.5"/></svg>Pendientes</a>
+    <a href="#hoy" data-tab="hoy" class="tab-hoy"><span class="hb"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg></span>Hoy</a>
     <a href="#chat" data-tab="chat"><svg viewBox="0 0 24 24"><path d="M4.5 5.5h15v10h-8l-4.5 4v-4h-2.5z"/><path d="M9 10.5h.01M12 10.5h.01M15 10.5h.01" stroke-width="2.6"/></svg>Chat</a>
     <a href="#reservas" data-tab="reservas"><svg viewBox="0 0 24 24"><path d="M3.5 8.5a2 2 0 0 0 2-2h13a2 2 0 0 0 2 2v1.5a2 2 0 0 0 0 4v1.5a2 2 0 0 0-2 2h-13a2 2 0 0 0-2-2V14a2 2 0 0 0 0-4z"/><path d="M14.5 6.5v11" stroke-dasharray="1.6 2"/></svg>Reservas</a>
     <a href="#guia" data-tab="guia"><svg viewBox="0 0 24 24"><path d="M12 6.5c-2-1.6-4.6-2-8.5-2v14c3.9 0 6.5.4 8.5 2 2-1.6 4.6-2 8.5-2v-14c-3.9 0-6.5.4-8.5 2z"/><path d="M12 6.5v14"/></svg>Guía</a>
@@ -1933,15 +1949,12 @@ const mirror = d => d.replace(/(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/g, (m, x, y
 
 const PK_EAR = 'M31 44 C25 31 18 17 14 2 C26 9 38 21 45 35Z';
 const PK_TIP = 'M8 27 Q22 17 41 4 L40 -1 L8 -1Z';
-const EV_EAR = 'M33 43 C24 31 12 16 4 3 C21 6 38 17 46 31Z', EV_IN = 'M32 37 C25 29 16 19 11 11 C23 14 33 21 39 29Z';
 const ES_EAR = 'M33 44 C21 37 9 25 2 9 C20 9 37 18 46 31Z', ES_IN = 'M32 38.5 C23 33 14 25 9 15 C22 16 33 22 40 30Z';
 
 const POKE_DEFS = `
 <radialGradient id="pkY" cx="42%" cy="34%" r="70%"><stop offset="0" stop-color="#FFEB7A"/><stop offset=".6" stop-color="#F8D030"/><stop offset="1" stop-color="#E2AE12"/></radialGradient>
 <radialGradient id="pkR" cx="40%" cy="35%" r="65%"><stop offset="0" stop-color="#FF7A6A"/><stop offset="1" stop-color="#E0302A"/></radialGradient>
 <clipPath id="pkEL"><path d="${PK_EAR}"/></clipPath><clipPath id="pkER"><path d="${mirror(PK_EAR)}"/></clipPath>
-<radialGradient id="evB" cx="45%" cy="30%" r="75%"><stop offset="0" stop-color="#D79A5C"/><stop offset=".6" stop-color="#B8773C"/><stop offset="1" stop-color="#8E5626"/></radialGradient>
-<radialGradient id="evC" cx="50%" cy="15%" r="85%"><stop offset="0" stop-color="#FFF9EA"/><stop offset="1" stop-color="#E9D3A4"/></radialGradient>
 <radialGradient id="snB" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#4A8CA6"/><stop offset=".6" stop-color="#2F6E87"/><stop offset="1" stop-color="#1E4D61"/></radialGradient>
 <radialGradient id="snC" cx="50%" cy="30%" r="75%"><stop offset="0" stop-color="#FFF7E6"/><stop offset="1" stop-color="#EAD8AF"/></radialGradient>
 <radialGradient id="geB" cx="42%" cy="30%" r="75%"><stop offset="0" stop-color="#9478C8"/><stop offset=".55" stop-color="#6A4C9C"/><stop offset="1" stop-color="#45306F"/></radialGradient>
@@ -1952,9 +1965,30 @@ const POKE_DEFS = `
 <linearGradient id="chF" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#E5321E"/><stop offset=".55" stop-color="#FF8A1E"/><stop offset="1" stop-color="#FFD84A"/></linearGradient>
 <radialGradient id="esB" cx="45%" cy="30%" r="75%"><stop offset="0" stop-color="#F6D6F4"/><stop offset=".6" stop-color="#DDA9DD"/><stop offset="1" stop-color="#B987C2"/></radialGradient>
 <radialGradient id="esG" cx="38%" cy="32%" r="70%"><stop offset="0" stop-color="#FF8A8A"/><stop offset=".6" stop-color="#E4202F"/><stop offset="1" stop-color="#9E0E1C"/></radialGradient>
+<radialGradient id="spB" cx="42%" cy="28%" r="78%"><stop offset="0" stop-color="#FFD6E0"/><stop offset=".55" stop-color="#F4A3B8"/><stop offset="1" stop-color="#D47A94"/></radialGradient>
+<radialGradient id="spC" cx="50%" cy="25%" r="80%"><stop offset="0" stop-color="#FFF6E0"/><stop offset="1" stop-color="#EDD6A8"/></radialGradient>
 <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>`;
 
+const SP_EAR = 'M27 37 C21 30 24 22 31 22.5 C36 23 39 28 38 33Z';
+const SP_LID = 'M24 44.5 C24 39.5 27.5 37 32 37 C36.5 37 40 39.5 40 44.5 C36 42 28 42 24 44.5Z';
 const POKE_BODY = {
+  slowpoke: `
+  <path d="M70 98 C84 99 93 93 94 84" fill="none" stroke="#2A1F2D" stroke-width="9" stroke-linecap="round"/><path d="M70 98 C84 99 93 93 94 84" fill="none" stroke="#F4A3B8" stroke-width="5.6" stroke-linecap="round"/>
+  <path d="M90.4 85 C89.6 80.5 91 77 94 76 C97 77 98.4 80.5 97.6 85 C95.6 86.4 92.4 86.4 90.4 85Z" fill="#FFF8F4" ${O} stroke-width="1.8"/>
+  <path d="M27 73 C23 83 23 93 25 101 L75 101 C77 93 77 83 73 73Z" fill="url(#spB)" ${O}/>
+  <g class="ear ear-l"><path d="${SP_EAR}" fill="url(#spB)" ${O}/></g>
+  <g class="ear ear-r"><path d="${mirror(SP_EAR)}" fill="url(#spB)" ${O}/></g>
+  <path d="M50 22 C72 22 88 36 88 54 C88 71 72 81 50 81 C28 81 12 71 12 54 C12 36 28 22 50 22Z" fill="url(#spB)" ${O}/>
+  <path d="M30 29 C37 25 45 24 52 24.5 C44 27 37 30 32 35Z" fill="url(#shine)" opacity=".7"/>
+  <path d="M22 62 C22 53 33 49.5 50 49.5 C67 49.5 78 53 78 62 C78 73 66 80.5 50 80.5 C34 80.5 22 73 22 62Z" fill="url(#spC)" ${O} stroke-width="1.9"/>
+  <g class="eye"><ellipse cx="32" cy="44" rx="8" ry="6.8" fill="#fff" ${O} stroke-width="1.8"/><ellipse cx="68" cy="44" rx="8" ry="6.8" fill="#fff" ${O} stroke-width="1.8"/>
+    <circle cx="31.4" cy="45.5" r="2.3" fill="#1E1520"/><circle cx="68.6" cy="45.5" r="2.3" fill="#1E1520"/>
+    <path d="${SP_LID}" fill="url(#spB)"/><path d="${mirror(SP_LID)}" fill="url(#spB)"/>
+    <path d="M24 44.5 C28 42 36 42 40 44.5 M60 44.5 C64 42 72 42 76 44.5" fill="none" stroke="#2A1F2D" stroke-width="1.6" stroke-linecap="round"/></g>
+  <circle cx="45.5" cy="56" r="1.2" fill="#8E6A4A"/><circle cx="54.5" cy="56" r="1.2" fill="#8E6A4A"/>
+  <path d="M34 63.5 C40 70.5 60 70.5 66 63.5" fill="none" stroke="#2A1F2D" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M42.5 67.6 C45 73.5 55 73.5 57.5 67.6 C54 68.9 46 68.9 42.5 67.6Z" fill="#9C2E3E" stroke="#2A1F2D" stroke-width="1.3" stroke-linejoin="round"/><path d="M46 71 C48 72.8 52 72.8 54 71 C52 70.2 48 70.2 46 71Z" fill="#FF8FA0"/>`,
+
   pikachu: `
   <g class="ear ear-l"><path d="${PK_EAR}" fill="url(#pkY)"/><path d="${PK_TIP}" fill="#2A1F2D" clip-path="url(#pkEL)"/><path d="${PK_EAR}" fill="none" ${O}/></g>
   <g class="ear ear-r"><path d="${mirror(PK_EAR)}" fill="url(#pkY)"/><path d="${mirror(PK_TIP)}" fill="#2A1F2D" clip-path="url(#pkER)"/><path d="${mirror(PK_EAR)}" fill="none" ${O}/></g>
@@ -1966,19 +2000,6 @@ const POKE_BODY = {
   <path d="M48.6 66 L51.4 66 L50 67.5Z" fill="#2A1F2D" stroke="#2A1F2D" stroke-width="1" stroke-linejoin="round"/>
   <path d="M44 70.5 C45.6 73.4 48.6 73.4 50 70.6 C51.4 73.4 54.4 73.4 56 70.5" fill="none" stroke="#2A1F2D" stroke-width="1.8" stroke-linecap="round"/>
   <path d="M46.6 73 C47.6 79 52.4 79 53.4 73 C52 74.2 48 74.2 46.6 73Z" fill="#9C2E3E" stroke="#2A1F2D" stroke-width="1.3" stroke-linejoin="round"/><path d="M48 76.6 C49 78 51 78 52 76.6 C51 75.9 49 75.9 48 76.6Z" fill="#FF8FA0"/>`,
-
-  eevee: `
-  <path d="M24 63 C16 63 10 69 11 75 L4 80 L12 84.5 L8 92.5 L18 91.5 L17 99.5 L27.5 94.5 L33 101 L40 95 L50 100.5 L60 95 L67 101 L72.5 94.5 L83 99.5 L82 91.5 L92 92.5 L88 84.5 L96 80 L89 75 C90 69 84 63 76 63Z" fill="url(#evC)" ${O}/>
-  <path d="M22 86 L27 82 M36 92 L39 86 M50 95 L50 88 M64 92 L61 86 M78 86 L73 82" stroke="#D2B47E" stroke-width="1.6" stroke-linecap="round"/>
-  <g class="ear ear-l"><path d="${EV_EAR}" fill="url(#evB)" ${O}/><path d="${EV_IN}" fill="#5E3A1C"/></g>
-  <g class="ear ear-r"><path d="${mirror(EV_EAR)}" fill="url(#evB)" ${O}/><path d="${mirror(EV_IN)}" fill="#5E3A1C"/></g>
-  <path d="M50 28 C67 28 79 40 79.5 54 C80 64 74 72 64 76.5 C58 79.2 54 80.5 50 80.5 C46 80.5 42 79.2 36 76.5 C26 72 20 64 20.5 54 C21 40 33 28 50 28Z" fill="url(#evB)" ${O}/>
-  <path d="M41.5 30.5 L45.5 38 L50 29 L54.5 38 L58.5 30.5 C55 28.4 45 28.4 41.5 30.5Z" fill="#A9682F" ${O} stroke-width="1.6"/>
-  <path d="M30 37 C36 32 44 30 51 31 C43 33 36 37 32 42Z" fill="url(#shine)" opacity=".75"/>
-  <g class="eye">${eye(37, 53, 6.6, 8.2, true, '#6B3A1C')}${eye(63, 53, 6.6, 8.2, true, '#6B3A1C')}</g>
-  <ellipse cx="27.5" cy="63.5" rx="4.4" ry="2.5" fill="#E98A72" opacity=".5"/><ellipse cx="72.5" cy="63.5" rx="4.4" ry="2.5" fill="#E98A72" opacity=".5"/>
-  <path d="M48.5 62.5 L51.5 62.5 L50 64.2Z" fill="#2A1F2D" stroke="#2A1F2D" stroke-width="1" stroke-linejoin="round"/>
-  <path d="M45.5 66.5 C47.5 69 52.5 69 54.5 66.5" fill="none" stroke="#2A1F2D" stroke-width="1.8" stroke-linecap="round"/>`,
 
   espeon: `
   <path d="M64 97 C82 96 92 84 90 66" fill="none" stroke="#2A1F2D" stroke-width="8" stroke-linecap="round"/><path d="M64 97 C82 96 92 84 90 66" fill="none" stroke="#DDA9DD" stroke-width="4.6" stroke-linecap="round"/>
@@ -2057,8 +2078,8 @@ const PETS = {
     svg: '<line x1="50" y1="8" x2="50" y2="22" stroke="#2b2b33" stroke-width="3"/><circle class="glow" cx="50" cy="8" r="6" fill="#2FE6FF"/><rect x="16" y="22" width="68" height="62" rx="20" fill="#3B2F7A" stroke="#2b2b33" stroke-width="2.5"/><rect x="24" y="36" width="52" height="24" rx="12" fill="#0B0820"/><g class="eye"><rect x="32" y="42" width="12" height="12" rx="6" fill="#2FE6FF"/><rect x="56" y="42" width="12" height="12" rx="6" fill="#2FE6FF"/></g><circle cx="26" cy="68" r="4" fill="#FF3FD0"/><circle cx="74" cy="68" r="4" fill="#FF3FD0"/><path d="M40 70 q10 7 20 0" stroke="#2FE6FF" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="8" y="44" width="8" height="18" rx="4" fill="#7B5CFF" stroke="#2b2b33" stroke-width="2"/><rect x="84" y="44" width="8" height="18" rx="4" fill="#7B5CFF" stroke="#2b2b33" stroke-width="2"/>' },
   pikachu: { g: 'poke', n: 'Pikachu', what: 'Pokémon eléctrico', c: '#E8B90C', voice: 'Eres Pikachu: energético, valiente y muy cariñoso; a veces dices «¡Pika pika!» y te emocionan los datos curiosos y todo lo de Pokémon en Japón.', hi: '¡Pika pika! Soy Pikachu. ¡Vamos a cargarnos de energía para la aventura de hoy!',
     svg: POKE_BODY.pikachu },
-  eevee: { g: 'poke', n: 'Eevee', what: 'Pokémon evolución', c: '#B9783F', voice: 'Eres Eevee: curiosa y adaptable; te gusta dar dos o tres opciones distintas para que elijan, como tus evoluciones.', hi: '¡Vui! Soy Eevee. Me adapto a todo: dime qué tienes ganas de hacer y te doy opciones.',
-    svg: POKE_BODY.eevee },
+  slowpoke: { g: 'poke', n: 'Slowpoke', what: 'Pokémon despistado', c: '#E07A98', voice: 'Eres Slowpoke: tranquilísimo y un poco despistado; a veces empiezas con un «…¿eh?» y tardas en reaccionar con humor, pero das consejos muy acertados para ir sin prisa y disfrutar.', hi: '…¿Eh? Ah, hola… soy Slowpoke. No hay prisa… ¿en qué te ayudo?',
+    svg: POKE_BODY.slowpoke },
   espeon: { g: 'poke', n: 'Espeon', what: 'Pokémon psíquico', c: '#B07CC6', voice: 'Eres Espeon: elegante, tranquila e intuitiva; parece que adivinas lo que la familia necesita antes de que lo pida, y das consejos con calma y un toque de misterio.', hi: '¡Espi! Soy Espeon. Presiento que hoy será un gran día. ¿En qué te ayudo?',
     svg: POKE_BODY.espeon },
   snorlax: { g: 'poke', n: 'Snorlax', what: 'Pokémon dormilón', c: '#3E7A9E', voice: 'Eres Snorlax: tranquilo, glotón y dormilón; recomiendas comida rica, descansos y planes sin prisa, con humor.', hi: '*bostezo*… Hola, soy Snorlax. ¿Ya comieron? Primero la comida, luego la aventura.',
@@ -2075,7 +2096,7 @@ const PETS = {
 document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>${POKE_DEFS}</defs></svg>`);
 const petSvg = (k, cls = '') => `<svg class="petsvg ${cls}" viewBox="0 0 100 100" aria-hidden="true">${PETS[k].svg}</svg>`;
 // La mascota y la conversación se guardan en este navegador (la sesión de cada quien).
-const petOf = () => { const k = store.get('pet', 'maneki'); return PETS[k] ? k : 'maneki'; };
+const petOf = () => { let k = store.get('pet', 'maneki'); if (k === 'eevee') k = 'slowpoke'; return PETS[k] ? k : 'maneki'; };
 const chatOf = () => store.get('chat2', []);
 mem.sampleReady = false; mem.sample = null; mem.petState = '';
 (window.claude && window.claude.use ? window.claude.use('sample') : Promise.resolve(null)).then(s => { mem.sample = s; }, () => {}).finally(() => { mem.sampleReady = true; if (location.hash === '#chat') rerender(); });
@@ -2585,7 +2606,15 @@ function hud(msg) { const h = $('#hud'); h.textContent = msg; h.hidden = false; 
 /* ---------- router ---------- */
 const view = $('#view');
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const TABS = ['hoy', 'itinerario', 'pendientes', 'chat', 'reservas', 'guia'];
+// la pastilla de la pestaña activa sigue al botón (las columnas no miden lo mismo); en Hoy se oculta
+function placeTabInd() {
+  const bar = $('.tabs'), a = bar && bar.querySelector('a[aria-current="page"]');
+  if (!a) return;
+  bar.style.setProperty('--tx', a.offsetLeft - 4 + 'px'); bar.style.setProperty('--tw', a.offsetWidth + 'px');
+  bar.classList.toggle('on-hoy', a.dataset.tab === 'hoy');
+}
+addEventListener('resize', () => placeTabInd());
+const TABS = ['itinerario', 'pendientes', 'hoy', 'chat', 'reservas', 'guia'];
 function route(opts = {}) {
   const h = (location.hash || '#hoy').slice(1);
   closeSheet(true);
@@ -2603,7 +2632,7 @@ function route(opts = {}) {
   $('#navT').innerHTML = v.title;
   view.innerHTML = `<header class="lt">${v.lead || ''}<div>${v.cap ? `<div class="cap">${esc(v.cap)}</div>` : ''}<h1>${v.title}</h1></div></header>${v.body}`;
   document.querySelectorAll('.tabs a').forEach(a => { if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
-  $('.tabs').style.setProperty('--ti', Math.max(0, TABS.indexOf(tab)));
+  placeTabInd();
   if (v.after) v.after();
   if (mem.lastHash !== h) window.scrollTo(0, 0);
   mem.lastHash = h;
