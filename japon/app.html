@@ -6,7 +6,7 @@
   /* «Washi & Sumi»: papel, tinta y colores tradicionales japoneses. Todo texto ≥ 7:1 (AAA). */
   --bg: #F7F5F0; --card: #FFFFFF; --fill: rgba(22,23,28,.06); --fill2: rgba(22,23,28,.10); --segsel: #FFFFFF;
   --label: #16171C; --label2: #3B3C45; --label3: #8A8B94; --label-h: #2E2F37; --sep: rgba(22,23,28,.14); --gray: #43444D;
-  --tint: #1A4886; --green: #175A33; --orange: #573A00; --red: #7A2318; --yellow: #644200; --indigo: #3B3FA8; --teal: #07565E; --purple: #5A3689; --pink: #8C1B43;
+  --tint: #153E76; --green: #175A33; --orange: #573A00; --red: #7A2318; --yellow: #644200; --indigo: #3B3FA8; --teal: #07565E; --purple: #5A3689; --pink: #8C1B43;
   --on: #FFFFFF; --chip: #FFFFFF; --halo: rgba(247,245,240,.95);
   --bar: rgba(249,249,249,.84); --barline: rgba(0,0,0,.2);
   --sea: #D5E4F1; --land: #F8F8F3; --coast: #A5B4C3; --sun: #87271A;
@@ -1568,6 +1568,7 @@ function viewToday(n, hm, preview) {
   ${preview ? grp(null, row({ t: `Vista previa: Día ${n} a las ${hm}` }) + row({ tag: 'button', cls: 'center', t: 'Salir de la vista previa', attrs: 'data-preview-off' })) : ''}
   ${ended ? grp(null, row({ cls: 'ld', lead: ico(I.bed, cityVar(day.city)), t: 'Terminó el plan de hoy', s: tomorrow ? `Mañana: ${tomorrow.items[0].t} · ${esc(tomorrow.items[0].h)}` : '¡Buen viaje de regreso!' }) + (tomorrow ? row({ href: '#dia' + tomorrow.n, cls: 'link', t: `Ver Día ${tomorrow.n}`, chev: 1 }) : '')) : ''}
   ${ended ? prepHtml(tomorrow, day.base) : ''}
+  ${!ended && MORNING[day.n] && hm < MORNING[day.n].leave ? morningHtml(day) : ''}
   ${leaveHtml(day, hm)}
   ${card}
   ${!ended && hm >= '18:00' ? prepHtml(tomorrow, day.base) : ''}
@@ -1618,7 +1619,7 @@ function viewDay(n, opts = {}) {
   }
   let content = '';
   if (seg === 'plan') {
-    content = grp('Plan por hora', day.items.map((it, i) => {
+    content = morningHtml(day) + grp('Plan por hora', day.items.map((it, i) => {
       const id = 'd' + n + '-' + i, on = !!c[id];
       const tags = (i === nowIdx ? '<span class="pill now">Ahora</span>' : '') + (it.k === 'res' ? '<span class="pill ok">Reserva</span>' : '') + (it.x ? '<span class="pill tint">Opcional</span>' : '') + (it.s ? '<span class="pill">Sugerencia</span>' : '');
       return `<div class="r li it${on ? ' done' : ''}${i === nowIdx ? ' now' : ''}">${checkBtn(id, it.h)}<div class="m">
@@ -1934,8 +1935,8 @@ const CASH_CITY = { FJ: 'En Kawaguchiko y los tours del Fuji muchos lugares solo
 function prepHtml(tom, nightBase) {
   if (!tom) return '';
   const first = tom.items[0], L = leaveInfo(tom, '00:00'), moving = !nightBase || nightBase !== tom.base;
-  const start = Math.min(toMin(first.t), L ? L.leave : Infinity);
-  const wake = start - 60 - (moving && nightBase ? 30 : 0);
+  const start = Math.min(toMin(first.t), L ? L.leave : Infinity), M = MORNING[tom.n];
+  const wake = M ? toMin(M.wake) : start - 60 - (moving && nightBase ? 30 : 0);
   const pid = k => 'prep' + tom.n + '-' + k;
   const task = (k, t, s) => row({ cls: 'li' + (checks()[pid(k)] ? ' done' : ''), lead: checkBtn(pid(k), t), t: esc(t), s: esc(s) });
   const tks = TICKETS.map((t, i) => [t, i]).filter(([t]) => t.day === tom.n);
@@ -1943,7 +1944,7 @@ function prepHtml(tom, nightBase) {
   const ropa = lo <= 1 ? 'abrigo grueso, gorro y guantes' : lo <= 5 ? 'chamarra abrigadora y capas' : 'chamarra ligera';
   const nb = BASES[tom.base], ob = nightBase && BASES[nightBase];
   return grp('Para mañana',
-    task('wake', `Despertador ≈ ${fmtHM(wake)}`, `${first.t} · ${first.h}${L ? ` · salir a las ${fmtHM(L.leave)}` : ''}`) +
+    task('wake', `Despertador ≈ ${fmtHM(wake)}`, M ? `Salir a las ${M.leave} hacia ${dayMorning(tom).to} · ${first.t} ${first.h}` : `${first.t} · ${first.h}${L ? ` · salir a las ${fmtHM(L.leave)}` : ''}`) +
     (moving ? task('bags', ob ? 'Maletas listas esta noche' : 'Llegada al primer alojamiento', ob ? `Check-out de ${ob.n} a las ${hmOf(ob.out)} · check-in en ${nb.n} desde ${hmOf(nb.in)}` : `Check-in en ${nb.n} desde ${hmOf(nb.in)}`) : '') +
     tks.map(([t, i]) => task('tk' + i, `Tener a la mano: ${t.n}`, t.info)).join('') +
     docsFor([...tks.map(([, i]) => 'tk:' + i), ...(moving ? ['b:' + tom.base] : [])]).map(docRow).join('') +
@@ -1959,6 +1960,49 @@ function prepHtml(tom, nightBase) {
 
 /* ---------- Hora de salir ---------- */
 const fmtHM = m => { m = ((m % 1440) + 1440) % 1440; return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
+/* Arranque de cada día: a qué hora despertar y salir del alojamiento hacia el primer lugar.
+   Despertar ≈ 1 h antes de salir (con Sam y desayuno), más en días de check-out o ryokan.
+   El trayecto sale del primer tramo del día (day.legs[0]); la nota cubre lo que falta. */
+const MORNING = {
+  1: { wake: '05:00', leave: '08:30', from: 'Aeropuerto de Narita', note: 'Aterrizan a las 06:30 (AM 58) y despiertan en el avión con el desayuno a bordo. Migración, maletas, yenes y Suica toman 1–1.5 h.' },
+  2: { wake: '06:10', leave: '07:10', note: 'Desayuno rápido de konbini; en Harajuku hay cafés después del santuario.' },
+  3: { wake: '08:00', leave: '09:10', note: 'Mañana tranquila: desayunen en el Airbnb.' },
+  4: { wake: '07:40', leave: '08:50', note: 'Lleguen antes de que abran las tiendas para entrar sin fila.' },
+  5: { wake: '06:40', leave: '07:40', note: 'La entrada es de 09:00 a 09:30: así llegan con margen para la fila y los casilleros. El QR aparece desde las 00:00.' },
+  6: { wake: '07:30', leave: '09:00', note: 'Check-out antes de las 10:00. Lleguen a Shinjuku hacia las 09:40 para comprar bento y encontrar el andén del Fuji Excursion 15 (10:30). Con muchas maletas: taxi directo (~40 min).' },
+  7: { wake: '06:30', leave: '09:00', note: 'Desayuno buffet en Ubuya desde las 07:00 y check-out. Dejen las maletas en los casilleros de la estación Kawaguchiko o pregunten al Airbnb de Funatsu (a 10 min a pie).' },
+  8: { wake: '06:30', leave: '07:30', note: 'Check-out a más tardar a las 10:00. Desde la estación Kawaguchiko sale el bus a Mishima (~2 h) y luego el Shinkansen a Kioto: el bus aún no está comprado, confirmen la hora.' },
+  9: { wake: '06:00', leave: '06:30', note: 'Kiyomizu-dera abre a las 06:00: temprano se ve sin multitudes. Desayuno después en Sannenzaka.' },
+  10: { wake: '05:40', leave: '06:15', note: 'Para estar en el bambú antes de las 07:30. En taxi directo (~30 min) pueden salir a las 06:30.' },
+  11: { wake: '05:45', leave: '06:30', note: 'Desayuno ligero: hay konbini junto a la estación Fushimi-Inari.' },
+  12: { wake: '07:30', leave: '11:30', note: 'Mañana para empacar sin prisa; check-out antes de las 12:00. En Osaka la entrada es desde las 16:00: pregunten a Emi si pueden dejar maletas antes.' },
+  13: { wake: '05:45', leave: '06:30', note: 'Lleguen antes de la apertura con los 6 boletos a la mano. Desayuno de konbini en el camino.' },
+  14: { wake: '06:15', leave: '07:10', note: 'Trayecto largo (~1 h 20 min): desayunen antes o compren algo en Namba.' },
+  15: { wake: '07:00', leave: '08:30', note: 'Check-out antes de las 10:00. De Shin-Osaka sigue el Thunderbird a Tsuruga y el Hokuriku Shinkansen a Kanazawa: los trenes aún no están comprados.' },
+  16: { wake: '07:30', leave: '08:35', note: 'Kenroku-en abre temprano: a esta hora hay poca gente.' },
+  17: { wake: '06:45', leave: '08:00', note: 'Check-out antes de las 10:00. El bus a Shirakawa-gō sale de la estación de Kanazawa (lado este) y requiere reserva: aún no está confirmado.' },
+  18: { wake: '06:30', leave: '07:15', note: 'Check-out hasta las 11:00: después del mercado regresen por las maletas para tomar el tren Hida a Nagoya.' },
+  19: { wake: '07:45', leave: '08:45', note: 'Último día completo: empiecen con calma.' },
+  20: { wake: '05:00', leave: '06:00', note: 'Maletas listas desde la noche anterior. Skyliner de Keisei Ueno a Narita (~45 min); el vuelo AM 57 sale a las 09:35, lleguen antes de las 07:30.' }
+};
+function dayMorning(day) {
+  const m = MORNING[day.n], l = day.legs[0];
+  if (!m || !l) return null;
+  const steps = l.steps.filter(x => !x.alt), alt = l.steps.find(x => x.alt);
+  const mins = steps.reduce((a, x) => a + (x.min || 0), 0);
+  const stepTxt = x => { const t = x.alt ? x.t.replace(/^(alternativa:\s*|o\s+)/i, '') : x.t;
+    return x.m === 'walk' ? `a pie ${x.min} min${t ? ' (' + t + ')' : ''}` : `${(LINES[x.line] || [x.line])[0]}: ${t}${x.min ? ` (${x.min} min)` : ''}`; };
+  return { ...m, from: m.from || place(l.o).n, to: place(l.d).n, mins, arrive: fmtHM(toMin(m.leave) + mins), icon: steps.every(x => x.m === 'walk') ? I.walk : steps.some(x => x.line === 'taxi') ? I.car : steps.some(x => x.line === 'bus') ? I.bus : I.train, route: steps.map(stepTxt).join(' → '), alt: alt && stepTxt(alt), href: gmRoute(l.o, l.d, steps.every(x => x.m === 'walk') ? 'walking' : 'transit') };
+}
+function morningHtml(day) {
+  const m = dayMorning(day);
+  if (!m) return '';
+  return grp('Arranque del día',
+    row({ cls: 'ld', lead: ico(I.moon, 'var(--indigo)'), t: `<span class="tm">${m.wake}</span> Despertar`, s: esc(m.note) }) +
+    row({ cls: 'ld', lead: ico(I.bed, 'var(--tint)'), t: `<span class="tm">${m.leave}</span> Salir de ${esc(m.from)}`, s: `Hacia ${esc(m.to)} · ≈ ${m.mins} min, llegan ≈ ${m.arrive}` }) +
+    row({ cls: 'ld', lead: ico(m.icon, 'var(--green)'), t: esc(m.route), sm: 1, s: m.alt ? 'O bien: ' + esc(m.alt) : '' }) +
+    row({ href: m.href, ext: 1, cls: 'link', t: 'Ver este trayecto en Google Maps' }));
+}
 function leaveInfo(day, hm) {
   for (const [k, it] of day.items.entries()) {
     if (it.t <= hm) continue;
@@ -1966,8 +2010,9 @@ function leaveInfo(day, hm) {
     const l = legs[0];
     if (k > 0 && (day.items[k - 1].p || []).includes(l.d)) continue; // ya están ahí
     const mins = l.steps.filter(s => !s.alt).reduce((a, s) => a + (s.min || 0), 0);
-    const leave = toMin(it.t) - mins - 10;
-    return { it, l, mins, leave, left: leave - toMin(hm) };
+    const M = l === day.legs[0] && MORNING[day.n]; // el primer trayecto sale a la hora del arranque del día
+    const leave = M ? toMin(M.leave) : toMin(it.t) - mins - 10;
+    return { it, l, mins, leave, planned: !!M, left: leave - toMin(hm) };
   }
   return null;
 }
@@ -1976,7 +2021,7 @@ function leaveHtml(day, hm) {
   const a = place(L.l.o), b = place(L.l.d);
   const st = L.left <= 0 ? 'late' : L.left <= 10 ? 'now' : L.left <= 30 ? 'soon' : '';
   const head = L.left <= 0 ? '¡Ya deberían salir!' : `Salgan a las ${fmtHM(L.leave)}`;
-  const sub = L.left <= 0 ? `${L.it.h} empieza a las ${L.it.t}` : `en ${fmtMin(L.left)} · ${L.mins} min de trayecto + 10 de margen`;
+  const sub = L.left <= 0 ? `${L.it.h} empieza a las ${L.it.t}` : `en ${fmtMin(L.left)} · ${L.mins} min de trayecto${L.planned ? '' : ' + 10 de margen'}`;
   return `<section class="leave ${st}"><div class="lv-top"><span class="lv-k">Hora de salir</span><span class="lv-to">→ ${esc(b.n)}</span></div>
     <div class="lv-h">${head}</div><div class="lv-s">${esc(sub)}</div>${flowHtml(L.l)}
     <div class="lv-btns"><a class="lnk" href="${gmRoute(L.l.o, L.l.d, L.l.steps.filter(s => !s.alt).every(s => s.m === 'walk') ? 'walking' : 'transit')}" target="_blank" rel="noopener">Ruta desde ${esc(a.n)}</a><a class="lnk" href="${gmDirFromHere(L.l.d)}" target="_blank" rel="noopener">Desde donde estoy</a></div></section>`;
