@@ -774,8 +774,8 @@ const BASES = {
     note: 'Base en Higashiyama, cerca de Gion y Kiyomizu-Gojō (Keihan). Desde Kyoto Station: taxi con maletas.' },
   osaka: { n: 'Airbnb Chateau DATE', host: 'Emi', city: 'OS', lat: 34.6708, lng: 135.4978,
     addr: 'Chateau DATE, 2-11-3 Nishishinsaibashi, Chuo-ku, Osaka 542-0086', ja: '〒542-0086 大阪府大阪市中央区西心斎橋2-11-3　Chateau DATE', say: '大阪市中央区西心斎橋、2丁目11番3号',
-    in: '1 dic · ver hora en Airbnb', out: '4 dic · ver hora en Airbnb', nights: 3, status: 'Confirmado',
-    note: 'Nueva base en Amerikamura: 5 min a pie de Dōtonbori y de Shinsaibashi. Estaciones: Shinsaibashi (Midōsuji), Yotsubashi y Osaka-Namba. Confirmen en Airbnb la hora de entrada y salida y si guardan maletas.' },
+    in: '1 dic · 16:00+', out: '4 dic · 10:00', nights: 3, status: 'Confirmado',
+    note: 'Nueva base en Amerikamura: 5 min a pie de Dōtonbori y de Shinsaibashi. Estaciones: Shinsaibashi (Midōsuji), Yotsubashi y Osaka-Namba. Llegada autónoma con candado (el código llega por Airbnb). Preguntar a Emi si guardan maletas antes de las 16:00.' },
   kanazawa: { n: 'Vacation Rent Kanazawa G-02', host: 'Toshio', city: 'KZ', lat: 36.5703, lng: 136.6555,
     addr: '25 Shimotsutsumichō, Kanazawa, Ishikawa 920-0917', ja: '〒920-0917 石川県金沢市下堤町25', say: '金沢市下堤町、25番地',
     in: '4 dic · 15:00+', out: '6 dic · 10:00', nights: 2, status: 'Confirmado',
@@ -969,13 +969,13 @@ const DAYS = [
 
  { n: 6, date: '2026-11-25', city: 'FJ', base: 'ubuya', title: 'Llegada a Fuji y Ryokan Ubuya', wx: [11, 1], sun: '16:35',
    items: [
-    { t: '08:00', e: '11:30', h: 'Check-out y viaje a Kawaguchiko', d: 'Salir de Motoasakusa antes de las 10:00. Llegar sin correr para aprovechar Ubuya.', f: 'Bento o konbini para el camino.', p: ['b:tokyo1', 'shinjuku', 'kawaguchiko'], r: 'Transporte aún sin comprar: Fuji Excursion o bus desde Busta Shinjuku.' },
-    { t: '12:00', e: '15:15', h: 'Almuerzo y lago Kawaguchi', d: 'Visita breve a la orilla del lago o a un mirador accesible.', f: 'Hōtō (fideos gruesos de Yamanashi) frente al lago.', p: ['lake'], r: 'No planear cena fuera: el ryokan incluye buffet.' },
+    { t: '09:00', e: '12:24', h: 'Check-out y tren Fuji Excursion 15 · RESERVADO', d: 'Salir de Motoasakusa a las 9:00. Fuji Excursion 15 sale de JR Shinjuku a las 10:30 y llega a Kawaguchiko a las 12:24. Coche 3, asientos 2-C, 3-C y 3-D.', f: 'Bento o konbini para el camino (en Shinjuku hay ekiben).', p: ['b:tokyo1', 'shinjuku', 'kawaguchiko'], k: 'res', r: 'Es boleto electrónico de asiento: además pasen el torniquete con Suica/PASMO con saldo (o compren boleto de tarifa básica). No hay que recoger nada.' },
+    { t: '12:30', e: '15:15', h: 'Almuerzo y lago Kawaguchi', d: 'Visita breve a la orilla del lago o a un mirador accesible.', f: 'Hōtō (fideos gruesos de Yamanashi) frente al lago.', p: ['lake'], r: 'No planear cena fuera: el ryokan incluye buffet.' },
     { t: '16:00', e: '21:00', h: 'Check-in Ryokan Ubuya · CONFIRMADO', d: 'Habitación Deluxe japonesa con baño privado al aire libre, 2 camas. Yukata, onsen y CENA BUFFET incluida.', p: ['b:ubuya'], k: 'res', r: 'Plan JAPANiCAN: buffet + desayuno; no kaiseki. Preguntar hora de check-out.' }
    ],
    legs: [
     { o: 'b:tokyo1', d: 'shinjuku', steps: [W(8, 'A Shin-Okachimachi'), T('oedo', 'Shin-Okachimachi → Shinjuku-nishiguchi (sentido Iidabashi)', 20, 'Un solo tren y con elevadores.'), W(8, 'A JR Shinjuku / Busta Shinjuku (salida Nueva Sur)'), X(40, 'Con muchas maletas: taxi directo', '≈ ¥6,000–7,000', true)] },
-    { o: 'shinjuku', d: 'kawaguchiko', steps: [T('fujiex', 'Opción A · Shinjuku → Kawaguchiko directo', 115, 'Todo reservado; comprar en JR East (eki-net).'), T('bus', 'Opción B · Bus de autopista Busta Shinjuku → Kawaguchiko', 110, 'Reservar en highwaybus.com; maletas en bodega.', true)] },
+    { o: 'shinjuku', d: 'kawaguchiko', steps: [T('fujiex', 'Fuji Excursion 15 · Shinjuku 10:30 → Kawaguchiko 12:24', 114, 'Coche 3 · asientos 2-C, 3-C y 3-D. Pasen con Suica/PASMO para la tarifa básica.')] },
     { o: 'kawaguchiko', d: 'lake', steps: [W(10, 'Hacia la orilla del lago')] },
     { o: 'lake', d: 'b:ubuya', steps: [X(8, 'Taxi a Ubuya (o preguntar por su shuttle)')] }
    ],
@@ -1242,7 +1242,9 @@ const TICKETS = [
   { d: '2026-12-02', day: 13, n: 'Universal Studios Japan', when: '2 dic · todo el día', st: 'ok', stl: 'Pagado ¥114,300', info: '3 × 1 Day Studio Pass + 3 × Express Pass 8 Minion & MineCart Special (6 e-tickets). Verificar fecha y ventanas en cada e-ticket.', place: 'usj' },
   { d: '2026-11-26', day: 7, n: 'Tour Fuji', when: '26 nov', st: 'warn', stl: 'Pendiente de verificar', info: 'Chūreitō, Oshino Hakkai y Fujiyoshida. 5.ª estación solo como alternativa por clima.', place: 'chureito' },
   { d: '2026-12-03', day: 14, n: 'Steakland Kobe', when: '3 dic · comida', st: 'warn', stl: 'No verificado', info: 'Reservar o llegar temprano; confirmar que el curso diga Kobe Beef.', place: 'steakland' },
-  { d: '2026-12-06', day: 17, n: 'Buses Shirakawa-gō', when: '6 dic', st: 'hot', stl: 'Sin confirmación', info: 'Reservar Kanazawa → Shirakawa-gō y Shirakawa-gō → Takayama por separado, con horarios coordinados.', place: 'shirakawa' }
+  { d: '2026-12-06', day: 17, n: 'Buses Shirakawa-gō', when: '6 dic', st: 'hot', stl: 'Sin confirmación', info: 'Reservar Kanazawa → Shirakawa-gō y Shirakawa-gō → Takayama por separado, con horarios coordinados.', place: 'shirakawa' },
+  { d: '2026-11-25', day: 6, n: 'Tren Fuji Excursion 15', when: '25 nov · Shinjuku 10:30 → Kawaguchiko 12:24', st: 'ok', stl: 'Pagado ¥4,150', info: '2 adultos + 1 niño, asientos reservados en el coche 3: 2-C, 3-C y 3-D. Es boleto electrónico de tren expreso: no se recoge nada, pero hay que pagar la tarifa básica aparte pasando el torniquete con Suica/PASMO con saldo (o con boleto normal).', place: 'shinjuku' },
+  { d: '2026-11-18', day: 1, n: 'Vuelos Aeroméxico', when: 'Ida 18 nov 21:30 · regreso 9 dic 09:35', st: 'ok', stl: 'Confirmado', info: 'Ida AM 58: México T2 21:30 → Monterrey 23:15, sale 00:45 → Narita T1 20 nov 06:30 (asientos 28G, 28J y 28H). Regreso AM 57: Narita T1 9 dic 09:35 → México T2 07:00 (27A, 27C y 27B). Tarifa básica: revisen el equipaje permitido.', place: 'narita' }
 ];
 
 // Lo que falta comprar (checklist)
@@ -1252,7 +1254,7 @@ const TODO = [
   { pr: 2, why: 'Lo piden en migración; 1–2 semanas antes', id: 't-vjw', t: 'Registrar Visit Japan Web (3 personas)', s: 'QR de migración y aduana para Narita. Háganlo 1–2 semanas antes.', when: 'Antes del 20 nov', links: [['Visit Japan Web', 'https://www.vjw.digital.go.jp/']] },
   { pr: 2, why: 'Sin datos no hay Google Maps', id: 't-esim', t: 'eSIM o pocket wifi', s: 'Datos para Google Maps los 20 días.', when: 'Antes del 20 nov', links: [['eSIM Japón (Airalo)', 'https://www.airalo.com/japan-esim']] },
   { pr: 3, why: 'Opcional', id: 't-shibuya', t: 'Shibuya Sky al atardecer', date: '2026-11-21', s: 'Opcional. El horario de 16:00 es el del atardecer y se agota.', links: [['Boletos Shibuya Sky', 'https://www.shibuya-scramble-square.com/sky/ticket/']] },
-  { pr: 1, why: 'Abre venta el 25 oct y es todo reservado', id: 't-fuji', t: 'Tokio → Kawaguchiko', date: '2026-11-25', opens: '2026-10-25', on: '1 mes antes, 10:00 JST', s: 'Fuji Excursion (todo reservado) o bus de autopista desde Busta Shinjuku.', links: [['eki-net (JR East)', 'https://www.eki-net.com/en/jreast-train-reservation/Top/Index'], ['Guía Fuji Excursion', 'https://ekitan.com/en/article/fujikaiyu'], ['Bus: Japan Bus Online', 'https://japanbusonline.com/en']], note: 'eki-net solo reserva el tramo JR (Shinjuku–Ōtsuki); revisen cómo cubrir el tramo Fujikyū o tomen el bus.' },
+  { pr: 1, done: 1, why: 'Abre venta el 25 oct y es todo reservado', id: 't-fuji', t: 'Tokio → Kawaguchiko', date: '2026-11-25', opens: '2026-10-25', on: '1 mes antes, 10:00 JST', s: 'Fuji Excursion (todo reservado) o bus de autopista desde Busta Shinjuku.', links: [['eki-net (JR East)', 'https://www.eki-net.com/en/jreast-train-reservation/Top/Index'], ['Guía Fuji Excursion', 'https://ekitan.com/en/article/fujikaiyu'], ['Bus: Japan Bus Online', 'https://japanbusonline.com/en']], note: 'eki-net solo reserva el tramo JR (Shinjuku–Ōtsuki); revisen cómo cubrir el tramo Fujikyū o tomen el bus.' },
   { pr: 1, why: 'Sin confirmar; define cómo se mueven el 26 nov', id: 't-tour', t: 'Tour o transporte Fuji', date: '2026-11-26', s: 'Chūreitō, Oshino Hakkai y Fujiyoshida. Sin tour, la ruta en tren + taxi del Día 7 funciona.', links: [['Tours en GetYourGuide', 'https://www.getyourguide.com/s/?q=Kawaguchiko%20Chureito%20Oshino%20Hakkai'], ['Tours en Klook', 'https://www.klook.com/search/result/?query=Chureito%20Oshino%20Hakkai']] },
   { pr: 1, why: 'Abre venta el 27 oct; une Fuji con Kioto', id: 't-kyoto', t: 'Kawaguchiko → Mishima → Kioto', date: '2026-11-27', opens: '2026-10-27', on: 'Shinkansen ~1 mes antes', s: 'Bus Fujikyū a Mishima (llega al lado sur) + Shinkansen Hikari a Kioto.', links: [['Bus Fujikyū', 'https://bus-en.fujikyu.co.jp/'], ['SmartEX (Shinkansen)', 'https://smart-ex.jp/en/']], note: 'La venta en línea del bus a veces rechaza tarjetas extranjeras; si pasa, se compra en la taquilla de Kawaguchiko.' },
   { pr: 3, why: 'Comida; se puede llegar temprano sin reserva', id: 't-steak', t: 'Steakland Kobe', date: '2026-12-03', s: 'Reservar o llegar temprano; pedir el curso «Kobe Beef».', links: [['Ver en Google Maps', 'https://www.google.com/maps/search/?api=1&query=Steakland%20Kobe%20Sannomiya']] },
@@ -1404,8 +1406,9 @@ function row(o) {
   const trail = o.tr || o.chev || o.ext ? `<div class="tr${o.chev ? ' chev' : ''}${o.ext ? ' ext' : ''}">${o.tr || ''}</div>` : '';
   return `<${el} class="r ${o.cls || ''}"${href}${type} ${o.attrs || ''}>${o.lead || ''}<div class="m">${o.pre || ''}${o.t != null ? `<div class="t${o.tb ? ' b' : ''}${o.sm ? ' sm' : ''}">${o.t}</div>` : ''}${o.s ? `<div class="s">${o.s}</div>` : ''}${o.x ? `<div class="x">${o.x}</div>` : ''}${o.extra || ''}</div>${trail}</${el}>`;
 }
-const checks = () => store.get('checks', {});
-function toggleCheck(id) { const c = checks(); if (c[id]) delete c[id]; else c[id] = 1; store.set('checks', c); }
+// pendientes que ya se hicieron (por ejemplo, compras confirmadas por correo) aparecen marcados
+const checks = () => ({ ...Object.fromEntries(TODO.filter(t => t.done).map(t => [t.id, 1])), ...store.get('checks', {}) });
+function toggleCheck(id) { const c = store.get('checks', {}), was = checks()[id]; if (was) { if (TODO.some(t => t.id === id && t.done)) c[id] = 0; else delete c[id]; } else c[id] = 1; store.set('checks', c); }
 const checkBtn = (id, label) => `<button class="chk" type="button" aria-pressed="${!!checks()[id]}" aria-label="Marcar ${esc(label)}" data-check="${id}">${I.check}</button>`;
 const todoRow = t => row({ cls: 'li' + (checks()[t.id] ? ' done' : ''), lead: checkBtn(t.id, t.t), t: esc(t.t), s: esc(t.s) });
 const tipRows = items => items.map(h => row({ t: h, sm: 1 })).join('');
@@ -1582,7 +1585,7 @@ function viewToday(n, hm, preview) {
   ${grp('Accesos rápidos', row({ href: gmDirFromHere('b:' + day.base), ext: 1, cls: 'ld', lead: ico(I.bed, cityVar(day.city)), t: 'Volver al alojamiento', s: esc(base.n) }) +
     row({ tag: 'button', cls: 'ld', lead: ico(I.car, 'var(--orange)'), t: 'Dirección para el taxista', attrs: `data-taxi="${day.base}"`, chev: 1 }) +
     docsFor(['b:' + day.base, ...TICKETS.map((tk, ti) => tk.day === n ? 'tk:' + ti : null).filter(Boolean), ...(n === 1 || n === 20 ? ['vuelo'] : [])]).map(docRow).join('') +
-    mem.docs.filter(dd => n === 1 || n === 20 ? dd.cat === 'vuelo' && !dd.link : false).map(docRow).join('') +
+    mem.docs.filter(dd => n === 1 || n === 20 ? dd.cat === 'vuelo' : false).map(docRow).join('') +
     (() => { const l = shopItems().filter(x => !x.bought && x.city === day.city); return l.length ? row({ href: '#guia-compras', cls: 'ld', lead: ico(I.gift, 'var(--pink)'), t: `Souvenirs de ${CITY[day.city].n}: ${l.length} por comprar`, s: esc(l.slice(0, 3).map(x => x.name).join(', ')), chev: 1 }) : ''; })() +
     row({ href: '#chat', cls: 'ld', lead: ico(I.speech, 'var(--purple)'), t: 'Pregúntale a tu mascota', s: 'Comida, cambios de plan, traducciones', chev: 1 }) +
     row({ href: '#dia' + n, cls: 'ld', lead: ico(I.ticket, 'var(--tint)'), t: 'Día completo: rutas, mapa y tips', chev: 1 }))}`;
@@ -1678,12 +1681,12 @@ function viewReservas() {
   const done = TODO.filter(t => c[t.id]).length;
   const stColor = { ok: 'var(--green)', warn: 'var(--orange)', hot: 'var(--red)' };
   const body = `
-  ${docsGroup()}
   ${grp(null, row({ href: '#pendientes', cls: 'ld', lead: ico(I.check, 'var(--green)'), t: 'Pendientes por reservar', s: `${done} de ${TODO.length} listos`, chev: 1 }))}
-  ${grp('Entradas y reservas', TICKETS.map((t, i) => row({ tag: 'button', cls: 'ld', lead: ico(I.ticket, stColor[t.st]), t: esc(t.n), s: esc(t.when), tr: `<span class="pill ${t.st}">${esc(t.stl)}</span>`, attrs: `data-ticket="${i}"`, chev: 1 })).join(''))}
+  ${grp('Entradas y reservas', TICKETS.map((t, i) => [t, i]).sort((a, b) => a[0].d.localeCompare(b[0].d)).map(([t, i]) => row({ tag: 'button', cls: 'ld', lead: ico(I.ticket, stColor[t.st]), t: esc(t.n), s: esc(t.when), tr: `<span class="pill ${t.st}">${esc(t.stl)}</span>`, attrs: `data-ticket="${i}"`, chev: 1 })).join(''))}
   ${grp('Alojamientos · 19 noches', BASE_ORDER.map(k => { const b = BASES[k]; return row({ tag: 'button', cls: 'lr', lead: `<div class="st" style="--c:${cityVar(b.city)}"><i>${b.city}</i><b>${b.nights}n</b></div>`, t: esc(b.n), s: esc(b.in + ' → ' + b.out), attrs: `data-base="${k}"`, chev: 1 }); }).join(''))}
+  ${docsGroup()}
   ${grp('Pagos programados de Airbnb', PAYMENTS.map(p => row({ cls: 'ld', lead: cal(p.d), t: esc(p.t), s: esc(p.a), tr: p.d < today ? '<span class="pill">Verificar cobro</span>' : '<span class="pill warn">Próximo</span>' })).join(''))}`;
-  return { title: 'Reservas', cap: '8 hospedajes · 4 entradas pagadas', body };
+  return { title: 'Reservas', cap: '8 hospedajes · vuelos, tren y 4 entradas', body };
 }
 
 
@@ -2281,6 +2284,7 @@ const fmtSize = b => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1
 const docLinkName = l => !l ? '' : l.startsWith('b:') ? (BASES[l.slice(2)] || {}).n : l.startsWith('tk:') ? (TICKETS[+l.slice(3)] || {}).n : '';
 function docRow(d) {
   const cat = DOC_CATS.find(c => c[0] === d.cat) || DOC_CATS[5];
+  if (d.url) return row({ href: d.url, ext: 1, cls: 'ld', lead: ico(I.ticket, cat[2]), t: esc(d.name), s: esc(d.info || docLinkName(d.link) || '') });
   const off = mem.offline.has(d.assetId);
   return row({ tag: 'button', cls: 'ld', lead: ico(d.type === 'application/pdf' ? I_DOC : I.ticket, cat[2]), t: esc(d.name), s: [docLinkName(d.link), fmtSize(d.size || 0)].filter(Boolean).map(esc).join(' · '), tr: off ? '<span class="pill ok">Sin conexión</span>' : '', attrs: `data-doc="${d.id}"`, chev: 1 });
 }
@@ -2289,7 +2293,7 @@ function docsGroup() {
   if (!mem.docsReady) return grp('Documentos', row({ t: 'Cargando documentos…' }));
   if (!mem.db) return grp('Documentos', row({ cls: 'ld', lead: ico(I_DOC, 'var(--gray)'), t: 'Documentos no disponibles aquí', s: 'Se guardan y se ven al abrir la app desde claude.ai.' }));
   const rows = DOC_CATS.map(([k, label]) => { const l = mem.docs.filter(d => (d.cat || 'otros') === k); return l.length ? `<div class="r subh">${label}</div>` + l.map(docRow).join('') : ''; }).join('');
-  const missing = mem.docs.filter(d => !mem.offline.has(d.assetId)).length;
+  const missing = mem.docs.filter(d => d.assetId && !mem.offline.has(d.assetId)).length;
   return grp('Documentos · ' + mem.docs.length,
     (mem.assets && mem.isOwner ? row({ tag: 'button', cls: 'ld link', lead: ico(sv('<path d="M12 5v14M5 12h14"/>'), 'var(--tint)'), t: 'Agregar PDF o captura', attrs: 'data-doc-add' }) : '') +
     (rows || row({ t: 'Aún no hay documentos' })) +
@@ -2434,7 +2438,7 @@ async function saveEdit(form) {
   catch (e) { $('#edMsg').textContent = 'No se pudieron guardar los cambios. Intenta de nuevo.'; }
 }
 async function saveAllOffline(btn) {
-  const l = mem.docs.filter(d => !mem.offline.has(d.assetId));
+  const l = mem.docs.filter(d => d.assetId && !mem.offline.has(d.assetId));
   for (const [k, d] of l.entries()) { btn.querySelector('.t').textContent = `Guardando ${k + 1} de ${l.length}…`; try { await getBlob(d.assetId); } catch (e) {} }
   hud('Listo para ver sin internet'); rerender();
 }
@@ -2634,7 +2638,7 @@ function baseSheet(k) {
 function ticketSheet(i) {
   const t = TICKETS[i];
   const td = docsFor(['tk:' + i]);
-  openSheet(t.n, (td.length ? grp('Documentos', td.map(docRow).join('')) : '') + grp(null, row({ t: 'Cuándo', tr: esc(t.when) }) + row({ t: 'Estado', tr: `<span class="pill ${t.st}">${esc(t.stl)}</span>` }), esc(t.info)) +
+  openSheet(t.n, (td.length ? grp('Documentos', td.map(docRow).join('')) : '') + grp(null, row({ t: 'Cuándo', s: esc(t.when) }) + row({ t: 'Estado', tr: `<span class="pill ${t.st}">${esc(t.stl)}</span>` }), esc(t.info)) +
     grp(null, row({ href: '#dia' + t.day, cls: 'link', t: `Ver Día ${t.day}`, chev: 1 }) + row({ href: gmSearch(t.place), ext: 1, cls: 'link', t: 'Abrir en Google Maps' })));
 }
 let speakBtn = null;
