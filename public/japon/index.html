@@ -1946,16 +1946,18 @@ const eye = (cx, cy, rx, ry, iris, irisCol) => `<ellipse cx="${cx}" cy="${cy}" r
 // espejo horizontal de un trazo (para no dibujar dos veces cada oreja)
 const mirror = d => d.replace(/(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/g, (m, x, y) => `${+(100 - x).toFixed(2)} ${y}`);
 
-const PK_EAR = 'M31 44 C25 31 18 17 14 2 C26 9 38 21 45 35Z';
-const PK_TIP = 'M8 27 Q22 17 41 4 L40 -1 L8 -1Z';
+// Pikachu sentado (estilo sticker): contorno fino y borde blanco
+const PKO = 'stroke="#1B1B1B" stroke-width="1.35" stroke-linejoin="round" stroke-linecap="round"';
+const PK_EAR = 'M26 31 C20 22 10 11 2 3 C13 6 26 13 36 22.5Z';
+const PK_TIP = 'M-2 21 Q12 15 24 2 L20 -2 L-2 -2Z';
+const PK_TAIL = 'M64 33 L97 23 L96.5 50 L85 50.5 L88.5 59 L74.5 68 L72.5 61.5 L79.5 57.5 L76 47 L66 47.5Z';
+const PK_BODY = 'M46.5 20 C60 20 70.5 29 71 42.5 C71.3 49 70 54 67.8 58 C70.5 64 72.5 71 74 77.5 C79.5 77.5 86.5 80.5 89 85 C91 89.5 88 95 81 95.5 L12 95.5 C5 95 2 89.5 4 85 C6.5 80.5 13.5 77.5 19 77.5 C20.5 71 22.5 64 25.2 58 C23 54 21.7 49 22 42.5 C22.5 29 33 20 46.5 20Z';
 const ES_EAR = 'M44 26 C30 16 14 7.5 3 4 C2 17 4.5 34 15.5 52 L32 47Z', ES_IN = 'M7 12.5 C7 24.5 9.8 36 16.6 46.5 L30.5 39 C25.5 28.5 17 19.5 7 12.5Z';
 // Espeon chibi: contorno café grueso y colores planos
 const ESO = 'stroke="#5A1F18" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"';
 const ES_HEAD = 'M38 25 C45 22.8 55 22.8 62 25 C74 27 81 35 81.5 45 L98 59.5 C92.5 60.4 88 61.2 84 61.8 L85.5 66.5 C81 66 77 65.6 73.5 66.2 C68 71.6 59 74 50 74 C41 74 32 71.6 26.5 66.2 C23 65.6 19 66 14.5 66.5 L16 61.8 C12 61.2 7.5 60.4 2 59.5 L18.5 45 C19 35 26 27 38 25Z';
 
 const POKE_DEFS = `
-<radialGradient id="pkY" cx="42%" cy="34%" r="70%"><stop offset="0" stop-color="#FFEB7A"/><stop offset=".6" stop-color="#F8D030"/><stop offset="1" stop-color="#E2AE12"/></radialGradient>
-<radialGradient id="pkR" cx="40%" cy="35%" r="65%"><stop offset="0" stop-color="#FF7A6A"/><stop offset="1" stop-color="#E0302A"/></radialGradient>
 <clipPath id="pkEL"><path d="${PK_EAR}"/></clipPath><clipPath id="pkER"><path d="${mirror(PK_EAR)}"/></clipPath>
 <radialGradient id="snB" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#4A8CA6"/><stop offset=".6" stop-color="#2F6E87"/><stop offset="1" stop-color="#1E4D61"/></radialGradient>
 <radialGradient id="snC" cx="50%" cy="30%" r="75%"><stop offset="0" stop-color="#FFF7E6"/><stop offset="1" stop-color="#EAD8AF"/></radialGradient>
@@ -1965,41 +1967,41 @@ const POKE_DEFS = `
 <radialGradient id="jiE" cx="45%" cy="35%" r="65%"><stop offset="0" stop-color="#9BEBFF"/><stop offset=".6" stop-color="#32A8D8"/><stop offset="1" stop-color="#1D6A9E"/></radialGradient>
 <radialGradient id="chB" cx="42%" cy="28%" r="78%"><stop offset="0" stop-color="#FFB06A"/><stop offset=".55" stop-color="#F58A3C"/><stop offset="1" stop-color="#D8661E"/></radialGradient>
 <linearGradient id="chF" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#E5321E"/><stop offset=".55" stop-color="#FF8A1E"/><stop offset="1" stop-color="#FFD84A"/></linearGradient>
-<radialGradient id="spB" cx="42%" cy="28%" r="78%"><stop offset="0" stop-color="#FFD6E0"/><stop offset=".55" stop-color="#F4A3B8"/><stop offset="1" stop-color="#D47A94"/></radialGradient>
-<radialGradient id="spC" cx="50%" cy="25%" r="80%"><stop offset="0" stop-color="#FFF6E0"/><stop offset="1" stop-color="#EDD6A8"/></radialGradient>
 <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>`;
 
-const SP_EAR = 'M27 37 C21 30 24 22 31 22.5 C36 23 39 28 38 33Z';
-const SP_LID = 'M24 44.5 C24 39.5 27.5 37 32 37 C36.5 37 40 39.5 40 44.5 C36 42 28 42 24 44.5Z';
+// Slowpoke estilo sticker: contorno café oscuro grueso, colores planos
+const SPO = 'stroke="#2B1C17" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"';
 const POKE_BODY = {
   slowpoke: `
-  <path d="M70 98 C84 99 93 93 94 84" fill="none" stroke="#2A1F2D" stroke-width="9" stroke-linecap="round"/><path d="M70 98 C84 99 93 93 94 84" fill="none" stroke="#F4A3B8" stroke-width="5.6" stroke-linecap="round"/>
-  <path d="M90.4 85 C89.6 80.5 91 77 94 76 C97 77 98.4 80.5 97.6 85 C95.6 86.4 92.4 86.4 90.4 85Z" fill="#FFF8F4" ${O} stroke-width="1.8"/>
-  <path d="M27 73 C23 83 23 93 25 101 L75 101 C77 93 77 83 73 73Z" fill="url(#spB)" ${O}/>
-  <g class="ear ear-l"><path d="${SP_EAR}" fill="url(#spB)" ${O}/></g>
-  <g class="ear ear-r"><path d="${mirror(SP_EAR)}" fill="url(#spB)" ${O}/></g>
-  <path d="M50 22 C72 22 88 36 88 54 C88 71 72 81 50 81 C28 81 12 71 12 54 C12 36 28 22 50 22Z" fill="url(#spB)" ${O}/>
-  <path d="M30 29 C37 25 45 24 52 24.5 C44 27 37 30 32 35Z" fill="url(#shine)" opacity=".7"/>
-  <path d="M22 62 C22 53 33 49.5 50 49.5 C67 49.5 78 53 78 62 C78 73 66 80.5 50 80.5 C34 80.5 22 73 22 62Z" fill="url(#spC)" ${O} stroke-width="1.9"/>
-  <g class="eye"><ellipse cx="32" cy="44" rx="8" ry="6.8" fill="#fff" ${O} stroke-width="1.8"/><ellipse cx="68" cy="44" rx="8" ry="6.8" fill="#fff" ${O} stroke-width="1.8"/>
-    <circle cx="31.4" cy="45.5" r="2.3" fill="#1E1520"/><circle cx="68.6" cy="45.5" r="2.3" fill="#1E1520"/>
-    <path d="${SP_LID}" fill="url(#spB)"/><path d="${mirror(SP_LID)}" fill="url(#spB)"/>
-    <path d="M24 44.5 C28 42 36 42 40 44.5 M60 44.5 C64 42 72 42 76 44.5" fill="none" stroke="#2A1F2D" stroke-width="1.6" stroke-linecap="round"/></g>
-  <circle cx="45.5" cy="56" r="1.2" fill="#8E6A4A"/><circle cx="54.5" cy="56" r="1.2" fill="#8E6A4A"/>
-  <path d="M34 63.5 C40 70.5 60 70.5 66 63.5" fill="none" stroke="#2A1F2D" stroke-width="1.8" stroke-linecap="round"/>
-  <path d="M42.5 67.6 C45 73.5 55 73.5 57.5 67.6 C54 68.9 46 68.9 42.5 67.6Z" fill="#9C2E3E" stroke="#2A1F2D" stroke-width="1.3" stroke-linejoin="round"/><path d="M46 71 C48 72.8 52 72.8 54 71 C52 70.2 48 70.2 46 71Z" fill="#FF8FA0"/>`,
+  <path d="M29.5 13 C29.5 5.5 39 2 44.5 6.5 C49 10.5 46 15.5 41.5 18 C38.2 19.8 37.6 22.5 37.8 26.5" fill="none" stroke="#2B1C17" stroke-width="9.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M29.5 13 C29.5 5.5 39 2 44.5 6.5 C49 10.5 46 15.5 41.5 18 C38.2 19.8 37.6 22.5 37.8 26.5" fill="none" stroke="#F7D64A" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <g class="ear ear-l"><circle cx="14.5" cy="45" r="11" fill="#E8A5B3" ${SPO}/><path d="M15.5 50 C10 50.5 9 42 14.5 41 C18.6 40.3 20 45.5 16.8 46.6" fill="none" ${SPO}/></g>
+  <g class="ear ear-r"><circle cx="77" cy="26.5" r="10.5" fill="#E8A5B3" ${SPO}/><path d="M76.5 31.5 C82 32 83 23.5 77.5 22.5 C73.5 22 72 27 75.2 28.2" fill="none" ${SPO}/></g>
+  <path d="M11 58 C9 42 22 29 42 27.5 C58 26.5 73 28.5 84 37 C94 45 97 60 96.5 76 C96 90 80 98.5 52 98.5 C25 98.5 8 91 8 80 C8 72 9.5 64 11 58Z" fill="#E8A5B3" ${SPO}/>
+  <circle cx="38" cy="34" r="3.6" fill="#F7D64A" stroke="#2B1C17" stroke-width="2.2"/>
+  <g class="eye"><circle cx="31.5" cy="59" r="10.5" fill="#FFFDF6" ${SPO}/><circle cx="29.6" cy="59.4" r="2" fill="#2B1C17"/>
+    <circle cx="76.5" cy="45.5" r="10" fill="#FFFDF6" ${SPO}/><circle cx="75.4" cy="44.6" r="2" fill="#2B1C17"/></g>
+  <path d="M25.5 76 C24 66.5 33 61.5 45 59.5 C58.5 57 72 51 83 48.5 C93 46.6 98 53.5 95.5 61.5 C94 66.5 90 70 85.5 72 C87.5 79 85 88.5 77 93.5 C67 99.5 46 99.5 35.5 94 C28.5 90 26 83.5 25.5 76Z" fill="#F2E4AC" ${SPO}/>
+  <path d="M33 79 C46 82.5 67 80.5 82 73 C82.5 83.5 74 92.5 59.5 93.8 C46.5 95 36.5 89 33 79Z" fill="#D9756D" ${SPO}/>
+  <path d="M53.5 81.6 L60 80.8 L58.4 85 C57.6 86.2 55.6 86.3 55 85Z" fill="#FFFDF6" stroke="#2B1C17" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M63 61.5 L65 63.6 M71.2 58.6 L72.4 60.8" stroke="#2B1C17" stroke-width="2.4" stroke-linecap="round"/>
+  <ellipse cx="85" cy="89" rx="7.4" ry="5.4" transform="rotate(25 85 89)" fill="#FFFDF6" ${SPO}/>`,
 
   pikachu: `
-  <g class="ear ear-l"><path d="${PK_EAR}" fill="url(#pkY)"/><path d="${PK_TIP}" fill="#2A1F2D" clip-path="url(#pkEL)"/><path d="${PK_EAR}" fill="none" ${O}/></g>
-  <g class="ear ear-r"><path d="${mirror(PK_EAR)}" fill="url(#pkY)"/><path d="${mirror(PK_TIP)}" fill="#2A1F2D" clip-path="url(#pkER)"/><path d="${mirror(PK_EAR)}" fill="none" ${O}/></g>
-  <path d="M50 31 C68 31 82 43 84 59 C86 77 70 91 50 91 C30 91 14 77 16 59 C18 43 32 31 50 31Z" fill="url(#pkY)" ${O}/>
-  <path d="M82 70 C78 83 65 89.5 50 89.5 C40 89.5 32 87 26 82 C41 86 67 84 82 70Z" fill="#C98E0C" opacity=".3"/>
-  <path d="M29 41 C37 36 47 35 55 36 C45 38 37 42 31 47Z" fill="url(#shine)" opacity=".8"/>
-  <g class="eye">${eye(35, 58, 6.2, 6.6)}${eye(65, 58, 6.2, 6.6)}</g>
-  <g class="cheek"><circle cx="24.5" cy="72" r="7.6" fill="url(#pkR)"/><circle cx="75.5" cy="72" r="7.6" fill="url(#pkR)"/><ellipse cx="22.6" cy="69.6" rx="2.4" ry="1.6" fill="#fff" opacity=".55"/><ellipse cx="73.6" cy="69.6" rx="2.4" ry="1.6" fill="#fff" opacity=".55"/></g>
-  <path d="M48.6 66 L51.4 66 L50 67.5Z" fill="#2A1F2D" stroke="#2A1F2D" stroke-width="1" stroke-linejoin="round"/>
-  <path d="M44 70.5 C45.6 73.4 48.6 73.4 50 70.6 C51.4 73.4 54.4 73.4 56 70.5" fill="none" stroke="#2A1F2D" stroke-width="1.8" stroke-linecap="round"/>
-  <path d="M46.6 73 C47.6 79 52.4 79 53.4 73 C52 74.2 48 74.2 46.6 73Z" fill="#9C2E3E" stroke="#2A1F2D" stroke-width="1.3" stroke-linejoin="round"/><path d="M48 76.6 C49 78 51 78 52 76.6 C51 75.9 49 75.9 48 76.6Z" fill="#FF8FA0"/>`,
+  <g fill="#fff" stroke="#fff" stroke-width="7" stroke-linejoin="round" style="filter:drop-shadow(0 1.5px 1.5px rgba(0,0,0,.18))"><path d="${PK_EAR}"/><path d="${mirror(PK_EAR)}"/><path d="${PK_TAIL}"/><path d="${PK_BODY}"/></g>
+  <path d="${PK_TAIL}" fill="#F6D646" ${PKO}/><path d="M72.5 62.5 L77.5 59.5 L78.5 66 L74 69.5Z" fill="#C9772B"/><path d="${PK_TAIL}" fill="none" ${PKO}/>
+  <g class="ear ear-l"><path d="${PK_EAR}" fill="#F6D646"/><path d="${PK_TIP}" fill="#1B1B1B" clip-path="url(#pkEL)"/><path d="${PK_EAR}" fill="none" ${PKO}/></g>
+  <g class="ear ear-r"><path d="${mirror(PK_EAR)}" fill="#F6D646"/><path d="${mirror(PK_TIP)}" fill="#1B1B1B" clip-path="url(#pkER)"/><path d="${mirror(PK_EAR)}" fill="none" ${PKO}/></g>
+  <path d="${PK_BODY}" fill="#F6D646" ${PKO}/>
+  <path d="M39 89 C42 86.5 51 86.5 54 89 L54.6 95.5 L38.4 95.5Z M4.2 88 C6 84 12 82 18 83 L22.6 95.5 L12 95.5 C6 95 3.4 92 4.2 88Z M88.8 88 C87 84 81 82 75 83 L70.4 95.5 L81 95.5 C87 95 89.6 92 88.8 88Z" fill="#E3A53D"/>
+  <path d="M40.5 65.5 C44 68 49 68 52.5 65.5" fill="none" stroke="#D99A3A" stroke-width="2.4" stroke-linecap="round"/><path d="M26.5 59.5 C33 64 60 64 66.5 59.5" fill="none" stroke="#1B1B1B" stroke-width="1.3" stroke-linecap="round" opacity=".85"/>
+  <path d="M31.5 61.5 C29.5 72.5 32 84.5 37.5 95.4 M61.5 61.5 C63.5 72.5 61 84.5 55.5 95.4 M19 79.5 C21 85 23 90.5 24.5 95.4 M74 79.5 C72 85 70 90.5 68.5 95.4" fill="none" ${PKO}/>
+  <path d="M7 88.6 L9.8 91.8 M11.6 86.2 L14.2 90.2 M86 88.6 L83.2 91.8 M81.4 86.2 L78.8 90.2" stroke="#1B1B1B" stroke-width="1.3" stroke-linecap="round"/>
+  <g class="eye"><circle cx="34" cy="44" r="4.8" fill="#1B1B1B"/><path d="M30 46.4 C31.6 49.2 36.4 49.2 38 46.4 C36 47.4 32 47.4 30 46.4Z" fill="#7A4A1E"/><circle cx="35.2" cy="42.4" r="1.9" fill="#fff"/>
+    <circle cx="59" cy="44" r="4.8" fill="#1B1B1B"/><path d="M55 46.4 C56.6 49.2 61.4 49.2 63 46.4 C61 47.4 57 47.4 55 46.4Z" fill="#7A4A1E"/><circle cx="60.2" cy="42.4" r="1.9" fill="#fff"/></g>
+  <g class="cheek"><circle cx="27.5" cy="55" r="5.8" fill="#E8432E" ${PKO}/><circle cx="65.5" cy="55" r="5.8" fill="#E8432E" ${PKO}/></g>
+  <ellipse cx="46.5" cy="49.2" rx=".9" ry=".7" fill="#1B1B1B"/>
+  <path d="M40.5 52.5 C42 55.2 45 55.4 46.5 53.2 C48 55.4 51 55.2 52.5 52.5" fill="none" stroke="#1B1B1B" stroke-width="1.5" stroke-linecap="round"/>`,
 
   espeon: `
   <g class="ear ear-l"><path d="${ES_EAR}" fill="#C8A8D6" ${ESO}/><path d="${ES_IN}" fill="#2E3D78"/><path d="${ES_EAR}" fill="none" ${ESO}/></g>
