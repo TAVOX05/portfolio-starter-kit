@@ -1915,93 +1915,123 @@ function leaveHtml(day, hm) {
    y responde en uno o dos segundos. El contexto que se envía es compacto. */
 // Pokémon dibujados para la app: degradados compartidos (POKE_DEFS, se insertan una vez) + cuerpo de cada uno.
 const O = 'stroke="#2A1F2D" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"';
-const POKE_DEFS = `
-<radialGradient id="pkY" cx="42%" cy="34%" r="70%"><stop offset="0" stop-color="#FFF08A"/><stop offset=".55" stop-color="#FBD43A"/><stop offset="1" stop-color="#E9AE14"/></radialGradient>
-<radialGradient id="pkR" cx="40%" cy="35%" r="65%"><stop offset="0" stop-color="#FF8A78"/><stop offset="1" stop-color="#D9302A"/></radialGradient>
-<radialGradient id="evB" cx="42%" cy="32%" r="72%"><stop offset="0" stop-color="#DDA266"/><stop offset=".6" stop-color="#BE7A3E"/><stop offset="1" stop-color="#94592A"/></radialGradient>
-<radialGradient id="evC" cx="50%" cy="20%" r="80%"><stop offset="0" stop-color="#FFF8E8"/><stop offset="1" stop-color="#E8D2A6"/></radialGradient>
-<radialGradient id="snB" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#4E93B5"/><stop offset=".6" stop-color="#2F6E8F"/><stop offset="1" stop-color="#1F4D66"/></radialGradient>
-<radialGradient id="snC" cx="50%" cy="30%" r="75%"><stop offset="0" stop-color="#FFF6E2"/><stop offset="1" stop-color="#E9D3A8"/></radialGradient>
-<radialGradient id="geB" cx="42%" cy="30%" r="75%"><stop offset="0" stop-color="#9C7BD6"/><stop offset=".55" stop-color="#6F4DAA"/><stop offset="1" stop-color="#47307A"/></radialGradient>
-<radialGradient id="geE" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#FF6A6A"/><stop offset="1" stop-color="#C8161D"/></radialGradient>
-<radialGradient id="jiB" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#FFE0EC"/><stop offset=".5" stop-color="#F9B3CD"/><stop offset="1" stop-color="#E5849F"/></radialGradient>
-<radialGradient id="jiE" cx="45%" cy="35%" r="65%"><stop offset="0" stop-color="#8FE0FF"/><stop offset=".6" stop-color="#2E9BD8"/><stop offset="1" stop-color="#1B5E9E"/></radialGradient>
-<radialGradient id="chB" cx="42%" cy="30%" r="75%"><stop offset="0" stop-color="#FFB46A"/><stop offset=".55" stop-color="#F7883A"/><stop offset="1" stop-color="#D9621C"/></radialGradient>
-<linearGradient id="chF" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#E5321E"/><stop offset=".55" stop-color="#FF8A1E"/><stop offset="1" stop-color="#FFD84A"/></linearGradient>
-<linearGradient id="shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>`;
-
 const eye = (cx, cy, rx, ry, iris, irisCol) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#1E1520"/>` +
   (iris ? `<ellipse cx="${cx}" cy="${cy + ry * .35}" rx="${rx * .7}" ry="${ry * .45}" fill="${irisCol}" opacity=".85"/>` : '') +
   `<ellipse cx="${cx - rx * .3}" cy="${cy - ry * .38}" rx="${rx * .42}" ry="${ry * .36}" fill="#fff"/><circle cx="${cx + rx * .35}" cy="${cy + ry * .38}" r="${rx * .18}" fill="#fff" opacity=".9"/>`;
+// espejo horizontal de un trazo (para no dibujar dos veces cada oreja)
+const mirror = d => d.replace(/(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/g, (m, x, y) => `${+(100 - x).toFixed(2)} ${y}`);
+
+const PK_EAR = 'M31 44 C25 31 18 17 14 2 C26 9 38 21 45 35Z';
+const PK_TIP = 'M8 27 Q22 17 41 4 L40 -1 L8 -1Z';
+const EV_EAR = 'M33 43 C24 31 12 16 4 3 C21 6 38 17 46 31Z', EV_IN = 'M32 37 C25 29 16 19 11 11 C23 14 33 21 39 29Z';
+const ES_EAR = 'M33 44 C21 37 9 25 2 9 C20 9 37 18 46 31Z', ES_IN = 'M32 38.5 C23 33 14 25 9 15 C22 16 33 22 40 30Z';
+
+const POKE_DEFS = `
+<radialGradient id="pkY" cx="42%" cy="34%" r="70%"><stop offset="0" stop-color="#FFEB7A"/><stop offset=".6" stop-color="#F8D030"/><stop offset="1" stop-color="#E2AE12"/></radialGradient>
+<radialGradient id="pkR" cx="40%" cy="35%" r="65%"><stop offset="0" stop-color="#FF7A6A"/><stop offset="1" stop-color="#E0302A"/></radialGradient>
+<clipPath id="pkEL"><path d="${PK_EAR}"/></clipPath><clipPath id="pkER"><path d="${mirror(PK_EAR)}"/></clipPath>
+<radialGradient id="evB" cx="45%" cy="30%" r="75%"><stop offset="0" stop-color="#D79A5C"/><stop offset=".6" stop-color="#B8773C"/><stop offset="1" stop-color="#8E5626"/></radialGradient>
+<radialGradient id="evC" cx="50%" cy="15%" r="85%"><stop offset="0" stop-color="#FFF9EA"/><stop offset="1" stop-color="#E9D3A4"/></radialGradient>
+<radialGradient id="snB" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#4A8CA6"/><stop offset=".6" stop-color="#2F6E87"/><stop offset="1" stop-color="#1E4D61"/></radialGradient>
+<radialGradient id="snC" cx="50%" cy="30%" r="75%"><stop offset="0" stop-color="#FFF7E6"/><stop offset="1" stop-color="#EAD8AF"/></radialGradient>
+<radialGradient id="geB" cx="42%" cy="30%" r="75%"><stop offset="0" stop-color="#9478C8"/><stop offset=".55" stop-color="#6A4C9C"/><stop offset="1" stop-color="#45306F"/></radialGradient>
+<radialGradient id="geE" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#FF6A6A"/><stop offset="1" stop-color="#C8161D"/></radialGradient>
+<radialGradient id="jiB" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#FFE3EE"/><stop offset=".5" stop-color="#F8B4CC"/><stop offset="1" stop-color="#E5869F"/></radialGradient>
+<radialGradient id="jiE" cx="45%" cy="35%" r="65%"><stop offset="0" stop-color="#9BEBFF"/><stop offset=".6" stop-color="#32A8D8"/><stop offset="1" stop-color="#1D6A9E"/></radialGradient>
+<radialGradient id="chB" cx="42%" cy="28%" r="78%"><stop offset="0" stop-color="#FFB06A"/><stop offset=".55" stop-color="#F58A3C"/><stop offset="1" stop-color="#D8661E"/></radialGradient>
+<linearGradient id="chF" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#E5321E"/><stop offset=".55" stop-color="#FF8A1E"/><stop offset="1" stop-color="#FFD84A"/></linearGradient>
+<radialGradient id="esB" cx="45%" cy="30%" r="75%"><stop offset="0" stop-color="#F6D6F4"/><stop offset=".6" stop-color="#DDA9DD"/><stop offset="1" stop-color="#B987C2"/></radialGradient>
+<radialGradient id="esG" cx="38%" cy="32%" r="70%"><stop offset="0" stop-color="#FF8A8A"/><stop offset=".6" stop-color="#E4202F"/><stop offset="1" stop-color="#9E0E1C"/></radialGradient>
+<linearGradient id="shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>`;
 
 const POKE_BODY = {
   pikachu: `
-  <g class="ear ear-l"><path d="M34 40 C27 27 17 13 11 4 C24 7 39 19 46 32Z" fill="url(#pkY)" ${O}/><path d="M11 4 C14 9 17 13 20 17 C24 15 27 12 29 10 C23 7 16 5 11 4Z" fill="#2A1F2D"/></g>
-  <g class="ear ear-r"><path d="M66 40 C73 27 83 13 89 4 C76 7 61 19 54 32Z" fill="url(#pkY)" ${O}/><path d="M89 4 C86 9 83 13 80 17 C76 15 73 12 71 10 C77 7 84 5 89 4Z" fill="#2A1F2D"/></g>
-  <path d="M50 27 C71 27 86 40 87 58 C88 77 71 90 50 90 C29 90 12 77 13 58 C14 40 29 27 50 27Z" fill="url(#pkY)" ${O}/>
-  <path d="M82 66 C78 80 64 88 50 88 C40 88 31 85 25 80 C40 84 66 82 82 66Z" fill="#C98E0C" opacity=".35"/>
-  <path d="M30 36 C38 31 48 30 56 31 C46 33 38 37 32 42Z" fill="url(#shine)"/>
-  <g class="eye">${eye(35, 55, 6, 6.8)}${eye(65, 55, 6, 6.8)}</g>
-  <g class="cheek"><ellipse cx="22" cy="68" rx="8.5" ry="7.5" fill="url(#pkR)"/><ellipse cx="78" cy="68" rx="8.5" ry="7.5" fill="url(#pkR)"/><ellipse cx="20" cy="65.5" rx="2.6" ry="1.8" fill="#fff" opacity=".7"/><ellipse cx="76" cy="65.5" rx="2.6" ry="1.8" fill="#fff" opacity=".7"/></g>
-  <path d="M48.3 62 L51.7 62 L50 63.6Z" fill="#2A1F2D" stroke="#2A1F2D" stroke-width="1" stroke-linejoin="round"/>
-  <path d="M44 67 C45.5 70 48.5 70 50 66.8 C51.5 70 54.5 70 56 67" fill="none" stroke="#2A1F2D" stroke-width="1.8" stroke-linecap="round"/>
-  <path d="M46.5 69.5 C47.5 76 52.5 76 53.5 69.5 C52 70.8 48 70.8 46.5 69.5Z" fill="#9C2E3E" stroke="#2A1F2D" stroke-width="1.4" stroke-linejoin="round"/><path d="M48 73.5 C49 75 51 75 52 73.5 C51 72.8 49 72.8 48 73.5Z" fill="#FF8FA0"/>`,
+  <g class="ear ear-l"><path d="${PK_EAR}" fill="url(#pkY)"/><path d="${PK_TIP}" fill="#2A1F2D" clip-path="url(#pkEL)"/><path d="${PK_EAR}" fill="none" ${O}/></g>
+  <g class="ear ear-r"><path d="${mirror(PK_EAR)}" fill="url(#pkY)"/><path d="${mirror(PK_TIP)}" fill="#2A1F2D" clip-path="url(#pkER)"/><path d="${mirror(PK_EAR)}" fill="none" ${O}/></g>
+  <path d="M50 31 C68 31 82 43 84 59 C86 77 70 91 50 91 C30 91 14 77 16 59 C18 43 32 31 50 31Z" fill="url(#pkY)" ${O}/>
+  <path d="M82 70 C78 83 65 89.5 50 89.5 C40 89.5 32 87 26 82 C41 86 67 84 82 70Z" fill="#C98E0C" opacity=".3"/>
+  <path d="M29 41 C37 36 47 35 55 36 C45 38 37 42 31 47Z" fill="url(#shine)" opacity=".8"/>
+  <g class="eye">${eye(35, 58, 6.2, 6.6)}${eye(65, 58, 6.2, 6.6)}</g>
+  <g class="cheek"><circle cx="24.5" cy="72" r="7.6" fill="url(#pkR)"/><circle cx="75.5" cy="72" r="7.6" fill="url(#pkR)"/><ellipse cx="22.6" cy="69.6" rx="2.4" ry="1.6" fill="#fff" opacity=".55"/><ellipse cx="73.6" cy="69.6" rx="2.4" ry="1.6" fill="#fff" opacity=".55"/></g>
+  <path d="M48.6 66 L51.4 66 L50 67.5Z" fill="#2A1F2D" stroke="#2A1F2D" stroke-width="1" stroke-linejoin="round"/>
+  <path d="M44 70.5 C45.6 73.4 48.6 73.4 50 70.6 C51.4 73.4 54.4 73.4 56 70.5" fill="none" stroke="#2A1F2D" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M46.6 73 C47.6 79 52.4 79 53.4 73 C52 74.2 48 74.2 46.6 73Z" fill="#9C2E3E" stroke="#2A1F2D" stroke-width="1.3" stroke-linejoin="round"/><path d="M48 76.6 C49 78 51 78 52 76.6 C51 75.9 49 75.9 48 76.6Z" fill="#FF8FA0"/>`,
 
   eevee: `
-  <g class="ear ear-l"><path d="M37 41 C27 31 12 17 3 8 C20 7 37 16 47 30Z" fill="url(#evB)" ${O}/><path d="M34 35 C26 28 16 19 10 13 C22 13 34 20 41 28Z" fill="#5A3519"/></g>
-  <g class="ear ear-r"><path d="M63 41 C73 31 88 17 97 8 C80 7 63 16 53 30Z" fill="url(#evB)" ${O}/><path d="M66 35 C74 28 84 19 90 13 C78 13 66 20 59 28Z" fill="#5A3519"/></g>
-  <path d="M50 27 C68 27 80 39 80 55 C80 70 68 80 50 80 C32 80 20 70 20 55 C20 39 32 27 50 27Z" fill="url(#evB)" ${O}/>
-  <path d="M43 29 L47 36 L50 28 L53 36 L57 29 C54 27 46 27 43 29Z" fill="#B06E36" ${O} stroke-width="1.6"/>
-  <path d="M31 36 C37 31 45 29 52 30 C44 32 37 36 33 41Z" fill="url(#shine)"/>
-  <g class="eye">${eye(37, 54, 6.4, 8, true, '#7A4524')}${eye(63, 54, 6.4, 8, true, '#7A4524')}</g>
-  <ellipse cx="27" cy="64" rx="4.5" ry="2.6" fill="#E98A72" opacity=".55"/><ellipse cx="73" cy="64" rx="4.5" ry="2.6" fill="#E98A72" opacity=".55"/>
-  <path d="M48.4 62.5 L51.6 62.5 L50 64.2Z" fill="#2A1F2D" stroke="#2A1F2D" stroke-width="1" stroke-linejoin="round"/>
-  <path d="M45.5 66.5 C47.5 69 52.5 69 54.5 66.5" fill="none" stroke="#2A1F2D" stroke-width="1.8" stroke-linecap="round"/>
-  <g transform="translate(5 11) scale(.9)"><path d="M17 74 C21 67 27 70 29 75 C31 67 39 68 41 75 C43 67 51 67 53 75 C55 67 63 68 65 75 C67 69 75 67 83 74 C90 82 82 96 68 95 C60 99 40 99 32 95 C18 96 10 82 17 74Z" fill="url(#evC)" ${O}/>
-  <path d="M30 85 C38 90 62 90 70 85" fill="none" stroke="#D9BE8C" stroke-width="1.6" stroke-linecap="round"/></g>`,
+  <path d="M24 63 C16 63 10 69 11 75 L4 80 L12 84.5 L8 92.5 L18 91.5 L17 99.5 L27.5 94.5 L33 101 L40 95 L50 100.5 L60 95 L67 101 L72.5 94.5 L83 99.5 L82 91.5 L92 92.5 L88 84.5 L96 80 L89 75 C90 69 84 63 76 63Z" fill="url(#evC)" ${O}/>
+  <path d="M22 86 L27 82 M36 92 L39 86 M50 95 L50 88 M64 92 L61 86 M78 86 L73 82" stroke="#D2B47E" stroke-width="1.6" stroke-linecap="round"/>
+  <g class="ear ear-l"><path d="${EV_EAR}" fill="url(#evB)" ${O}/><path d="${EV_IN}" fill="#5E3A1C"/></g>
+  <g class="ear ear-r"><path d="${mirror(EV_EAR)}" fill="url(#evB)" ${O}/><path d="${mirror(EV_IN)}" fill="#5E3A1C"/></g>
+  <path d="M50 28 C67 28 79 40 79.5 54 C80 64 74 72 64 76.5 C58 79.2 54 80.5 50 80.5 C46 80.5 42 79.2 36 76.5 C26 72 20 64 20.5 54 C21 40 33 28 50 28Z" fill="url(#evB)" ${O}/>
+  <path d="M41.5 30.5 L45.5 38 L50 29 L54.5 38 L58.5 30.5 C55 28.4 45 28.4 41.5 30.5Z" fill="#A9682F" ${O} stroke-width="1.6"/>
+  <path d="M30 37 C36 32 44 30 51 31 C43 33 36 37 32 42Z" fill="url(#shine)" opacity=".75"/>
+  <g class="eye">${eye(37, 53, 6.6, 8.2, true, '#6B3A1C')}${eye(63, 53, 6.6, 8.2, true, '#6B3A1C')}</g>
+  <ellipse cx="27.5" cy="63.5" rx="4.4" ry="2.5" fill="#E98A72" opacity=".5"/><ellipse cx="72.5" cy="63.5" rx="4.4" ry="2.5" fill="#E98A72" opacity=".5"/>
+  <path d="M48.5 62.5 L51.5 62.5 L50 64.2Z" fill="#2A1F2D" stroke="#2A1F2D" stroke-width="1" stroke-linejoin="round"/>
+  <path d="M45.5 66.5 C47.5 69 52.5 69 54.5 66.5" fill="none" stroke="#2A1F2D" stroke-width="1.8" stroke-linecap="round"/>`,
+
+  espeon: `
+  <path d="M64 97 C82 96 92 84 90 66" fill="none" stroke="#2A1F2D" stroke-width="8" stroke-linecap="round"/><path d="M64 97 C82 96 92 84 90 66" fill="none" stroke="#DDA9DD" stroke-width="4.6" stroke-linecap="round"/>
+  <path d="M88.5 68 C87 61 84 56 79 52 C86 52.5 90 56 91 60 C92 55 95 51 99.5 49 C97 54 94.5 61 92 68Z" fill="url(#esB)" ${O} stroke-width="1.8"/>
+  <path d="M40 72 C39 82 37.5 92 36.5 101 L63.5 101 C62.5 92 61 82 60 72Z" fill="url(#esB)" ${O}/>
+  
+  <g class="ear ear-l"><path d="${ES_EAR}" fill="url(#esB)" ${O}/><path d="${ES_IN}" fill="#A86DB8"/><path d="M40 33 L34.5 27 L36.5 32 L30.5 28.5 L35 35Z" fill="#F7E6F7"/></g>
+  <g class="ear ear-r"><path d="${mirror(ES_EAR)}" fill="url(#esB)" ${O}/><path d="${mirror(ES_IN)}" fill="#A86DB8"/><path d="${mirror('M40 33 L34.5 27 L36.5 32 L30.5 28.5 L35 35Z')}" fill="#F7E6F7"/></g>
+  <path d="M25.5 61 C20.5 65 16.5 69.5 13 74 C19 72 24 68.5 27.5 65.5Z M74.5 61 C79.5 65 83.5 69.5 87 74 C81 72 76 68.5 72.5 65.5Z" fill="url(#esB)" ${O} stroke-width="1.7"/>
+  <path d="M50 30 C65 30 76 40 77 52 C78 62 72 70 62 74 C57 76 53 77 50 77 C47 77 43 76 38 74 C28 70 22 62 23 52 C24 40 35 30 50 30Z" fill="url(#esB)" ${O}/>
+  <path d="M31 38 C37 33 44 31 51 32 C43 34 37 38 33 43Z" fill="url(#shine)" opacity=".8"/>
+  <circle cx="50" cy="39.5" r="4" fill="url(#esG)" stroke="#2A1F2D" stroke-width="1.5"/><ellipse cx="48.6" cy="38.2" rx="1.3" ry="1" fill="#fff" opacity=".9"/>
+  <g class="eye">${eye(38, 54, 6.2, 7.6, true, '#9B3FA8')}${eye(62, 54, 6.2, 7.6, true, '#9B3FA8')}</g>
+  <ellipse cx="29" cy="63" rx="4" ry="2.3" fill="#F08AB4" opacity=".45"/><ellipse cx="71" cy="63" rx="4" ry="2.3" fill="#F08AB4" opacity=".45"/>
+  <path d="M48.6 62.8 L51.4 62.8 L50 64.3Z" fill="#2A1F2D" stroke="#2A1F2D" stroke-width="1" stroke-linejoin="round"/>
+  <path d="M46 67 C48 69.2 52 69.2 54 67" fill="none" stroke="#2A1F2D" stroke-width="1.7" stroke-linecap="round"/>`,
 
   snorlax: `
-  <path d="M22 34 L26 18 L37 28Z M78 34 L74 18 L63 28Z" fill="url(#snB)" ${O}/><path d="M25 29 L27 22 L32 27Z M75 29 L73 22 L68 27Z" fill="#163A4E"/>
-  <path d="M50 22 C74 22 90 38 90 60 C90 80 72 93 50 93 C28 93 10 80 10 60 C10 38 26 22 50 22Z" fill="url(#snB)" ${O}/>
-  <path d="M50 39 C55 33 63 32 70 36 C81 42 85 56 81 69 C77 82 65 89 50 89 C35 89 23 82 19 69 C15 56 19 42 30 36 C37 32 45 33 50 39Z" fill="url(#snC)" ${O} stroke-width="1.8"/>
-  <path d="M28 30 C36 25 46 24 54 25 C44 27 36 31 30 36Z" fill="url(#shine)" opacity=".6"/>
-  <g class="eye"><path d="M30 57 C34 59.5 39 59.5 43 57" fill="none" stroke="#2A1F2D" stroke-width="2.6" stroke-linecap="round"/><path d="M57 57 C61 59.5 66 59.5 70 57" fill="none" stroke="#2A1F2D" stroke-width="2.6" stroke-linecap="round"/></g>
-  <ellipse cx="27" cy="66" rx="5" ry="3" fill="#F2A08C" opacity=".5"/><ellipse cx="73" cy="66" rx="5" ry="3" fill="#F2A08C" opacity=".5"/>
-  <path d="M32 69 C40 81 60 81 68 69 C60 74 40 74 32 69Z" fill="#7A2E3A" ${O} stroke-width="1.8"/>
-  <path d="M38 72.5 L40.5 66.5 L43 73.2Z M57 73.2 L59.5 66.5 L62 72.5Z" fill="#fff" stroke="#2A1F2D" stroke-width="1.3" stroke-linejoin="round"/>
-  <g class="zz" fill="#2F6E8F" font-family="system-ui,sans-serif" font-weight="800"><text x="80" y="20" font-size="11">z</text><text x="88" y="10" font-size="8">z</text></g>`,
+  <path d="M21 35 L25 18 L37 28Z" fill="url(#snB)" ${O}/><path d="M24.5 30 L26.5 22 L32 27Z" fill="#163A4E"/>
+  <path d="M79 35 L75 18 L63 28Z" fill="url(#snB)" ${O}/><path d="M75.5 30 L73.5 22 L68 27Z" fill="#163A4E"/>
+  <path d="M50 22 C74 22 91 38 91 60 C91 80 72 94 50 94 C28 94 9 80 9 60 C9 38 26 22 50 22Z" fill="url(#snB)" ${O}/>
+  <path d="M50 40 C55 34 63 33 70 37 C81 43 86 56 82 69 C78 83 66 90 50 90 C34 90 22 83 18 69 C14 56 19 43 30 37 C37 33 45 34 50 40Z" fill="url(#snC)" ${O} stroke-width="1.8"/>
+  <path d="M28 30 C36 25 46 24 54 25 C44 27 36 31 30 36Z" fill="url(#shine)" opacity=".55"/>
+  <g class="eye"><path d="M29.5 57 C33.5 59.5 38.5 59.5 42.5 57" fill="none" stroke="#2A1F2D" stroke-width="2.6" stroke-linecap="round"/><path d="M57.5 57 C61.5 59.5 66.5 59.5 70.5 57" fill="none" stroke="#2A1F2D" stroke-width="2.6" stroke-linecap="round"/></g>
+  <ellipse cx="26.5" cy="66" rx="5" ry="3" fill="#F2A08C" opacity=".45"/><ellipse cx="73.5" cy="66" rx="5" ry="3" fill="#F2A08C" opacity=".45"/>
+  <path d="M30 69 C39 82 61 82 70 69 C61 74.5 39 74.5 30 69Z" fill="#7A2E3A" ${O} stroke-width="1.8"/>
+  <path d="M36.5 73 L39.5 66.2 L42.5 73.9Z M57.5 73.9 L60.5 66.2 L63.5 73Z" fill="#fff" stroke="#2A1F2D" stroke-width="1.3" stroke-linejoin="round"/>
+  <g class="zz" fill="#2F6E87" font-family="system-ui,sans-serif" font-weight="800"><text x="80" y="20" font-size="11">z</text><text x="88" y="10" font-size="8">z</text></g>`,
 
   gengar: `
-  <g class="body"><path d="M18 70 C12 62 11 52 14 45 L4 37 L19 36 C22 29 26 25 30 22 L27 8 L39 17 C43 15.5 47 15 50 15 L55 3 L61 16 C65 17 69 19 72 22 L80 11 L80 26 C84 30 86 36 87 42 L97 38 L89 51 C90 59 89 66 85 72 C79 85 66 93 50 93 C34 93 23 84 18 70Z" fill="url(#geB)" ${O}/>
+  <g class="body"><path d="M18 70 C12 62 11 52 14 45 L4 37 L19 36 C22 29 26 25 30 22 L25 6 L39 17 C43 15.5 47 15 50 15 L55 4 L60 16 C64 17 68 19 71 21 L75 6 L80 26 C84 30 86 36 87 42 L97 38 L89 51 C90 59 89 66 85 72 C79 85 66 93 50 93 C34 93 23 84 18 70Z" fill="url(#geB)" ${O}/>
   <path d="M84 70 C78 84 66 91 50 91 C38 91 29 86 23 79 C40 86 70 84 84 70Z" fill="#2E1E52" opacity=".35"/>
-  <path d="M30 30 C37 25 45 23 52 23 C44 26 37 30 32 35Z" fill="url(#shine)" opacity=".5"/>
-  <g class="eye"><path d="M26 44 L46 51 L42 59 C33 61 26 55 26 44Z" fill="url(#geE)" ${O} stroke-width="1.8"/><path d="M74 44 L54 51 L58 59 C67 61 74 55 74 44Z" fill="url(#geE)" ${O} stroke-width="1.8"/><ellipse cx="38" cy="54" rx="2.6" ry="2.2" fill="#2A0C10"/><ellipse cx="62" cy="54" rx="2.6" ry="2.2" fill="#2A0C10"/><circle cx="37" cy="53" r=".9" fill="#fff"/><circle cx="61" cy="53" r=".9" fill="#fff"/></g>
-  <path d="M22 63 C32 82 68 82 78 63 C66 71 34 71 22 63Z" fill="#fff" ${O} stroke-width="2"/>
-  <path d="M30 68.5 L31 73 M37 70.5 L37.6 76.5 M44 71.5 L44.3 78 M50 71.8 L50 78.5 M56 71.5 L55.7 78 M63 70.5 L62.4 76.5 M70 68.5 L69 73" stroke="#9A93A8" stroke-width="1.2" stroke-linecap="round"/>
-  <path d="M26 66 C38 73 62 73 74 66" fill="none" stroke="#C9C3D6" stroke-width="1.2"/></g>`,
+  <path d="M30 30 C37 25 45 23 52 23 C44 26 37 30 32 35Z" fill="url(#shine)" opacity=".45"/>
+  <g class="eye"><path d="M25 43 L46 51 L42.5 59.5 C32.5 61.5 25 55 25 43Z" fill="url(#geE)" ${O} stroke-width="1.8"/><path d="M75 43 L54 51 L57.5 59.5 C67.5 61.5 75 55 75 43Z" fill="url(#geE)" ${O} stroke-width="1.8"/><ellipse cx="38" cy="54" rx="2.6" ry="2.3" fill="#2A0C10"/><ellipse cx="62" cy="54" rx="2.6" ry="2.3" fill="#2A0C10"/><circle cx="37" cy="53" r=".9" fill="#fff"/><circle cx="61" cy="53" r=".9" fill="#fff"/></g>
+  <path d="M20 62 C31 83 69 83 80 62 C67 71 33 71 20 62Z" fill="#fff" ${O} stroke-width="2"/>
+  <path d="M28.5 67.5 L29.6 72.5 M35.5 70 L36.2 76.5 M42.5 71.3 L42.9 78.3 M50 71.8 L50 79 M57.5 71.3 L57.1 78.3 M64.5 70 L63.8 76.5 M71.5 67.5 L70.4 72.5" stroke="#9A93A8" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M24 65.5 C37 73 63 73 76 65.5" fill="none" stroke="#C9C3D6" stroke-width="1.2"/></g>`,
 
   jigglypuff: `
-  <g class="ear ear-l"><path d="M22 41 L15 15 L39 28Z" fill="url(#jiB)" ${O}/><path d="M22 34 L18.5 20 L31 27Z" fill="#2A1F2D"/></g>
-  <g class="ear ear-r"><path d="M78 41 L85 15 L61 28Z" fill="url(#jiB)" ${O}/><path d="M78 34 L81.5 20 L69 27Z" fill="#2A1F2D"/></g>
+  <g class="ear ear-l"><path d="M22 41 L15 15 L39 28Z" fill="url(#jiB)" ${O}/><path d="M22.5 34 L18.5 20 L31 27Z" fill="#2A1F2D"/></g>
+  <g class="ear ear-r"><path d="M78 41 L85 15 L61 28Z" fill="url(#jiB)" ${O}/><path d="M77.5 34 L81.5 20 L69 27Z" fill="#2A1F2D"/></g>
   <circle cx="50" cy="57" r="35" fill="url(#jiB)" ${O}/>
-  <path d="M50 22 C58 20 64 25 62 31 C60 37 50 37 47 33 C44 29 49 25 53 28" fill="url(#jiB)" ${O} stroke-width="2"/>
+  <path d="M51 22 C59 20 65 25 63 31.5 C61 37.5 50.5 37.5 47.5 33 C44.5 28.5 49 24.5 53.5 27.5" fill="url(#jiB)" ${O} stroke-width="2"/>
   <path d="M28 36 C34 30 42 27 48 27 C40 31 34 35 30 41Z" fill="url(#shine)"/>
-  <g class="eye"><circle cx="36" cy="56" r="10.5" fill="#fff" ${O} stroke-width="1.8"/><circle cx="64" cy="56" r="10.5" fill="#fff" ${O} stroke-width="1.8"/>
-    <circle cx="37" cy="57.5" r="7.6" fill="url(#jiE)"/><circle cx="63" cy="57.5" r="7.6" fill="url(#jiE)"/><circle cx="37" cy="58" r="3.6" fill="#0E2A47"/><circle cx="63" cy="58" r="3.6" fill="#0E2A47"/>
-    <ellipse cx="34" cy="53.5" rx="3" ry="2.6" fill="#fff"/><ellipse cx="60" cy="53.5" rx="3" ry="2.6" fill="#fff"/><circle cx="40" cy="61" r="1.3" fill="#fff"/><circle cx="66" cy="61" r="1.3" fill="#fff"/></g>
-  <ellipse cx="24" cy="70" rx="5" ry="3" fill="#FF7FA6" opacity=".55"/><ellipse cx="76" cy="70" rx="5" ry="3" fill="#FF7FA6" opacity=".55"/>
+  <g class="eye"><circle cx="36" cy="56" r="10.8" fill="#fff" ${O} stroke-width="1.8"/><circle cx="64" cy="56" r="10.8" fill="#fff" ${O} stroke-width="1.8"/>
+    <circle cx="37" cy="57.5" r="7.8" fill="url(#jiE)"/><circle cx="63" cy="57.5" r="7.8" fill="url(#jiE)"/><circle cx="37" cy="58" r="3.6" fill="#0E2A47"/><circle cx="63" cy="58" r="3.6" fill="#0E2A47"/>
+    <ellipse cx="33.8" cy="53.4" rx="3.2" ry="2.8" fill="#fff"/><ellipse cx="59.8" cy="53.4" rx="3.2" ry="2.8" fill="#fff"/><circle cx="40" cy="61" r="1.3" fill="#fff"/><circle cx="66" cy="61" r="1.3" fill="#fff"/></g>
+  <ellipse cx="24" cy="70" rx="5" ry="3" fill="#FF7FA6" opacity=".5"/><ellipse cx="76" cy="70" rx="5" ry="3" fill="#FF7FA6" opacity=".5"/>
   <path d="M45 74 C47 77.5 53 77.5 55 74" fill="none" stroke="#2A1F2D" stroke-width="1.9" stroke-linecap="round"/>`,
 
   charmander: `
-  <g class="flame"><path d="M86 34 C76 30 76 18 82 10 C83 16 87 17 88 13 C94 19 95 30 86 34Z" fill="url(#chF)" ${O} stroke-width="1.6"/><path d="M86 30 C82 28 82 22 85 18 C86 21 88 22 89 20 C91 24 90 29 86 30Z" fill="#FFF3A0"/></g>
-  <path d="M51 20 C72 20 86 35 86 53 C86 71 73 84 53 84 C33 84 15 73 15 54 C15 35 30 20 51 20Z" fill="url(#chB)" ${O}/>
-  <path d="M82 62 C78 76 66 83 53 83 C43 83 34 80 27 75 C42 80 70 78 82 62Z" fill="#B5470F" opacity=".3"/>
-  <path d="M30 30 C37 25 45 23 53 23 C44 26 37 30 32 35Z" fill="url(#shine)"/>
-  <path d="M28 70 C40 81 66 81 78 67 C73 79 63 85 53 85 C41 85 33 80 28 70Z" fill="#FFD79A" ${O} stroke-width="1.6"/>
-  <g class="eye">${eye(35, 50, 6.4, 8.2, true, '#2F5FA0')}${eye(65, 50, 6.4, 8.2, true, '#2F5FA0')}</g>
-  <circle cx="46.5" cy="61" r="1.1" fill="#2A1F2D"/><circle cx="53.5" cy="61" r="1.1" fill="#2A1F2D"/>
-  <path d="M39 65 C44 75 58 75 63 64 C56 68 46 68 39 65Z" fill="#9C2E3E" ${O} stroke-width="1.6"/><path d="M45 69.5 C48 72.5 54 72.5 57 69" fill="#FF8FA0"/>
-  <path d="M41 66 L43 69 L44.5 66.6Z" fill="#fff"/>`
+  <path d="M68 92 C82 92 90 82 89 66" fill="none" stroke="#2A1F2D" stroke-width="9.5" stroke-linecap="round"/><path d="M68 92 C82 92 90 82 89 66" fill="none" stroke="#F58A3C" stroke-width="6" stroke-linecap="round"/>
+  <g class="flame"><path d="M89 67 C79 63 79 51 85 43 C86 49 90 50 91 46 C97 52 98 63 89 67Z" fill="url(#chF)" ${O} stroke-width="1.6"/><path d="M89 63 C85 61 85 55 88 51 C89 54 91 55 92 53 C94 57 93 62 89 63Z" fill="#FFF3A0"/></g>
+  <path d="M31 72 C27 82 27 93 29 101 L71 101 C73 93 73 82 69 72Z" fill="url(#chB)" ${O}/>
+  <path d="M38 80 C37 88 38 95 40 101 L60 101 C62 95 63 88 62 80 C56 77.5 44 77.5 38 80Z" fill="#FBD98F" ${O} stroke-width="1.6"/>
+  <path d="M31.5 78 C27 80 25.5 84 26 88.5 L28 87 L29 89.5 L31.5 86.5Z M68.5 78 C73 80 74.5 84 74 88.5 L72 87 L71 89.5 L68.5 86.5Z" fill="url(#chB)" ${O} stroke-width="1.7"/>
+  <path d="M50 14 C70 14 84 28 84 46 C84 63 71 75 50 75 C29 75 16 63 16 46 C16 28 30 14 50 14Z" fill="url(#chB)" ${O}/>
+  <path d="M81 55 C77 68 65 74 50 74 C40 74 32 71 26 66 C42 71 68 68 81 55Z" fill="#B5470F" opacity=".28"/>
+  <path d="M28 25 C35 19 44 17 52 17 C43 20 36 24 31 30Z" fill="url(#shine)"/>
+  <g class="eye">${eye(34.5, 42, 6.6, 8.6, true, '#1F6E8C')}${eye(65.5, 42, 6.6, 8.6, true, '#1F6E8C')}</g>
+  <circle cx="46.5" cy="54" r="1.1" fill="#2A1F2D"/><circle cx="53.5" cy="54" r="1.1" fill="#2A1F2D"/>
+  <path d="M35 58 C41 70 59 70 65 58 C57 62.5 43 62.5 35 58Z" fill="#9C2E3E" ${O} stroke-width="1.6"/><path d="M42 63.5 C46 67 54 67 58 63.5 C54 62.6 46 62.6 42 63.5Z" fill="#FF8FA0"/>
+  <path d="M38 59.6 L40 63 L41.8 60.6Z" fill="#fff"/>`
 };
 
 const PETS = {
@@ -2019,6 +2049,8 @@ const PETS = {
     svg: POKE_BODY.pikachu },
   eevee: { g: 'poke', n: 'Eevee', what: 'Pokémon evolución', c: '#B9783F', voice: 'Eres Eevee: curiosa y adaptable; te gusta dar dos o tres opciones distintas para que elijan, como tus evoluciones.', hi: '¡Vui! Soy Eevee. Me adapto a todo: dime qué tienes ganas de hacer y te doy opciones.',
     svg: POKE_BODY.eevee },
+  espeon: { g: 'poke', n: 'Espeon', what: 'Pokémon psíquico', c: '#B07CC6', voice: 'Eres Espeon: elegante, tranquila e intuitiva; parece que adivinas lo que la familia necesita antes de que lo pida, y das consejos con calma y un toque de misterio.', hi: '¡Espi! Soy Espeon. Presiento que hoy será un gran día. ¿En qué te ayudo?',
+    svg: POKE_BODY.espeon },
   snorlax: { g: 'poke', n: 'Snorlax', what: 'Pokémon dormilón', c: '#3E7A9E', voice: 'Eres Snorlax: tranquilo, glotón y dormilón; recomiendas comida rica, descansos y planes sin prisa, con humor.', hi: '*bostezo*… Hola, soy Snorlax. ¿Ya comieron? Primero la comida, luego la aventura.',
     svg: POKE_BODY.snorlax },
   gengar: { g: 'poke', n: 'Gengar', what: 'Pokémon fantasma', c: '#6B4C9A', voice: 'Eres Gengar: travieso y bromista, te encanta la noche, las leyendas japonesas de fantasmas (sin dar miedo de verdad) y los lugares con luces de neón.', hi: 'Je je je… Soy Gengar. Conozco los secretos de Tokio de noche. ¿Qué travesura planeamos?',
