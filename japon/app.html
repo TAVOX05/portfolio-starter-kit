@@ -1345,15 +1345,20 @@ function place(key) {
 const gmSearch = key => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(place(key).q);
 const gmRoute = (o, d, mode = 'transit') => 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(place(o).q) + '&destination=' + encodeURIComponent(place(d).q) + '&travelmode=' + mode;
 const gmDay = keys => 'https://www.google.com/maps/dir/' + keys.slice(0, 10).map(k => encodeURIComponent(place(k).q)).join('/') + '/';
-// todas las paradas del día en el orden del plan: sale de donde arranca el primer traslado,
-// sigue las actividades por hora y, si el día termina en el alojamiento, regresa ahí
+// todas las paradas del día en el orden del plan, siempre de hotel a hotel: sale del alojamiento
+// donde durmieron (el Día 1 del aeropuerto), sigue las actividades por hora y termina en el
+// alojamiento de esa noche (el último día, en el aeropuerto). Google Maps acepta hasta 10 puntos.
 function dayRoute(day) {
-  const r = [], push = k => { if (k && r[r.length - 1] !== k && (k.startsWith('b:') || !r.includes(k))) r.push(k); };
-  push(day.legs[0] && day.legs[0].o);
-  day.items.forEach(it => (it.p || []).forEach(push));
-  const end = day.legs.length && day.legs[day.legs.length - 1].d;
-  if (end && end.startsWith('b:')) push(end);
-  return r.slice(0, 10);
+  const last = day.n === DAYS.length;
+  const start = day.n > 1 ? 'b:' + DAYS[day.n - 2].base : day.legs[0] && day.legs[0].o;
+  const end = last ? day.legs[day.legs.length - 1].d : 'b:' + day.base;
+  const mid = [];
+  day.items.forEach(it => (it.p || []).forEach(k => { if (k !== start && k !== end && !mid.includes(k)) mid.push(k); }));
+  // si a media jornada pasan por el alojamiento (dejar maletas, check-in), esa parada se conserva
+  const r = [start];
+  day.items.forEach(it => (it.p || []).forEach(k => { if (k && k !== r[r.length - 1] && (mid.includes(k) ? !r.includes(k) : k === end && it !== day.items[day.items.length - 1])) r.push(k); }));
+  if (r[r.length - 1] !== end) r.push(end);
+  return r.length > 10 ? [...r.slice(0, 9), end] : r;
 }
 const dayRouteRow = day => { const r = dayRoute(day); return r.length > 1 ? row({ href: gmDay(r), ext: 1, cls: 'ld', lead: ico(I.route, 'var(--tint)'), t: 'Ruta de todo el día', s: `${r.length} paradas en orden, en Google Maps` }) : ''; };
 const cityVar = c => 'var(--c-' + c + ')';
