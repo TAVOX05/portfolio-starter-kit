@@ -670,6 +670,32 @@ body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 3
 .badge { color: var(--bt, var(--on)); } .badge svg { stroke: var(--bt, #fff); }
 .seg { background: color-mix(in srgb, var(--label) 7%, var(--chip)); }
 .stp button { background: color-mix(in srgb, var(--label) 6%, var(--chip)); }
+/* sección de sellos por día y el gran sello */
+.gh.sub { margin-top: 14px; }
+.stamps.got .stamp { padding-block: 8px 8px; }
+.stamps.got .stamp small { display: none; }
+.stamp .kd { font-style: normal; font-size: 11px; font-weight: 600; color: var(--tint); line-height: 1.2; }
+.stampfx { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; align-content: center; gap: 22px; padding: 24px; background: color-mix(in srgb, var(--bg) 62%, transparent); -webkit-backdrop-filter: blur(8px) saturate(120%); backdrop-filter: blur(8px) saturate(120%); animation: sfxIn .25s ease-out both; cursor: pointer; }
+.stampfx.out { animation: sfxOut .45s ease-in .12s both; }
+@keyframes sfxIn { from { background-color: transparent; -webkit-backdrop-filter: blur(0); backdrop-filter: blur(0); } }
+@keyframes sfxOut { to { background-color: transparent; -webkit-backdrop-filter: blur(0); backdrop-filter: blur(0); } }
+.sfx-stage { position: relative; width: min(74vw, 340px); aspect-ratio: 1; display: grid; place-items: center; }
+.sfx-big { position: absolute; inset: 0; transform: scale(3.4) rotate(-26deg); opacity: 0; will-change: transform, opacity; }
+.sfx-ink { position: absolute; inset: 0; border-radius: 50%; display: grid; place-items: center; color: var(--c); border: 11px double var(--c); box-shadow: inset 0 0 0 9px transparent, inset 0 0 0 11px var(--c); background: radial-gradient(circle, color-mix(in srgb, var(--c) 14%, transparent), transparent 72%); filter: url(#inkf); }
+.sfx-ink span { font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif; font-weight: 800; line-height: 1; font-size: calc(min(74vw, 340px) * (0.62 - var(--n) * .1)); letter-spacing: -.04em; }
+.sfx-burst { position: absolute; inset: 0; border-radius: 50%; border: 3px solid var(--c); opacity: 0; }
+.sfx-dot { position: absolute; left: calc(50% + var(--x)); top: calc(50% + var(--y)); width: var(--z); height: var(--z); margin: calc(var(--z) / -2); border-radius: 50%; background: var(--c); opacity: 0; transform: scale(0); }
+.stampfx.hit .sfx-burst { animation: sfxBurst .6s ease-out both; }
+.stampfx.hit .sfx-dot { animation: sfxDot .5s cubic-bezier(.2,1.6,.4,1) both; }
+@keyframes sfxBurst { from { transform: scale(.85); opacity: .7; } to { transform: scale(1.7); opacity: 0; } }
+@keyframes sfxDot { 0% { transform: scale(0); opacity: 0; } 60% { opacity: .85; } 100% { transform: scale(1); opacity: .75; } }
+.sfx-cap { display: grid; gap: 2px; justify-items: center; text-align: center; opacity: 0; transform: translateY(12px); }
+.stampfx.hit .sfx-cap { animation: sfxCap .4s cubic-bezier(.2,1.4,.4,1) .08s both; }
+@keyframes sfxCap { to { opacity: 1; transform: none; } }
+.sfx-cap small { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--label2); }
+.sfx-cap b { font-size: 24px; line-height: 30px; font-weight: 700; color: var(--label); }
+.sfx-cap span { font-size: 17px; color: var(--label2); }
+@media (prefers-reduced-motion: reduce) { .sfx-big { transform: rotate(-8deg); opacity: 1; } .sfx-cap { opacity: 1; transform: none; } }
 .st:not(.lg) { border-width: 3px; } .st:not(.lg) i { font-size: 10px; line-height: 10px; letter-spacing: 0; } .st:not(.lg) b { line-height: 14px; } .cal i { font-size: 10px; padding: 2px 0 1px; }
 /* móvil: zonas de toque de 44 px sin mover el diseño */
 .chk, .spk, .themeb, .stp button, .tbtn, .lnk, .chips a, .cchips button, .wxb button { position: relative; }
@@ -1491,7 +1517,7 @@ function viewToday(n, hm, preview) {
     return row({ cls: 'li' + (on ? ' done' : ''), lead: checkBtn(xid, x.h), t: `<span class="tm">${x.t}</span> ${esc(x.h)}`, tr: tag || `<button class="tbtn" type="button" data-focus="${i}">Ver</button>` });
   }).join(''), null, `${dayProgress(day)[0]} de ${items.length}`)}
   ${advice}
-  ${(() => { const st = STAMPS.filter(x => x.city === day.city); return st.length ? `<section class="grp"><h2 class="gh"><span>Retos de hoy en familia</span><span>${st.filter(x => stampMarks(x.id).length).length}/${st.length}</span></h2><div class="stamps">${st.slice(0, 6).map(stampHtml).join('')}</div><a class="gf" href="#guia-sellos">Ver el pasaporte completo ›</a></section>` : ''; })()}
+  ${daySetHtml(day, 'Sellos e imanes de hoy')}
   ${food}
   ${grp('Accesos rápidos', row({ href: gmDirFromHere('b:' + day.base), ext: 1, cls: 'ld', lead: ico(I.bed, cityVar(day.city)), t: 'Volver al alojamiento', s: esc(base.n) }) +
     row({ tag: 'button', cls: 'ld', lead: ico(I.car, 'var(--orange)'), t: 'Dirección para el taxista', attrs: `data-taxi="${day.base}"`, chev: 1 }) +
@@ -1537,6 +1563,7 @@ function viewDay(n, opts = {}) {
         ${it.d ? `<div class="d">${esc(it.d)}</div>` : ''}${it.f ? `<div class="food"><b>Comer:</b> ${esc(it.f)}</div>` : ''}${it.r ? `<div class="rec">${esc(it.r)}</div>` : ''}
         ${(it.p || []).length ? `<div class="chips">${it.p.map(k => `<a href="${gmSearch(k)}" target="_blank" rel="noopener">${esc(place(k).n)}</a>`).join('')}</div>` : ''}</div></div>`;
     }).join(''), null, `${done} de ${tot}`) +
+    daySetHtml(day, 'Sellos e imanes del día') +
     grp('Alojamiento', row({ tag: 'button', cls: 'ld', lead: ico(I.bed, cityVar(day.city)), t: esc(base.n), s: esc(base.in + ' → ' + base.out), attrs: `data-base="${day.base}"`, chev: 1 }) +
       row({ tag: 'button', cls: 'ld', lead: ico(I.car, 'var(--orange)'), t: 'Mostrar dirección al taxista', attrs: `data-taxi="${day.base}"`, chev: 1 }));
   } else if (seg === 'rutas') {
@@ -1629,6 +1656,9 @@ function viewPend() {
 
 
 /* ---------- Pasaporte de sellos de Sam ---------- */
+// días en que toca cada reto (los de «En todo Japón» no tienen día fijo)
+const RETO_DAYS = { 's-kaminari': [1], 's-shibuya': [2], 's-gacha': [3, 19], 's-pika': [4], 's-pcafe': [4], 's-teamlab': [5], 's-fuji': [6, 7, 8], 's-pagoda': [7], 's-onsen': [6], 's-torii': [11], 's-bamboo': [10], 's-nintendo': [11], 's-matcha': [8, 9, 10, 11], 's-tako': [12], 's-mario': [13], 's-glico': [12], 's-orca': [14], 's-kobe': [14], 's-gold': [15, 16], 's-garden': [16], 's-snow': [17], 's-gassho': [17] };
+const KIND = { iman: 'Imán', eki: 'Sello de estación', goshuin: 'Goshuin' };
 const STAMPS = [
   ['TK', 's-kaminari', '雷門', 'Kaminarimon', 'Foto bajo la gran linterna roja de Sensō-ji'],
   ['TK', 's-shibuya', '渋谷', 'Cruce de Shibuya', 'Cruzar el cruce más famoso del mundo'],
@@ -1658,8 +1688,38 @@ const STAMPS = [
   ['JP', 's-konbini', 'コンビニ', 'Konbini', 'Elegir su snack favorito de konbini'],
   ['JP', 's-konbiniday', '三食', 'Día konbini', 'Desayuno, comida y cena de un día, todo de konbini'],
   ['JP', 's-wagyu', '和牛', 'Tabehōdai de wagyū', 'Comer en un buffet libre de wagyū: yakiniku o shabu-shabu'],
-  ['JP', 's-stampbook', '帳', 'Libreta de sellos', 'Comprar una libreta de sellos y poner el primer sello']
-].map(([city, id, k, t, r]) => ({ city, id, k, t, r }));
+  ['JP', 's-stampbook', '帳', 'Libreta de sellos', 'Comprar una libreta de sellos y poner el primer sello'],
+  // imanes: uno por ciudad, aparece todos los días que están ahí hasta que lo compren
+  ['TK', 'm-tokyo', '東京', 'Imán de Tokio', 'Un imán para el refri', 'iman', [1, 2, 3, 4, 5, 19]],
+  ['FJ', 'm-fuji', '富士', 'Imán del Fuji', 'Un imán para el refri', 'iman', [6, 7]],
+  ['KY', 'm-kyoto', '京都', 'Imán de Kioto', 'Un imán para el refri', 'iman', [8, 9, 10, 11]],
+  ['OS', 'm-osaka', '大阪', 'Imán de Osaka', 'Un imán para el refri', 'iman', [12, 13]],
+  ['KB', 'm-kobe', '神戸', 'Imán de Kobe', 'Un imán para el refri', 'iman', [14]],
+  ['KZ', 'm-kanazawa', '金沢', 'Imán de Kanazawa', 'Un imán para el refri', 'iman', [15, 16]],
+  ['HD', 'm-hida', '飛騨', 'Imán de Hida', 'Un imán para el refri', 'iman', [17, 18]],
+  // sellos de verdad para la libreta: de estación (eki stamp, gratis) y goshuin de templos
+  ['TK', 'e-ueno', '上野', 'Estación Ueno', 'JR Ueno, junto a los torniquetes', 'eki', [1]],
+  ['TK', 'g-sensoji', '浅草寺', 'Sensō-ji', 'En la oficina de goshuin del templo', 'goshuin', [1]],
+  ['TK', 'g-meiji', '明治', 'Meiji Jingū', 'En la oficina del santuario', 'goshuin', [2]],
+  ['TK', 'e-harajuku', '原宿', 'Estación Harajuku', 'JR Harajuku, junto a los torniquetes', 'eki', [2]],
+  ['TK', 'e-akiba', '秋葉原', 'Estación Akihabara', 'JR Akihabara, junto a los torniquetes', 'eki', [3, 19]],
+  ['TK', 'e-ikebukuro', '池袋', 'Estación Ikebukuro', 'JR Ikebukuro, junto a los torniquetes', 'eki', [4]],
+  ['FJ', 'e-kawaguchiko', '河口湖', 'Estación Kawaguchiko', 'En la estación de Fujikyū', 'eki', [6, 7, 8]],
+  ['FJ', 'g-sengen', '浅間', 'Arakurayama Sengen', 'Santuario al pie de la pagoda Chūreitō', 'goshuin', [7]],
+  ['KY', 'e-kyoto', '京都駅', 'Estación Kioto', 'JR Kioto, en la zona de torniquetes', 'eki', [8]],
+  ['KY', 'g-yasaka', '八坂', 'Santuario Yasaka', 'En la oficina del santuario', 'goshuin', [8]],
+  ['KY', 'g-kiyomizu', '清水寺', 'Kiyomizu-dera', 'En la oficina de goshuin del templo', 'goshuin', [9]],
+  ['KY', 'g-tenryuji', '天龍寺', 'Tenryū-ji', 'En la entrada del templo', 'goshuin', [10]],
+  ['KY', 'e-saga', '嵯峨', 'Estación Saga-Arashiyama', 'JR Saga-Arashiyama', 'eki', [10]],
+  ['KY', 'g-inari', '稲荷', 'Fushimi Inari', 'En la oficina del santuario principal', 'goshuin', [11]],
+  ['KY', 'g-byodoin', '平等院', 'Byōdō-in', 'En la oficina del templo', 'goshuin', [11]],
+  ['OS', 'g-hozenji', '法善寺', 'Hōzen-ji', 'Templo escondido junto a Dōtonbori', 'goshuin', [12]],
+  ['KZ', 'e-kanazawa', '金沢駅', 'Estación Kanazawa', 'JR Kanazawa, en la zona de torniquetes', 'eki', [15, 17]],
+  ['KZ', 'g-oyama', '尾山', 'Oyama-jinja', 'Santuario de la puerta de vitrales', 'goshuin', [15, 16]],
+  ['HD', 'e-takayama', '高山', 'Estación Takayama', 'JR Takayama, junto a los torniquetes', 'eki', [17, 18]],
+  ['TK', 'e-nagoya', '名古屋', 'Estación Nagoya', 'Al cambiar de tren rumbo a Tokio', 'eki', [18]],
+  ['TK', 'e-tokyo', '東京駅', 'Estación Tokio', 'JR Tokio, en la zona de torniquetes', 'eki', [18]]
+].map(([city, id, k, t, r, kind = 'reto', days]) => ({ city, id, k, t, r, kind, days: days || RETO_DAYS[id] || [] }));
 // Sellos familiares compartidos: base de datos "stamps", un documento por sello
 // con la fecha en que cada quien lo marcó ({octavio, selene, sam}). En tiempo real.
 const FAMILY = [['octavio', 'Octavio', '#2F80ED'], ['selene', 'Selene', '#E8457C'], ['sam', 'Sam', '#F59E0B']];
@@ -1678,7 +1738,7 @@ function startStamps(db) {
     if (mem.stampsDb) STAMPS.forEach(s => { const a = Object.keys(mem.stampsDb[s.id] || {}).length, b = Object.keys(next[s.id] || {}).length; if (b > a) mem.stampPop.add(s.id); });
     mem.stampsDb = next;
     const h = location.hash || '#hoy';
-    if ((h === '#guia-sellos' || h === '#hoy') && $('#sheet').hidden) rerender();
+    if ((h === '#guia-sellos' || h === '#hoy' || h.startsWith('#dia')) && $('#sheet').hidden && !mem.stampFx) rerender();
   }, () => {});
 }
 async function writeStamp(id, data) {
@@ -1694,8 +1754,18 @@ function stampHtml(s) {
   const ink = cols.length === 1 ? `color:${cols[0]}` : cols.length > 1 ? `background-image:linear-gradient(135deg,${cols.join(',')});-webkit-background-clip:text;background-clip:text;color:transparent` : '';
   return `<button class="stamp${marks.length ? ' on' : ''}" type="button" data-stamp="${s.id}" aria-label="${esc(s.t)}: ${esc(s.r)}${marks.length ? '. Marcado por ' + marks.map(famName).join(', ') : ''}">
     <span class="ink${mem.stampPop.has(s.id) ? ' slam' : ''}"${ring ? ` style="--ring:${ring}"` : ''}><span class="kj" lang="ja" style="font-size:${fs}px;${ink}">${esc(s.k)}</span></span>
-    <b>${esc(s.t)}</b><small>${esc(s.r)}</small>
+    ${KIND[s.kind] ? `<em class="kd">${KIND[s.kind]}</em>` : ''}<b>${esc(s.t)}</b><small>${esc(s.r)}</small>
     <span class="who">${marks.map(k => `<i style="background:${famColor(k)}">${famName(k)[0]}</i>`).join('')}</span></button>`;
+}
+function daySetHtml(day, title) {
+  const list = STAMPS.filter(s => s.days.includes(day.n));
+  if (!list.length) return '';
+  const order = { reto: 0, eki: 1, goshuin: 1, iman: 2 }, byKind = (a, b) => order[a.kind] - order[b.kind];
+  const done = list.filter(s => stampMarks(s.id).length).sort(byKind), todo = list.filter(s => !stampMarks(s.id).length).sort(byKind);
+  return `<section class="grp dayset"><h2 class="gh"><span>${title}</span><span>${done.length}/${list.length}</span></h2>
+    ${todo.length ? `<div class="stamps">${todo.map(stampHtml).join('')}</div>` : '<p class="gf">¡Todo sellado! 🎉</p>'}
+    ${done.length ? `<h3 class="gh sub"><span>Completados</span></h3><div class="stamps got">${done.map(stampHtml).join('')}</div>` : ''}
+    <a class="gf" href="#guia-sellos">Ver el pasaporte completo ›</a></section>`;
 }
 function meSeg() {
   return `<div class="mepick">${FAMILY.map(([k, n, c]) => `<button type="button" data-me="${k}" aria-pressed="${meKey() === k}" style="--fc:${c}"><span></span>${n}</button>`).join('')}</div>`;
@@ -1705,9 +1775,9 @@ function viewSellos() {
   const per = FAMILY.map(([k, n, c]) => [n, c, STAMPS.filter(s => stampData(s.id)[k]).length]);
   const groups = [...Object.keys(CITY).filter(k => STAMPS.some(s => s.city === k)), 'JP'];
   const out = `<section class="pend-hero"><div class="ring"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="39"/><circle class="fg" cx="50" cy="50" r="39" style="stroke:var(--red);stroke-dashoffset:${245 * (1 - got / STAMPS.length)}"/></svg><b>${got}</b></div>
-    <div><h2>${got} de ${STAMPS.length} retos en familia</h2><p class="per">${per.map(([n, c, v]) => `<span><i style="background:${c}"></i>${n} ${v}</span>`).join('')}</p></div></section>
+    <div><h2>${got} de ${STAMPS.length} sellos en familia</h2><p class="per">${per.map(([n, c, v]) => `<span><i style="background:${c}"></i>${n} ${v}</span>`).join('')}</p></div></section>
     <section class="grp"><h2 class="gh"><span>¿Quién está marcando en este teléfono?</span></h2>${meSeg()}${mem.db ? '' : '<p class="gf">Aquí los sellos no se comparten: ábranla desde claude.ai.</p>'}</section>
-    ${grp('Premios en familia', PRIZES.map(([n, t]) => row({ cls: 'ld' + (got >= n ? '' : ' done'), lead: ico(I.ticket, got >= n ? 'var(--red)' : 'var(--gray)'), t: esc(t), s: got >= n ? '¡Desbloqueado!' : `Faltan ${n - got} retos`, tr: got >= n ? '<span class="pill hot">Listo</span>' : `${got}/${n}` })).join(''))}
+    ${grp('Premios en familia', PRIZES.map(([n, t]) => row({ cls: 'ld' + (got >= n ? '' : ' done'), lead: ico(I.ticket, got >= n ? 'var(--red)' : 'var(--gray)'), t: esc(t), s: got >= n ? '¡Desbloqueado!' : `Faltan ${n - got} sellos`, tr: got >= n ? '<span class="pill hot">Listo</span>' : `${got}/${n}` })).join(''))}
     ${groups.map(k => `<section class="grp"><h2 class="gh"><span>${k === 'JP' ? 'En todo Japón' : CITY[k].n + ' <span lang="ja">' + CITY[k].jp + '</span>'}</span><span>${STAMPS.filter(s => s.city === k && stampMarks(s.id).length).length}/${STAMPS.filter(s => s.city === k).length}</span></h2><div class="stamps">${STAMPS.filter(s => s.city === k).map(stampHtml).join('')}</div></section>`).join('')}`;
   return out;
 }
@@ -1721,16 +1791,67 @@ function stampTap(id) {
   const s = STAMPS.find(x => x.id === id), data = { ...stampData(id) };
   if (!data[me]) {
     data[me] = new Date().toISOString();
-    mem.stampPop.add(id);
     if (mem.stampsDb) mem.stampsDb[id] = data;
     writeStamp(id, data).catch(() => hud('No se pudo guardar el sello'));
-    rerender(); hud(`¡Sello de ${famName(me)}!`);
+    stampFx(s, me);
     return;
   }
   const others = stampMarks(id).filter(k => k !== me);
   openSheet('Quitar sello', `<div class="show"><div class="say">${esc(s.t)}</div><div class="huge" lang="ja" style="color:${famColor(me)}">${esc(s.k)}</div>
     <div class="sub2">¿Quitar el sello de <b>${famName(me)}</b> de este reto?${others.length ? `<br>Los de ${others.map(famName).join(' y ')} se quedan.` : ''}</div></div>
     <div class="playbar"><button type="button" class="play alt" data-sheet-close>Cancelar</button><button type="button" class="play danger-btn" data-unstamp="${id}">Quitar mi sello</button></div>`);
+}
+/* El gran sello: llega enorme cubriendo la pantalla, baja, se estampa con un golpe
+   (temblor, salpicadura de tinta y vibración) y luego vuela a su lugar en la lista. */
+function haptic(pattern) {
+  try { if (navigator.vibrate) { navigator.vibrate(pattern); return; } } catch (e) {}
+  // iPhone no tiene vibrate(): un interruptor nativo oculto da un toque háptico (Safari 18+)
+  try { const l = document.createElement('label'), i = document.createElement('input'); i.type = 'checkbox'; i.setAttribute('switch', ''); l.style.display = 'none'; l.append(i); document.body.append(l); l.click(); l.remove(); } catch (e) {}
+}
+function stampFx(s, me) {
+  const col = famColor(me), n = [...s.k].length;
+  if (mem.stampFx) mem.stampFx.done();
+  const fx = document.createElement('div');
+  fx.className = 'stampfx'; fx.setAttribute('role', 'status');
+  fx.innerHTML = `<svg width="0" height="0" aria-hidden="true"><filter id="inkf"><feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" seed="${Math.floor(Math.random() * 99)}"/><feDisplacementMap in="SourceGraphic" scale="7" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
+    <div class="sfx-stage" style="--c:${col}"><div class="sfx-burst"></div>${Array.from({ length: 14 }, (_, i) => { const a = i / 14 * 6.283 + Math.random() * .4, d = 46 + Math.random() * 16, z = 4 + Math.random() * 12; return `<i class="sfx-dot" style="--x:${(Math.cos(a) * d).toFixed(1)}%;--y:${(Math.sin(a) * d).toFixed(1)}%;--z:${z.toFixed(0)}px"></i>`; }).join('')}
+    <div class="sfx-big" style="--c:${col}"><div class="sfx-ink"><span lang="ja" style="--n:${n}">${esc(s.k)}</span></div></div></div>
+    <div class="sfx-cap"><small>${KIND[s.kind] || 'Reto'}</small><b>${esc(s.t)}</b><span>¡Sellado por ${famName(me)}!</span></div>`;
+  document.body.append(fx);
+  const big = fx.querySelector('.sfx-big'), stage = fx.querySelector('.sfx-stage'), cap = fx.querySelector('.sfx-cap');
+  let ended = false, timer = 0;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const finish = () => {
+    if (ended) return; ended = true; clearTimeout(timer);
+    mem.stampPop.add(s.id); rerender();
+    const target = document.querySelector(`#view [data-stamp="${s.id}"] .ink`);
+    const out = () => { fx.remove(); if (mem.stampFx === ctl) mem.stampFx = null; };
+    fx.classList.add('out');
+    if (reduce || !target || !big.animate) { setTimeout(out, 250); return; }
+    const a = big.getBoundingClientRect(), b = target.getBoundingClientRect();
+    const dx = b.left + b.width / 2 - (a.left + a.width / 2), dy = b.top + b.height / 2 - (a.top + a.height / 2), k = b.width / a.width;
+    cap.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, fill: 'forwards' });
+    big.animate([{ transform: 'rotate(-8deg)' }, { transform: `translate(${dx}px, ${dy}px) scale(${k}) rotate(-8deg)`, opacity: .9 }], { duration: 480, easing: 'cubic-bezier(.5,0,.2,1)', fill: 'forwards' }).onfinish = out;
+  };
+  const ctl = { done: finish };
+  mem.stampFx = ctl;
+  fx.addEventListener('click', finish);
+  if (reduce || !big.animate) { haptic(30); timer = setTimeout(finish, 1100); return; }
+  // 1) llega enorme, cubriendo la pantalla, y baja acelerando
+  big.animate([
+    { transform: 'scale(3.4) rotate(-26deg)', opacity: 0, filter: 'blur(10px)' },
+    { transform: 'scale(2.6) rotate(-20deg)', opacity: .35, filter: 'blur(6px)', offset: .35 },
+    { transform: 'scale(1) rotate(-8deg)', opacity: 1, filter: 'blur(0)' }
+  ], { duration: 420, easing: 'cubic-bezier(.6,0,.9,.35)', fill: 'forwards' }).onfinish = () => {
+    // 2) ¡golpe!: aplasta, salpica, tiembla y vibra
+    haptic([25, 35, 60]);
+    fx.classList.add('hit');
+    big.animate([{ transform: 'scale(1) rotate(-8deg)' }, { transform: 'scale(1.06, .9) rotate(-8deg)', offset: .25 }, { transform: 'scale(.97, 1.03) rotate(-8deg)', offset: .6 }, { transform: 'scale(1) rotate(-8deg)' }], { duration: 300, easing: 'ease-out' });
+    stage.animate([{ transform: 'translate(0,0)' }, { transform: 'translate(-9px,6px)' }, { transform: 'translate(8px,-7px)' }, { transform: 'translate(-6px,-4px)' }, { transform: 'translate(5px,5px)' }, { transform: 'translate(-2px,2px)' }, { transform: 'translate(0,0)' }], { duration: 420, easing: 'ease-out' });
+    const v = document.querySelector('#view');
+    if (v) v.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(7px)' }, { transform: 'translateY(-3px)' }, { transform: 'translateY(0)' }], { duration: 360, easing: 'ease-out' });
+    timer = setTimeout(finish, 1250);
+  };
 }
 async function unstamp(id) {
   const me = meKey(), data = { ...stampData(id) };
