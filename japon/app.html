@@ -897,8 +897,8 @@ const DAYS = [
    items: [
     { t: '06:30', e: '10:30', h: 'Llegada a Narita', d: 'Migración y maletas. Tener a la mano el QR de Visit Japan Web. Sacar yenes en un cajero de 7-Eleven y cargar la Suica.', p: ['narita'], r: 'El horario exacto depende del vuelo.' },
     { t: '10:30', e: '12:00', h: 'Traslado Narita → Ueno / Asakusa', d: 'Skyliner a Keisei Ueno. Si el Airbnb no guarda maletas antes de las 16:00, usar lockers en Ueno/Asakusa.', p: ['keiseiUeno'], r: 'No asumir entrada al departamento antes de las 16:00.' },
-    { t: '12:00', e: '15:00', h: 'Comida y descanso en Asakusa / Ueno', d: 'Almuerzo tranquilo cerca de Asakusa.', f: 'Tempura o soba en Asakusa; melonpan en Nakamise.', p: [] },
-    { t: '15:00', e: '18:00', h: 'Sensō-ji + Nakamise-dōri', d: 'Primer templo memorable: puerta Kaminarimon, Nakamise y el salón principal. Al anochecer se ilumina.', f: 'Snacks en Nakamise (ningyo-yaki, kibi dango).', p: ['sensoji', 'nakamise'], r: 'Primer contacto clásico con Tokio.' },
+    { t: '12:00', e: '15:00', h: 'Comida, descanso y libreta para sellos de estación', d: 'Almuerzo tranquilo cerca de Asakusa. Comprar una libreta para los sellos de estación (eki stamps): sirve cualquier cuaderno de hojas lisas de Daiso, Loft, una papelería o un konbini. Pongan el primer sello en la estación Ueno.', f: 'Tempura o soba en Asakusa; melonpan en Nakamise.', p: [], r: 'Los sellos de estación son gratis y la tinta mancha: dejen secar unos segundos antes de cerrar la libreta.' },
+    { t: '15:00', e: '18:00', h: 'Sensō-ji + Nakamise-dōri · libreta de goshuin', d: 'Primer templo memorable: puerta Kaminarimon, Nakamise y el salón principal. Al anochecer se ilumina. Ahí mismo compren la libreta para los sellos de templos (goshuinchō, 御朱印帳) y pidan su primer goshuin.', f: 'Snacks en Nakamise (ningyo-yaki, kibi dango).', p: ['sensoji', 'nakamise'], r: 'Vayan primero a la oficina de goshuin: suele cerrar alrededor de las 16:30. El goshuin cuesta unos ¥500 y la libreta se usa solo para templos y santuarios, no para sellos de estación.' },
     { t: '18:00', e: '20:30', h: 'Check-in Airbnb Motoasakusa y cena cerca', d: 'Entrada con teclado desde las 16:00. Cena cercana y a dormir temprano por el jet lag.', p: ['b:tokyo1'], k: 'base' }
    ],
    legs: [
@@ -1721,7 +1721,7 @@ function viewPend() {
 
 /* ---------- Pasaporte de sellos de Sam ---------- */
 // días en que toca cada reto (los de «En todo Japón» no tienen día fijo)
-const RETO_DAYS = { 's-kaminari': [1], 's-shibuya': [2], 's-gacha': [3, 19], 's-pika': [4], 's-pcafe': [4], 's-teamlab': [5], 's-fuji': [6, 7, 8], 's-pagoda': [7], 's-onsen': [6], 's-torii': [11], 's-bamboo': [10], 's-nintendo': [11], 's-matcha': [8, 9, 10, 11], 's-tako': [12], 's-mario': [13], 's-glico': [12], 's-orca': [14], 's-kobe': [14], 's-gold': [15, 16], 's-garden': [16], 's-snow': [17], 's-gassho': [17] };
+const RETO_DAYS = { 's-stampbook': [1], 's-kaminari': [1], 's-shibuya': [2], 's-gacha': [3, 19], 's-pika': [4], 's-pcafe': [4], 's-teamlab': [5], 's-fuji': [6, 7, 8], 's-pagoda': [7], 's-onsen': [6], 's-torii': [11], 's-bamboo': [10], 's-nintendo': [11], 's-matcha': [8, 9, 10, 11], 's-tako': [12], 's-mario': [13], 's-glico': [12], 's-orca': [14], 's-kobe': [14], 's-gold': [15, 16], 's-garden': [16], 's-snow': [17], 's-gassho': [17] };
 const KIND = { iman: 'Imán', eki: 'Sello de estación', goshuin: 'Goshuin' };
 const STAMPS = [
   ['TK', 's-kaminari', '雷門', 'Kaminarimon', 'Foto bajo la gran linterna roja de Sensō-ji'],
@@ -1752,7 +1752,7 @@ const STAMPS = [
   ['JP', 's-konbini', 'コンビニ', 'Konbini', 'Elegir su snack favorito de konbini'],
   ['JP', 's-konbiniday', '三食', 'Día konbini', 'Desayuno, comida y cena de un día, todo de konbini'],
   ['JP', 's-wagyu', '和牛', 'Tabehōdai de wagyū', 'Comer en un buffet libre de wagyū: yakiniku o shabu-shabu'],
-  ['JP', 's-stampbook', '帳', 'Libreta de sellos', 'Comprar una libreta de sellos y poner el primer sello'],
+  ['JP', 's-stampbook', '帳', 'Libreta de sellos', 'Comprar la libreta para sellos de estación y poner el primero en Ueno'],
   // imanes: uno por ciudad, aparece todos los días que están ahí hasta que lo compren
   ['TK', 'm-tokyo', '東京', 'Imán de Tokio', 'Un imán para el refri', 'iman', [1, 2, 3, 4, 5, 19]],
   ['FJ', 'm-fuji', '富士', 'Imán del Fuji', 'Un imán para el refri', 'iman', [6, 7]],
@@ -1763,7 +1763,7 @@ const STAMPS = [
   ['HD', 'm-hida', '飛騨', 'Imán de Hida', 'Un imán para el refri', 'iman', [17, 18]],
   // sellos de verdad para la libreta: de estación (eki stamp, gratis) y goshuin de templos
   ['TK', 'e-ueno', '上野', 'Estación Ueno', 'JR Ueno, junto a los torniquetes', 'eki', [1]],
-  ['TK', 'g-sensoji', '浅草寺', 'Sensō-ji', 'En la oficina de goshuin del templo', 'goshuin', [1]],
+  ['TK', 'g-sensoji', '浅草寺', 'Sensō-ji', 'Comprar ahí la libreta de goshuin y pedir el primero (antes de las 16:30)', 'goshuin', [1]],
   ['TK', 'g-meiji', '明治', 'Meiji Jingū', 'En la oficina del santuario', 'goshuin', [2]],
   ['TK', 'e-harajuku', '原宿', 'Estación Harajuku', 'JR Harajuku, junto a los torniquetes', 'eki', [2]],
   ['TK', 'e-akiba', '秋葉原', 'Estación Akihabara', 'JR Akihabara, junto a los torniquetes', 'eki', [3, 19]],
