@@ -711,6 +711,9 @@ body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 3
 .tabs a.tab-hoy svg { width: 26px; height: 26px; stroke-width: 1.9; }
 .tab-hoy[aria-current="page"] .hb { background: color-mix(in srgb, var(--tint) 24%, transparent); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--tint) 45%, transparent); }
 .tab-hoy:active .hb { transform: scale(.94); }
+.xopt { align-items: flex-start; } .xopt .ico { margin-top: 2px; } .xopt .m { gap: 4px; }
+.xopt .xbtn { justify-self: start; margin-top: 4px; border: 0; cursor: pointer; font: inherit; font-size: 14px; font-weight: 600; padding: 8px 14px; } .xopt .xbtn::after { content: none; }
+.xopt.on .xbtn { background: var(--tint); color: var(--on); }
 .st:not(.lg) { border-width: 3px; } .st:not(.lg) i { font-size: 10px; line-height: 10px; letter-spacing: 0; } .st:not(.lg) b { line-height: 14px; } .cal i { font-size: 10px; padding: 2px 0 1px; }
 /* móvil: zonas de toque de 44 px sin mover el diseño */
 .chk, .spk, .themeb, .stp button, .tbtn, .lnk, .chips a, .cchips button, .wxb button { position: relative; }
@@ -810,6 +813,8 @@ const P = {
   akiba: ['Akihabara', 35.6984, 139.7731, 'Akihabara Electric Town'],
   yodobashi: ['Yodobashi Akiba', 35.6990, 139.7746, 'Yodobashi Camera Multimedia Akiba'],
   uenopark: ['Parque Ueno', 35.7148, 139.7731, 'Ueno Park'],
+  solamachi: ['Tokyo Skytree · Solamachi', 35.7101, 139.8107, 'Tokyo Solamachi'],
+  shibapark: ['Shiba Park (Tokyo Tower)', 35.6553, 139.7480, 'Shiba Park Tokyo'],
   sunshine: ['Pokémon Center MEGA TOKYO', 35.7290, 139.7193, 'Pokemon Center Mega Tokyo Sunshine City'],
   pokecafe: ['Pokémon Café + Center TOKYO DX', 35.6810, 139.7741, 'Pokemon Cafe Tokyo Nihonbashi Takashimaya'],
   charst: ['Tokyo Character Street', 35.6800, 139.7686, 'Tokyo Character Street'],
@@ -888,7 +893,7 @@ const LINES = {
   keisei: ['Keisei', '#1D3F8F'], fujiex: ['JR Fuji Excursion', '#C9302C'], fujikyu: ['Fujikyū', '#2E86C9'], bus: ['Bus', '#6B7280'],
   shinkansen: ['Shinkansen', '#1E64C8'], keihan: ['Keihan', '#0B7A4B'], hankyu: ['Hankyū', '#7A1F2B'], kintetsu: ['Kintetsu', '#D4122F'],
   sakaisuji: ['Sakaisuji', '#814721'], midosuji: ['Midōsuji', '#E5171F'], hanshin: ['Hanshin', '#E86A10'], jryume: ['JR Yumesaki', '#F18BB0'],
-  jrw: ['JR', '#0072BC'], thunder: ['Thunderbird', '#3C5A99'], hida: ['Ltd. Exp. Hida', '#4D8F3A'], taxi: ['Taxi', '#C9A200'], jrnara: ['JR', '#0072BC']
+  jrw: ['JR', '#0072BC'], thunder: ['Thunderbird', '#3C5A99'], hida: ['Ltd. Exp. Hida', '#4D8F3A'], taxi: ['Taxi', '#C9A200'], jrnara: ['JR', '#0072BC'], tobu: ['Tōbu Skytree', '#0E5E9E']
 };
 const W = (min, t, n, alt) => ({ m: 'walk', t, min, n, alt });
 const T = (line, t, min, n, alt) => ({ m: 'line', line, t, min, n, alt });
@@ -1196,6 +1201,47 @@ const DAYS = [
    tips: ['Vuelo internacional 09:35: lo ideal es estar en el aeropuerto ~07:00. Si el primer Skyliner llega tarde, tomen el Keisei Limited Express más temprano.', 'Con el nuevo reembolso de impuestos (tax-free) puede haber un trámite extra en Narita: denle tiempo.'] }
 ];
 
+// Planes opcionales: se agregan al día solo si la familia los elige (se guarda en el teléfono).
+// Van al final del día, así no se mueven las casillas ya marcadas de las demás actividades.
+const EXTRAS = [
+  { id: 'x-solamachi', day: 3, rec: 1, title: 'Mercado navideño de la Tokyo Skytree', sub: 'Solamachi · dom 22 nov · 18:30 · entrada libre',
+    why: 'El que mejor les queda: a 15 min del alojamiento, gratis, abierto mientras están en Tokio y con la Skytree iluminada. En Solamachi también está el Pokémon Center Skytree Town.',
+    item: { t: '18:30', e: '20:30', h: 'Mercado navideño de la Tokyo Skytree (Solamachi)', d: 'Mercado «de libro de cuentos» en la Sky Arena del piso 4, con la torre iluminada. Abre de 11:00 a 22:00 (últimos pedidos 21:00); entrada libre.', f: 'Salchichas, pretzels, dulces navideños y bebidas calientes.', p: ['solamachi'], r: 'Las tiendas de Solamachi (Pokémon Center incluido) cierran alrededor de las 21:00: si quieren pasar, vayan primero.', x: 1 },
+    legs: [{ o: 'uenopark', d: 'solamachi', steps: [W(5, 'A la estación Ueno'), T('ginza', 'Ueno (G16) → Asakusa (G19)', 5), T('tobu', 'Asakusa → Tokyo Skytree (1 parada)', 3), W(4, 'Subir a la Sky Arena, piso 4')] },
+      { o: 'solamachi', d: 'b:tokyo1', steps: [T('tobu', 'Tokyo Skytree → Asakusa', 3), T('ginza', 'Asakusa (G19) → Inaricho (G17)', 3), W(6, 'Al alojamiento'), T('taxi', 'O taxi directo, ~10 min', 10, null, true)] }] },
+  { id: 'x-shiba', day: 19, title: 'Tokyo Christmas Market en Shiba Park', sub: 'mar 8 dic · 18:30 · ¥1,000 por persona',
+    why: 'Mercado alemán junto a la Tokyo Tower iluminada. Es la última noche antes del vuelo: solo si tienen energía y las maletas listas.',
+    item: { t: '18:30', e: '20:30', h: 'Tokyo Christmas Market en Shiba Park', d: 'Mercado navideño alemán a los pies de la Tokyo Tower. Del 4 al 25 de diciembre; entrada ¥1,000 entre semana.', f: 'Salchichas, glühwein y kinderpunsch (sin alcohol) para Sam.', p: ['shibapark'], r: 'Mañana salen temprano al aeropuerto: regresen antes de las 21:30.', x: 1 },
+    legs: [{ o: 'b:tokyo2', d: 'shibapark', steps: [W(9, 'A JR Okachimachi'), T('yamanote', 'Okachimachi → Hamamatsuchō', 13), W(12, 'Por la puerta Daimon hacia Shiba Park')] },
+      { o: 'shibapark', d: 'b:tokyo2', steps: [W(12, 'A JR Hamamatsuchō'), T('yamanote', 'Hamamatsuchō → Okachimachi', 13), W(9, 'Al alojamiento')] }] }
+];
+const extrasOn = () => store.get('extras', {});
+function applyExtras() {
+  const on = extrasOn();
+  EXTRAS.forEach(x => {
+    const day = DAYS[x.day - 1];
+    if (!day._items) { day._items = day.items; day._legs = day.legs; }
+    day.items = on[x.id] ? [...day._items, x.item] : day._items;
+    // si el día terminaba volviendo al alojamiento desde el último lugar, ese tramo se cambia por el desvío
+    const legs = day._legs, last = legs[legs.length - 1];
+    day.legs = !on[x.id] ? legs : last && last.o === x.legs[0].o ? [...legs.slice(0, -1), ...x.legs] : [...legs, ...x.legs];
+  });
+}
+function extrasHtml(day) {
+  const list = EXTRAS.filter(x => x.day === day.n);
+  if (!list.length) return '';
+  const on = extrasOn();
+  return grp('Plan opcional', list.map(x => `<div class="r ld xopt${on[x.id] ? ' on' : ''}">${ico(I.gift, 'var(--red)')}<div class="m">
+    <div class="t b">${esc(x.title)}${x.rec ? ' <span class="pill hot">Recomendado</span>' : ''}</div><div class="s">${esc(x.sub)}</div><div class="x">${esc(x.why)}</div>
+    <button type="button" class="lnk xbtn" data-extra="${x.id}" aria-pressed="${!!on[x.id]}">${on[x.id] ? '✓ En el plan · quitar' : '+ Agregar al plan'}</button></div></div>`).join(''));
+}
+function toggleExtra(id) {
+  const on = { ...extrasOn() }, x = EXTRAS.find(e => e.id === id);
+  if (on[id]) delete on[id]; else on[id] = 1;
+  store.set('extras', on); applyExtras(); rerender();
+  hud(on[id] ? `Agregado al Día ${x.day}` : 'Quitado del plan');
+}
+
 // Reservas con boleto
 const TICKETS = [
   { d: '2026-11-23', day: 4, n: 'Pokémon Café TOKYO', when: '23 nov · 19:00–20:30', st: 'ok', stl: 'Reserva confirmada', info: '3 personas, asiento tipo A. Llegar 18:45. Nihombashi Takashimaya S.C. East Building, 5F. Recoger productos del pedido.', place: 'pokecafe' },
@@ -1289,6 +1335,7 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem('jp26:' + k); if (v != null) return JSON.parse(v); } catch (e) {} return k in mem ? mem[k] : d; },
   set(k, v) { mem[k] = v; try { localStorage.setItem('jp26:' + k, JSON.stringify(v)); } catch (e) {} }
 };
+applyExtras();
 const $ = (s, el = document) => el.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
@@ -1532,6 +1579,7 @@ function viewToday(n, hm, preview) {
     return row({ cls: 'li' + (on ? ' done' : ''), lead: checkBtn(xid, x.h), t: `<span class="tm">${x.t}</span> ${esc(x.h)}`, tr: tag || `<button class="tbtn" type="button" data-focus="${i}">Ver</button>` });
   }).join(''), null, `${dayProgress(day)[0]} de ${items.length}`)}
   ${advice}
+  ${extrasHtml(day)}
   ${daySetHtml(day, 'Sellos e imanes de hoy')}
   ${food}
   ${grp('Accesos rápidos', row({ href: gmDirFromHere('b:' + day.base), ext: 1, cls: 'ld', lead: ico(I.bed, cityVar(day.city)), t: 'Volver al alojamiento', s: esc(base.n) }) +
@@ -1572,12 +1620,13 @@ function viewDay(n, opts = {}) {
   if (seg === 'plan') {
     content = grp('Plan por hora', day.items.map((it, i) => {
       const id = 'd' + n + '-' + i, on = !!c[id];
-      const tags = (i === nowIdx ? '<span class="pill now">Ahora</span>' : '') + (it.k === 'res' ? '<span class="pill ok">Reserva</span>' : '') + (it.s ? '<span class="pill">Sugerencia</span>' : '');
+      const tags = (i === nowIdx ? '<span class="pill now">Ahora</span>' : '') + (it.k === 'res' ? '<span class="pill ok">Reserva</span>' : '') + (it.x ? '<span class="pill tint">Opcional</span>' : '') + (it.s ? '<span class="pill">Sugerencia</span>' : '');
       return `<div class="r li it${on ? ' done' : ''}${i === nowIdx ? ' now' : ''}">${checkBtn(id, it.h)}<div class="m">
         <div class="when">${it.t} – ${it.e}${tags}</div><div class="t">${esc(it.h)}</div>
         ${it.d ? `<div class="d">${esc(it.d)}</div>` : ''}${it.f ? `<div class="food"><b>Comer:</b> ${esc(it.f)}</div>` : ''}${it.r ? `<div class="rec">${esc(it.r)}</div>` : ''}
         ${(it.p || []).length ? `<div class="chips">${it.p.map(k => `<a href="${gmSearch(k)}" target="_blank" rel="noopener">${esc(place(k).n)}</a>`).join('')}</div>` : ''}</div></div>`;
     }).join(''), null, `${done} de ${tot}`) +
+    extrasHtml(day) +
     daySetHtml(day, 'Sellos e imanes del día') +
     grp('Alojamiento', row({ tag: 'button', cls: 'ld', lead: ico(I.bed, cityVar(day.city)), t: esc(base.n), s: esc(base.in + ' → ' + base.out), attrs: `data-base="${day.base}"`, chev: 1 }) +
       row({ tag: 'button', cls: 'ld', lead: ico(I.car, 'var(--orange)'), t: 'Mostrar dirección al taxista', attrs: `data-taxi="${day.base}"`, chev: 1 }));
@@ -3679,7 +3728,7 @@ function attachSwipe(card) {
 }
 document.addEventListener('click', e => { if (mem.swallowClick) { e.preventDefault(); e.stopPropagation(); } }, true);
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-say],[data-check],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket],[data-step],[data-focus],[data-food],[data-theme-set],[data-stamp],[data-ask],[data-chat-stop],[data-chat-clear],[data-doc],[data-doc-add],[data-doc-del],[data-offline-all],[data-doc-edit],[data-pet-pick],[data-pet],[data-me],[data-unstamp],[data-sheet-close],[data-scene-phase],[data-scene-wx],[data-wx],[data-scene-city],[data-shop-buy],[data-shop-del],[data-shop-idea]');
+  const t = e.target.closest('[data-say],[data-check],[data-extra],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket],[data-step],[data-focus],[data-food],[data-theme-set],[data-stamp],[data-ask],[data-chat-stop],[data-chat-clear],[data-doc],[data-doc-add],[data-doc-del],[data-offline-all],[data-doc-edit],[data-pet-pick],[data-pet],[data-me],[data-unstamp],[data-sheet-close],[data-scene-phase],[data-scene-wx],[data-wx],[data-scene-city],[data-shop-buy],[data-shop-del],[data-shop-idea]');
   if (!t) return;
   const d = t.dataset;
   const sg = t.closest('.seg');
@@ -3707,6 +3756,7 @@ document.addEventListener('click', e => {
   else if (d.unstamp) unstamp(d.unstamp);
   else if ('sheetClose' in d) closeSheet();
   else if ('offlineAll' in d) saveAllOffline(t);
+  else if (d.extra) toggleExtra(d.extra);
   else if (d.stamp) stampTap(d.stamp);
   else if (d.ask != null) { if (d.ask.endsWith(': ')) { const ta = $('#chatIn'); ta.value = d.ask; mem.draft = d.ask; ta.focus(); } else askClaude(d.ask); }
   else if ('chatStop' in d) { if (mem.chatCtl) mem.chatCtl.abort(); }
