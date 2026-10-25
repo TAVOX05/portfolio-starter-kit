@@ -1971,29 +1971,29 @@ function prepHtml(tom, nightBase) {
 /* ---------- Hora de salir ---------- */
 const fmtHM = m => { m = ((m % 1440) + 1440) % 1440; return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
 /* Arranque de cada día: a qué hora despertar y salir del alojamiento hacia el primer lugar.
-   Despertar ≈ 1 h antes de salir (con Sam y desayuno), más en días de check-out o ryokan.
+   Despertar al menos 1 h 30 min antes de salir (baño, arreglarse y desayunar), más en días de ryokan o check-out sin prisa.
    El trayecto sale del primer tramo del día (day.legs[0]); la nota cubre lo que falta. */
 const MORNING = {
   1: { wake: '05:00', leave: '08:30', from: 'Aeropuerto de Narita', note: 'Aterrizan a las 06:30 (AM 58) y despiertan en el avión con el desayuno a bordo. Migración, maletas, yenes y Suica toman 1–1.5 h.' },
-  2: { wake: '06:10', leave: '07:10', note: 'Desayuno rápido de konbini; en Harajuku hay cafés después del santuario.' },
-  3: { wake: '08:00', leave: '09:10', note: 'Mañana tranquila: desayunen en el Airbnb.' },
-  4: { wake: '07:40', leave: '08:50', note: 'Lleguen antes de que abran las tiendas para entrar sin fila.' },
-  5: { wake: '06:40', leave: '07:40', note: 'La entrada es de 09:00 a 09:30: así llegan con margen para la fila y los casilleros. El QR aparece desde las 00:00.' },
+  2: { wake: '05:40', leave: '07:10', note: 'Desayuno rápido de konbini; en Harajuku hay cafés después del santuario.' },
+  3: { wake: '07:40', leave: '09:10', note: 'Mañana tranquila: desayunen en el Airbnb.' },
+  4: { wake: '07:20', leave: '08:50', note: 'Lleguen antes de que abran las tiendas para entrar sin fila.' },
+  5: { wake: '06:10', leave: '07:40', note: 'La entrada es de 09:00 a 09:30: así llegan con margen para la fila y los casilleros. El QR aparece desde las 00:00.' },
   6: { wake: '07:30', leave: '09:00', note: 'Check-out antes de las 10:00. Lleguen a Shinjuku hacia las 09:40 para comprar bento y encontrar el andén del Fuji Excursion 15 (10:30). Con muchas maletas: taxi directo (~40 min).' },
   7: { wake: '06:30', leave: '09:00', note: 'Desayuno buffet en Ubuya desde las 07:00 y check-out. Dejen las maletas en los casilleros de la estación Kawaguchiko o pregunten al Airbnb de Funatsu (a 10 min a pie).' },
-  8: { wake: '06:30', leave: '07:30', note: 'Check-out a más tardar a las 10:00. Desde la estación Kawaguchiko sale el bus a Mishima (~2 h) y luego el Shinkansen a Kioto: el bus aún no está comprado, confirmen la hora.' },
-  9: { wake: '06:00', leave: '06:30', note: 'Kiyomizu-dera abre a las 06:00: temprano se ve sin multitudes. Desayuno después en Sannenzaka.' },
-  10: { wake: '05:40', leave: '06:15', note: 'Para estar en el bambú antes de las 07:30. En taxi directo (~30 min) pueden salir a las 06:30.' },
-  11: { wake: '05:45', leave: '06:30', note: 'Desayuno ligero: hay konbini junto a la estación Fushimi-Inari.' },
+  8: { wake: '06:00', leave: '07:30', note: 'Check-out a más tardar a las 10:00. Desde la estación Kawaguchiko sale el bus a Mishima (~2 h) y luego el Shinkansen a Kioto: el bus aún no está comprado, confirmen la hora.' },
+  9: { wake: '05:00', leave: '06:30', note: 'Kiyomizu-dera abre a las 06:00: temprano se ve sin multitudes. Desayuno después en Sannenzaka.' },
+  10: { wake: '04:45', leave: '06:15', note: 'Para estar en el bambú antes de las 07:30. En taxi directo (~30 min) pueden salir a las 06:30.' },
+  11: { wake: '05:00', leave: '06:30', note: 'Desayuno ligero: hay konbini junto a la estación Fushimi-Inari.' },
   12: { wake: '07:30', leave: '11:30', note: 'Mañana para empacar sin prisa; check-out antes de las 12:00. En Osaka la entrada es desde las 16:00: pregunten a Emi si pueden dejar maletas antes.' },
-  13: { wake: '05:45', leave: '06:30', note: 'Lleguen antes de la apertura con los 6 boletos a la mano. Desayuno de konbini en el camino.' },
-  14: { wake: '06:15', leave: '07:10', note: 'Trayecto largo (~1 h 20 min): desayunen antes o compren algo en Namba.' },
+  13: { wake: '05:00', leave: '06:30', note: 'Lleguen antes de la apertura con los 6 boletos a la mano. Desayuno de konbini en el camino.' },
+  14: { wake: '05:40', leave: '07:10', note: 'Trayecto largo (~1 h 20 min): desayunen antes o compren algo en Namba.' },
   15: { wake: '07:00', leave: '08:30', note: 'Check-out antes de las 10:00. De Shin-Osaka sigue el Thunderbird a Tsuruga y el Hokuriku Shinkansen a Kanazawa: los trenes aún no están comprados.' },
-  16: { wake: '07:30', leave: '08:35', note: 'Kenroku-en abre temprano: a esta hora hay poca gente.' },
-  17: { wake: '06:45', leave: '08:00', note: 'Check-out antes de las 10:00. El bus a Shirakawa-gō sale de la estación de Kanazawa (lado este) y requiere reserva: aún no está confirmado.' },
-  18: { wake: '06:30', leave: '07:15', note: 'Check-out hasta las 11:00: después del mercado regresen por las maletas para tomar el tren Hida a Nagoya.' },
-  19: { wake: '07:45', leave: '08:45', note: 'Último día completo: empiecen con calma.' },
-  20: { wake: '05:00', leave: '06:00', note: 'Maletas listas desde la noche anterior. Skyliner de Keisei Ueno a Narita (~45 min); el vuelo AM 57 sale a las 09:35, lleguen antes de las 07:30.' }
+  16: { wake: '07:05', leave: '08:35', note: 'Kenroku-en abre temprano: a esta hora hay poca gente.' },
+  17: { wake: '06:30', leave: '08:00', note: 'Check-out antes de las 10:00. El bus a Shirakawa-gō sale de la estación de Kanazawa (lado este) y requiere reserva: aún no está confirmado.' },
+  18: { wake: '05:45', leave: '07:15', note: 'Check-out hasta las 11:00: después del mercado regresen por las maletas para tomar el tren Hida a Nagoya.' },
+  19: { wake: '07:15', leave: '08:45', note: 'Último día completo: empiecen con calma.' },
+  20: { wake: '04:30', leave: '06:00', note: 'Maletas listas desde la noche anterior. Skyliner de Keisei Ueno a Narita (~45 min); el vuelo AM 57 sale a las 09:35, lleguen antes de las 07:30.' }
 };
 function dayMorning(day) {
   const m = MORNING[day.n], l = day.legs[0];
@@ -2008,7 +2008,7 @@ function morningHtml(day) {
   const m = dayMorning(day);
   if (!m) return '';
   return grp('Arranque del día',
-    row({ cls: 'ld', lead: ico(I.moon, 'var(--indigo)'), t: `<span class="tm">${m.wake}</span> Despertar`, s: esc(m.note) }) +
+    row({ cls: 'ld', lead: ico(I.moon, 'var(--indigo)'), t: `<span class="tm">${m.wake}</span> Despertar`, s: (day.n > 1 ? `${fmtMin(toMin(m.leave) - toMin(m.wake))} para bañarse, arreglarse y desayunar. ` : '') + esc(m.note) }) +
     row({ cls: 'ld', lead: ico(I.bed, 'var(--tint)'), t: `<span class="tm">${m.leave}</span> Salir de ${esc(m.from)}`, s: `Hacia ${esc(m.to)} · ≈ ${m.mins} min, llegan ≈ ${m.arrive}` }) +
     row({ cls: 'ld', lead: ico(m.icon, 'var(--green)'), t: esc(m.route), sm: 1, s: m.alt ? 'O bien: ' + esc(m.alt) : '' }) +
     row({ href: m.href, ext: 1, cls: 'link', t: 'Ver este trayecto en Google Maps' }));
