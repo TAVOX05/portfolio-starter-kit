@@ -714,6 +714,8 @@ body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 3
 .xopt { align-items: flex-start; } .xopt .ico { margin-top: 2px; } .xopt .m { gap: 4px; }
 .xopt .xbtn { justify-self: start; margin-top: 4px; border: 0; cursor: pointer; font: inherit; font-size: 14px; font-weight: 600; padding: 8px 14px; } .xopt .xbtn::after { content: none; }
 .xopt.on .xbtn { background: var(--tint); color: var(--on); }
+.websrch { color: var(--label2); font-size: 15px; }
+.webst { font-size: 13px; color: var(--label2); padding: 0 16px; }
 .st:not(.lg) { border-width: 3px; } .st:not(.lg) i { font-size: 10px; line-height: 10px; letter-spacing: 0; } .st:not(.lg) b { line-height: 14px; } .cal i { font-size: 10px; padding: 2px 0 1px; }
 /* móvil: zonas de toque de 44 px sin mover el diseño */
 .chk, .spk, .themeb, .stp button, .tbtn, .lnk, .chips a, .cchips button, .wxb button { position: relative; }
@@ -2150,14 +2152,44 @@ const petSvg = (k, cls = '') => `<svg class="petsvg ${cls}" viewBox="0 0 100 100
 const petOf = () => { let k = store.get('pet', 'maneki'); if (k === 'eevee') k = 'slowpoke'; return PETS[k] ? k : 'maneki'; };
 const chatOf = () => store.get('chat2', []);
 mem.sampleReady = false; mem.sample = null; mem.petState = '';
-(window.claude && window.claude.use ? window.claude.use('sample') : Promise.resolve(null)).then(s => { mem.sample = s; }, () => {}).finally(() => { mem.sampleReady = true; if (location.hash === '#chat') rerender(); });
+/* Búsqueda web del chat: la app no puede salir a internet, pero sí usar el conector
+   «Parallel Search» de la cuenta de quien la abre (capacidad mcp). Si ese teléfono no lo
+   tiene, no dio permiso o la vista no puede usar herramientas, el chat sigue sin internet. */
+const WEB = 'Parallel Search';
+mem.mcp = null; mem.webOff = ''; mem.toolsOk = false;
+mem.webSid = 'jp26-' + Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
+(window.claude && window.claude.use ? window.claude.use('mcp') : Promise.resolve(null)).then(m => { mem.mcp = m; if (location.hash === '#chat') rerender(); }, () => {});
+const webReady = () => !!(mem.mcp && mem.toolsOk && !mem.webOff);
+function webTools() {
+  if (!webReady()) return undefined;
+  const status = t => { const el = $('#streamMsg'); if (el) el.innerHTML = `<span class="websrch">${esc(t)}</span>`; };
+  const call = async (tool, input, what) => {
+    status('🔎 Buscando en internet: ' + what);
+    try { const r = await mem.mcp.callTool(WEB, tool, { ...input, session_id: mem.webSid }, { cache: false }); return r.payload ?? {}; }
+    catch (e) {
+      const off = { server_not_connected: 'Este teléfono no tiene conectado «Parallel Search».', needs_reauth: 'Hay que reconectar «Parallel Search» en claude.ai.', not_in_manifest: 'No se dio permiso para buscar en internet.', not_granted: 'Esta vista no permite conectores.', capability_disabled: 'Esta vista no permite conectores.', capability_removed: 'Esta vista no permite conectores.', blocked_by_policy: 'La cuenta no permite este conector.' }[e && e.code];
+      if (off) { mem.webOff = off; throw new Error(off + ' Responde sin internet.'); }
+      throw new Error('La búsqueda falló (' + ((e && e.code) || 'error') + '). Intenta responder con lo que sabes.');
+    }
+  };
+  const clip = (x, n) => ({ titulo: x.title, url: x.url, fecha: x.publish_date || undefined, extracto: (x.excerpts || [x.full_content || '']).join(' … ').replace(/\s+/g, ' ').slice(0, n) });
+  return [
+    { name: 'buscar_web', description: 'Busca en internet información actual que no está en el itinerario: horarios y si algo abre hoy, clima, eventos, precios, transporte, noticias. Devuelve hasta 5 resultados con extractos.',
+      inputSchema: { type: 'object', properties: { objetivo: { type: 'string', description: 'Qué quieres averiguar, en una frase concreta' }, consultas: { type: 'array', items: { type: 'string' }, description: '2 o 3 búsquedas de 3 a 6 palabras, de preferencia en inglés o japonés' } }, required: ['objetivo', 'consultas'] },
+      execute: async ({ objetivo, consultas }) => { const p = await call('web_search', { objective: String(objetivo).slice(0, 300), search_queries: (Array.isArray(consultas) && consultas.length ? consultas : [objetivo]).slice(0, 3).map(String) }, objetivo); return (p.results || []).slice(0, 5).map(x => clip(x, 900)); } },
+    { name: 'leer_pagina', description: 'Lee una página concreta (por ejemplo la oficial que salió en buscar_web) cuando los extractos no bastan.',
+      inputSchema: { type: 'object', properties: { url: { type: 'string', description: 'Dirección completa https://' }, objetivo: { type: 'string', description: 'Qué buscar en la página' } }, required: ['url', 'objetivo'] },
+      execute: async ({ url, objetivo }) => { const p = await call('web_fetch', { urls: [String(url)], objective: String(objetivo).slice(0, 200) }, 'leyendo ' + String(url).replace(/^https?:\/\/(www\.)?/, '').split('/')[0]); return (p.results || []).slice(0, 1).map(x => clip(x, 2500)); } }
+  ];
+}
+(window.claude && window.claude.use ? window.claude.use('sample') : Promise.resolve(null)).then(async s => { mem.sample = s; try { mem.toolsOk = !!(s && s.limits && (await s.limits()).tools); } catch (e) {} }, () => {}).finally(() => { mem.sampleReady = true; if (location.hash === '#chat') rerender(); });
 function tripContext() {
   const now = jstNow(), i = dayIndexFor(now.ymd), c = checks(), pet = PETS[petOf()];
   const dayTxt = d => `Día ${d.n} (${fdate(d.date, true)}, ${CITY[d.city].n}, duermen en ${BASES[d.base].n}): ` + d.items.map((it, k) => `${it.t}-${it.e} ${it.h}${it.f ? ' [comer: ' + it.f + ']' : ''}${c['d' + d.n + '-' + k] ? ' (hecho)' : ''}`).join('; ');
   const focus = mem.preview ? DAYS[mem.preview - 1] : i >= 0 ? DAYS[i] : null;
   return `Eres ${pet.n}, ${pet.what}, la mascota asistente de viaje de una familia mexicana: Octavio, Selene y su hijo Sam de 10 años, en Japón del 20 nov al 9 dic 2026. ${pet.voice}
 Te puede escribir cualquiera de los tres. Si el mensaje parece de Sam (un niño), usa frases cortas, palabras sencillas, entusiasmo y datos curiosos, nada que dé miedo; si dice que se perdió, que se quede quieto, busque a sus papás o un kōban y muestre su tarjeta de la app. Con adultos sé práctico y concreto.
-Responde en español de México, breve (máximo unas 120 palabras salvo que pidan más), para leer en el celular, con listas cortas y sin tablas. Usa nombres de lugares y estaciones como en Google Maps. No puedes navegar ni ver clima, horarios o precios en vivo: si algo depende de eso, dilo y sugiere verificarlo. Para traducir da el japonés, el romaji y una nota corta.
+Responde en español de México, breve (máximo unas 120 palabras salvo que pidan más), para leer en el celular, con listas cortas y sin tablas. Usa nombres de lugares y estaciones como en Google Maps. ${webReady() ? 'Tienes las herramientas buscar_web y leer_pagina para datos actuales: horarios y si algo está abierto hoy, clima, eventos, precios, transporte o noticias. Úsalas cuando la pregunta lo necesite (no para lo que ya está en el itinerario), busca de preferencia en inglés o japonés, y al final pon la fuente en una línea corta (solo el nombre del sitio). Si la búsqueda falla, dilo y responde con lo que sabes.' : 'No puedes navegar ni ver clima, horarios o precios en vivo: si algo depende de eso, dilo y sugiere verificarlo.'} Para traducir da el japonés, el romaji y una nota corta.
 Ahora en Japón: ${fdate(now.ymd, true)} ${now.ymd.slice(0, 4)}, ${now.hm} h.${focus ? '\nDÍA EN CURSO: ' + dayTxt(focus) : ' El viaje aún no empieza.'}
 ITINERARIO: ${DAYS.map(d => `D${d.n} ${fdate(d.date)} ${CITY[d.city].n}: ${d.title}`).join(' | ')}
 ALOJAMIENTOS: ${BASE_ORDER.map(k => `${BASES[k].n}, ${BASES[k].addr} (${BASES[k].in} → ${BASES[k].out})`).join(' | ')}
@@ -2181,6 +2213,7 @@ function viewChat() {
   const bubble = m => m.role === 'user' ? `<div class="msg user">${esc(m.content).replace(/\n/g, '<br>')}</div>` : `<div class="mrow">${ava()}<div class="msg assistant">${fmtChat(m.content)}</div></div>`;
   const body = `${head}
   <div class="chat" id="chat">${bubble({ role: 'assistant', content: pet.hi.replace('viajera', 'viajero') })}${chat.map(bubble).join('')}${mem.chatBusy ? `<div class="mrow">${ava(true)}<div class="msg assistant" id="streamMsg"><span class="typing"><i></i><i></i><i></i></span></div></div>` : ''}</div>
+  ${webReady() ? '<p class="webst">🌐 Puede buscar en internet</p>' : mem.webOff ? `<p class="webst">Sin internet: ${esc(mem.webOff)}</p>` : ''}
   <div class="qchips">${CHIPS.map(q => `<button type="button" class="lnk q" data-ask="${esc(q)}">${esc(q)}</button>`).join('')}</div>
   <div class="dock">${petEl(pk, 'sm live')}<form id="chatForm" class="composer"><textarea id="chatIn" rows="1" placeholder="Escríbele a ${esc(pet.n)}…" aria-label="Mensaje para ${esc(pet.n)}">${esc(mem.draft || '')}</textarea>
     ${mem.chatBusy ? '<button type="button" class="send stop" data-chat-stop aria-label="Detener">■</button>' : '<button type="submit" class="send" aria-label="Enviar">↑</button>'}</form></div>
@@ -2206,7 +2239,7 @@ async function askClaude(q) {
   let answer = '', talking = false;
   try {
     const r = await mem.sample([{ role: 'user', content: tripContext() }, ...turns], {
-      cache: false, model: 'claude-sonnet-5-5', modelTier: 'default', effort: 'medium', signal: mem.chatCtl.signal,
+      cache: false, model: 'claude-sonnet-5-5', modelTier: 'default', effort: 'medium', signal: mem.chatCtl.signal, ...(webReady() ? { tools: webTools() } : {}),
       onText: ({ text }) => { answer = text; if (!talking) { talking = true; setPetState('talk'); } const el = $('#streamMsg'); if (el) { el.innerHTML = fmtChat(text); scrollChat(); } }
     });
     answer = r.text + (r.truncated ? '\n\n(Respuesta cortada: pregunta algo más específico.)' : '');
