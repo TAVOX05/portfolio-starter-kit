@@ -1938,7 +1938,10 @@ const mirror = d => d.replace(/(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/g, (m, x, y
 
 const PK_EAR = 'M31 44 C25 31 18 17 14 2 C26 9 38 21 45 35Z';
 const PK_TIP = 'M8 27 Q22 17 41 4 L40 -1 L8 -1Z';
-const ES_EAR = 'M33 44 C21 37 9 25 2 9 C20 9 37 18 46 31Z', ES_IN = 'M32 38.5 C23 33 14 25 9 15 C22 16 33 22 40 30Z';
+const ES_EAR = 'M44 26 C30 16 14 7.5 3 4 C2 17 4.5 34 15.5 52 L32 47Z', ES_IN = 'M7 12.5 C7 24.5 9.8 36 16.6 46.5 L30.5 39 C25.5 28.5 17 19.5 7 12.5Z';
+// Espeon chibi: contorno café grueso y colores planos
+const ESO = 'stroke="#5A1F18" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"';
+const ES_HEAD = 'M38 25 C45 22.8 55 22.8 62 25 C74 27 81 35 81.5 45 L98 59.5 C92.5 60.4 88 61.2 84 61.8 L85.5 66.5 C81 66 77 65.6 73.5 66.2 C68 71.6 59 74 50 74 C41 74 32 71.6 26.5 66.2 C23 65.6 19 66 14.5 66.5 L16 61.8 C12 61.2 7.5 60.4 2 59.5 L18.5 45 C19 35 26 27 38 25Z';
 
 const POKE_DEFS = `
 <radialGradient id="pkY" cx="42%" cy="34%" r="70%"><stop offset="0" stop-color="#FFEB7A"/><stop offset=".6" stop-color="#F8D030"/><stop offset="1" stop-color="#E2AE12"/></radialGradient>
@@ -1952,8 +1955,6 @@ const POKE_DEFS = `
 <radialGradient id="jiE" cx="45%" cy="35%" r="65%"><stop offset="0" stop-color="#9BEBFF"/><stop offset=".6" stop-color="#32A8D8"/><stop offset="1" stop-color="#1D6A9E"/></radialGradient>
 <radialGradient id="chB" cx="42%" cy="28%" r="78%"><stop offset="0" stop-color="#FFB06A"/><stop offset=".55" stop-color="#F58A3C"/><stop offset="1" stop-color="#D8661E"/></radialGradient>
 <linearGradient id="chF" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#E5321E"/><stop offset=".55" stop-color="#FF8A1E"/><stop offset="1" stop-color="#FFD84A"/></linearGradient>
-<radialGradient id="esB" cx="45%" cy="30%" r="75%"><stop offset="0" stop-color="#F6D6F4"/><stop offset=".6" stop-color="#DDA9DD"/><stop offset="1" stop-color="#B987C2"/></radialGradient>
-<radialGradient id="esG" cx="38%" cy="32%" r="70%"><stop offset="0" stop-color="#FF8A8A"/><stop offset=".6" stop-color="#E4202F"/><stop offset="1" stop-color="#9E0E1C"/></radialGradient>
 <radialGradient id="spB" cx="42%" cy="28%" r="78%"><stop offset="0" stop-color="#FFD6E0"/><stop offset=".55" stop-color="#F4A3B8"/><stop offset="1" stop-color="#D47A94"/></radialGradient>
 <radialGradient id="spC" cx="50%" cy="25%" r="80%"><stop offset="0" stop-color="#FFF6E0"/><stop offset="1" stop-color="#EDD6A8"/></radialGradient>
 <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>`;
@@ -1991,20 +1992,15 @@ const POKE_BODY = {
   <path d="M46.6 73 C47.6 79 52.4 79 53.4 73 C52 74.2 48 74.2 46.6 73Z" fill="#9C2E3E" stroke="#2A1F2D" stroke-width="1.3" stroke-linejoin="round"/><path d="M48 76.6 C49 78 51 78 52 76.6 C51 75.9 49 75.9 48 76.6Z" fill="#FF8FA0"/>`,
 
   espeon: `
-  <path d="M64 97 C82 96 92 84 90 66" fill="none" stroke="#2A1F2D" stroke-width="8" stroke-linecap="round"/><path d="M64 97 C82 96 92 84 90 66" fill="none" stroke="#DDA9DD" stroke-width="4.6" stroke-linecap="round"/>
-  <path d="M88.5 68 C87 61 84 56 79 52 C86 52.5 90 56 91 60 C92 55 95 51 99.5 49 C97 54 94.5 61 92 68Z" fill="url(#esB)" ${O} stroke-width="1.8"/>
-  <path d="M40 72 C39 82 37.5 92 36.5 101 L63.5 101 C62.5 92 61 82 60 72Z" fill="url(#esB)" ${O}/>
-  
-  <g class="ear ear-l"><path d="${ES_EAR}" fill="url(#esB)" ${O}/><path d="${ES_IN}" fill="#A86DB8"/><path d="M40 33 L34.5 27 L36.5 32 L30.5 28.5 L35 35Z" fill="#F7E6F7"/></g>
-  <g class="ear ear-r"><path d="${mirror(ES_EAR)}" fill="url(#esB)" ${O}/><path d="${mirror(ES_IN)}" fill="#A86DB8"/><path d="${mirror('M40 33 L34.5 27 L36.5 32 L30.5 28.5 L35 35Z')}" fill="#F7E6F7"/></g>
-  <path d="M25.5 61 C20.5 65 16.5 69.5 13 74 C19 72 24 68.5 27.5 65.5Z M74.5 61 C79.5 65 83.5 69.5 87 74 C81 72 76 68.5 72.5 65.5Z" fill="url(#esB)" ${O} stroke-width="1.7"/>
-  <path d="M50 30 C65 30 76 40 77 52 C78 62 72 70 62 74 C57 76 53 77 50 77 C47 77 43 76 38 74 C28 70 22 62 23 52 C24 40 35 30 50 30Z" fill="url(#esB)" ${O}/>
-  <path d="M31 38 C37 33 44 31 51 32 C43 34 37 38 33 43Z" fill="url(#shine)" opacity=".8"/>
-  <circle cx="50" cy="39.5" r="4" fill="url(#esG)" stroke="#2A1F2D" stroke-width="1.5"/><ellipse cx="48.6" cy="38.2" rx="1.3" ry="1" fill="#fff" opacity=".9"/>
-  <g class="eye">${eye(38, 54, 6.2, 7.6, true, '#9B3FA8')}${eye(62, 54, 6.2, 7.6, true, '#9B3FA8')}</g>
-  <ellipse cx="29" cy="63" rx="4" ry="2.3" fill="#F08AB4" opacity=".45"/><ellipse cx="71" cy="63" rx="4" ry="2.3" fill="#F08AB4" opacity=".45"/>
-  <path d="M48.6 62.8 L51.4 62.8 L50 64.3Z" fill="#2A1F2D" stroke="#2A1F2D" stroke-width="1" stroke-linejoin="round"/>
-  <path d="M46 67 C48 69.2 52 69.2 54 67" fill="none" stroke="#2A1F2D" stroke-width="1.7" stroke-linecap="round"/>`,
+  <g class="ear ear-l"><path d="${ES_EAR}" fill="#C8A8D6" ${ESO}/><path d="${ES_IN}" fill="#2E3D78"/><path d="${ES_EAR}" fill="none" ${ESO}/></g>
+  <g class="ear ear-r"><path d="${mirror(ES_EAR)}" fill="#C8A8D6" ${ESO}/><path d="${mirror(ES_IN)}" fill="#2E3D78"/><path d="${mirror(ES_EAR)}" fill="none" ${ESO}/></g>
+  <path d="M35 70 C33 79 33.5 88 35.5 94.5 C37.5 98 46.5 98.3 48.8 95.8 L50 92.8 L51.2 95.8 C53.5 98.3 62.5 98 64.5 94.5 C66.5 88 67 79 65 70Z" fill="#C8A8D6" ${ESO}/>
+  <path d="M46.8 85 C46.2 89.5 46.8 93.2 48.7 95.6 M53.2 85 C53.8 89.5 53.2 93.2 51.3 95.6" fill="none" ${ESO} stroke-width="1.7"/>
+  <path d="${ES_HEAD}" fill="#C8A8D6" ${ESO}/>
+  <circle cx="50" cy="45" r="4.4" fill="#E5313A" ${ESO} stroke-width="1.7"/>
+  <g class="eye"><ellipse cx="35.5" cy="57.5" rx="7" ry="9.2" transform="rotate(-30 35.5 57.5)" fill="#33289A" ${ESO} stroke-width="1.7"/><ellipse cx="64.5" cy="57.5" rx="7" ry="9.2" transform="rotate(30 64.5 57.5)" fill="#33289A" ${ESO} stroke-width="1.7"/>
+    <circle cx="38.6" cy="55.6" r="2.9" fill="#FFFDF4"/><circle cx="61.4" cy="55.6" r="2.9" fill="#FFFDF4"/></g>
+  <path d="M48.7 66.4 L51.3 66.4 L50 67.7Z" fill="#5A1F18" stroke="#5A1F18" stroke-width=".8" stroke-linejoin="round"/>`,
 
   snorlax: `
   <path d="M21 35 L25 18 L37 28Z" fill="url(#snB)" ${O}/><path d="M24.5 30 L26.5 22 L32 27Z" fill="#163A4E"/>
