@@ -954,7 +954,8 @@ const DAYS = [
     { t: '13:45', e: '16:45', h: 'Nihombashi: Pokémon Center TOKYO DX', d: 'Mismo edificio que el Pokémon Café. Si sobra tiempo: Tokyo Character Street (Tokyo Station, B1).', p: ['pokecafe', 'charst'] },
     { t: '17:00', e: '18:40', h: 'Pausa y llegada con margen', d: 'Estar en Nihombashi Takashimaya S.C. East Building, 5.º piso, a las 18:45 a más tardar.', p: ['pokecafe'] },
     { t: '19:00', e: '20:30', h: 'Pokémon Café TOKYO · RESERVA CONFIRMADA', d: '3 personas, asiento tipo A, 90 min. Llevar el correo de reserva y recoger los productos apartados.', p: ['pokecafe'], k: 'res', r: 'Llegar al menos 15 min antes.' },
-    { t: '20:30', e: '21:30', h: 'Regreso a Motoasakusa', p: ['b:tokyo1'] }
+    { t: '20:30', e: '21:30', h: 'Regreso a Motoasakusa', p: ['b:tokyo1'] },
+    { t: '21:30', e: '21:45', h: 'Konbini: desayuno para mañana', d: 'Mañana salen temprano a teamLab (07:40). Compren en el konbini más cercano al Airbnb lo del desayuno para comer allí antes de salir: onigiri, sándwiches, yogur, fruta, pan y jugos o leche.', p: ['b:tokyo1'] }
    ],
    legs: [
     { o: 'b:tokyo1', d: 'sunshine', steps: [W(6, 'A Inaricho'), T('ginza', 'Inaricho (G17) → Ueno (G16)', 2), T('yamanote', 'Ueno → Ikebukuro (vía Nippori)', 17), W(10, 'Salida Este, por Sunshine 60-dōri')] },
@@ -965,7 +966,7 @@ const DAYS = [
 
  { n: 5, date: '2026-11-24', city: 'TK', base: 'tokyo1', title: 'teamLab y preparación para Fuji', wx: [14, 7], sun: '16:29',
    items: [
-    { t: '07:40', e: '08:40', h: 'Salida hacia teamLab Planets', d: 'Desayuno ligero antes de salir. QR cargados y batería llena.', p: ['b:tokyo1'], r: 'El QR aparece desde la medianoche del día de visita.' },
+    { t: '07:40', e: '08:40', h: 'Salida hacia teamLab Planets', d: 'Desayuno en el Airbnb con lo del konbini de anoche. QR cargados y batería llena.', p: ['b:tokyo1'], r: 'El QR aparece desde la medianoche del día de visita.' },
     { t: '09:00', e: '11:30', h: 'teamLab Planets · ENTRADA PAGADA', d: 'Ventana de ingreso 09:00–09:30, 2 adultos + 1 niño, sin límite de permanencia. Se camina descalzo y hay agua hasta la rodilla.', p: ['teamlab'], k: 'res', r: 'Pantalones que se puedan arremangar arriba de la rodilla; hay lockers gratis.' },
     { t: '11:15', e: '15:00', h: 'Toyosu / Ginza ligero', d: 'Comida en Toyosu o Ginza. Para Sam: Hakuhinkan Toy Park, juguetería de varios pisos en Ginza.', f: 'Comida en Toyosu, Ginza o Tokyo Station.', p: ['hakuhinkan', 'ginza'] },
     { t: '15:00', e: '20:00', h: 'Regreso, lavandería y maletas', d: 'Recoger bolsas, lavar ropa y organizar el check-out de mañana a las 10:00.', f: 'Cena cerca del Airbnb.', p: ['b:tokyo1'], r: 'Dejar maletas listas para Ubuya/Fuji. Valorar enviar maletas grandes a Kyoto.' }
@@ -1980,7 +1981,7 @@ const MORNING = {
   2: { wake: '05:40', leave: '07:10', note: 'Desayuno rápido de konbini; en Harajuku hay cafés después del santuario.' },
   3: { wake: '07:40', leave: '09:10', note: 'Mañana tranquila: desayunen en el Airbnb.' },
   4: { wake: '07:20', leave: '08:50', note: 'Lleguen antes de que abran las tiendas para entrar sin fila.' },
-  5: { wake: '06:10', leave: '07:40', note: 'La entrada es de 09:00 a 09:30: así llegan con margen para la fila y los casilleros. El QR aparece desde las 00:00.' },
+  5: { wake: '06:10', leave: '07:40', note: 'Desayunen en el Airbnb lo que compraron anoche en el konbini. La entrada es de 09:00 a 09:30: así llegan con margen para la fila y los casilleros. El QR aparece desde las 00:00.' },
   6: { wake: '07:30', leave: '09:00', note: 'Check-out antes de las 10:00. Lleguen a Shinjuku hacia las 09:40 para comprar bento y encontrar el andén del Fuji Excursion 15 (10:30). Con muchas maletas: taxi directo (~40 min).' },
   7: { wake: '06:30', leave: '09:00', note: 'Desayuno buffet en Ubuya desde las 07:00 y check-out. Dejen las maletas en los casilleros de la estación Kawaguchiko o pregunten al Airbnb de Funatsu (a 10 min a pie).' },
   8: { wake: '06:00', leave: '07:30', note: 'Check-out a más tardar a las 10:00. Desde la estación Kawaguchiko sale el bus a Mishima (~2 h) y luego el Shinkansen a Kioto: el bus aún no está comprado, confirmen la hora.' },
