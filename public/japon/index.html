@@ -487,7 +487,7 @@ body::before, .nav { background: transparent; }
 .stamp .ink { width: 68px; height: 68px; border-radius: 50%; display: grid; place-items: center; border: 2px dashed var(--label3); color: var(--label2); font-weight: 800; line-height: 1; margin-bottom: 4px; font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif; }
 .stamp.on .ink { border: 4px double #D7332B; color: #D7332B; transform: rotate(-8deg); background: radial-gradient(circle, color-mix(in srgb, #D7332B 10%, transparent), transparent 70%); }
 .stamp b { font-size: 13px; font-weight: 600; } .stamp small { font-size: 11px; color: var(--label2); line-height: 1.25; }
-.stamp:not(.on) b { color: var(--label2); }
+.stamp:not(.on) b { color: var(--label); }
 @media (prefers-reduced-motion: no-preference) { .stamp .ink.slam { animation: slam .5s cubic-bezier(.3,1.6,.5,1) both; } @keyframes slam { 0% { transform: scale(1.9) rotate(-28deg); opacity: 0; } 60% { transform: scale(.9) rotate(-6deg); opacity: 1; } 100% { transform: rotate(-8deg); } } .stamp { transition: transform .3s var(--spring); } .stamp:active { transform: scale(.95); } }
 
 /* chat */
@@ -685,7 +685,7 @@ body::before { left: 0; right: 0; top: 0; bottom: auto; height: calc(env(safe-ar
   -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 52%, transparent 100%); mask-image: linear-gradient(180deg, #000 0%, #000 52%, transparent 100%); }
 body.scrolled::before { opacity: 1; background: linear-gradient(180deg, var(--edge-tint) 0%, color-mix(in srgb, var(--edge-tint) 70%, transparent) 55%, transparent 100%); -webkit-backdrop-filter: blur(18px) saturate(180%); backdrop-filter: blur(18px) saturate(180%); }
 .nav, body.scrolled .nav { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; border-bottom-color: transparent; }
-.edge-b { position: fixed; left: 0; right: 0; bottom: 0; height: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 19; pointer-events: none;
+.edge-b { position: fixed; left: 0; right: 0; bottom: 0; height: calc(env(safe-area-inset-bottom, 0px) + 88px); z-index: 19; pointer-events: none;
   background: linear-gradient(0deg, color-mix(in srgb, var(--edge-tint) 75%, transparent) 0%, transparent 100%);
   -webkit-backdrop-filter: blur(10px) saturate(160%); backdrop-filter: blur(10px) saturate(160%);
   -webkit-mask-image: linear-gradient(0deg, #000 0%, #000 40%, transparent 100%); mask-image: linear-gradient(0deg, #000 0%, #000 40%, transparent 100%); }
@@ -735,19 +735,26 @@ body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 3
    Columnas 1.5 + 1.5 | Hoy | 1 + 1 + 1: las dos mitades miden lo mismo y Hoy queda centrado. */
 /* ===== BARRA DE PESTAÑAS · única definición =====
    5 columnas iguales (p = (ancho − 12) / 5): «Hoy» es la columna 3 y cae en el centro exacto.
-   Las etiquetas van en una misma línea (y = 42) y la cápsula activa mide lo mismo en todas (48×30). */
-.tabs { --tbh: 64px; --tbd: 52px; --tbup: 18px; --tbp: color-mix(in srgb, var(--bg) 52%, transparent); --tbbr: 1.14;
+   Las etiquetas van en una misma línea (y = 42) y la cápsula activa mide lo mismo en todas (48×30).
+   El cristal de la barra vive en ::before y lleva un recorte circular donde se asienta el botón «Hoy»:
+   así la barra no pasa por detrás del botón (que también es de cristal). */
+.tabs { --tbh: 64px; --tbd: 42px; --tbup: 14px; --tbcy: 7px; --tbn: 26px;   /* disco de 42 px, sobresale 14 px; centro en y = 7; recorte de radio 26 (5 px de aire) */
+  --tbp: color-mix(in srgb, var(--bg) 52%, transparent); --tbbr: 1.14;
   position: fixed; z-index: 20; left: 50%; right: auto; bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   width: min(440px, calc(100% - 20px)); height: var(--tbh); padding: 0; border: 0; border-radius: calc(var(--tbh) / 2);
-  transform: translateX(-50%); overflow: visible;
-  background: var(--tbp);
-  -webkit-backdrop-filter: blur(26px) saturate(190%) brightness(var(--tbbr)); backdrop-filter: blur(26px) saturate(190%) brightness(var(--tbbr));
-  box-shadow: inset 0 0 0 .5px var(--bar-rim), inset 0 1px 0 var(--bar-hi), inset 0 -1px 0 var(--bar-lo),
-    0 16px 36px -14px rgba(0,0,0,.42), 0 3px 10px -3px rgba(0,0,0,.12); }
+  transform: translateX(-50%); overflow: visible; background: none;
+  box-shadow: 0 16px 36px -14px rgba(0,0,0,.42), 0 8px 12px -7px rgba(0,0,0,.14); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tabs { --tbbr: .84; } }
 :root[data-theme="dark"] .tabs { --tbbr: .84; }
 .tabs::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  background: linear-gradient(180deg, var(--bar-sheen), transparent 52%); }
+  background: linear-gradient(180deg, var(--bar-sheen), transparent 52%), var(--tbp);
+  -webkit-backdrop-filter: blur(26px) saturate(190%) brightness(var(--tbbr)); backdrop-filter: blur(26px) saturate(190%) brightness(var(--tbbr));
+  box-shadow: inset 0 0 0 .5px var(--bar-rim), inset 0 1px 0 var(--bar-hi), inset 0 -1px 0 var(--bar-lo);
+  -webkit-mask: radial-gradient(circle at 50% var(--tbcy), transparent calc(var(--tbn) - .5px), #000 calc(var(--tbn) + .5px));
+  mask: radial-gradient(circle at 50% var(--tbcy), transparent calc(var(--tbn) - .5px), #000 calc(var(--tbn) + .5px)); }
+/* filo de luz en el borde del recorte, como el resto del contorno */
+.tabs::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(circle at 50% var(--tbcy), transparent calc(var(--tbn) - .2px), var(--bar-rim) calc(var(--tbn) + .4px), transparent calc(var(--tbn) + 1.4px)); }
 .tabs .wrap { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
   height: 100%; max-width: none; margin: 0; padding: 0 6px; }
 .tabs a { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0;
@@ -762,27 +769,25 @@ body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 3
   background: color-mix(in srgb, var(--tint) 14%, rgba(255,255,255,.10));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tint) 30%, transparent), inset 0 1px 0 rgba(255,255,255,.45); }
 .tabs a[aria-current="page"] .tbi::before { opacity: 1; transform: none; }
-/* «Hoy»: disco sólido que sobresale 18 px; el anillo del color de la barra hace de muesca */
+/* «Hoy»: esfera de cristal con un tinte muy leve, asentada en el recorte; activa = más tinte y sol relleno */
 .tabs .tab-hoy { color: var(--tint); font-weight: 700; }
 .tabs .tab-hoy::after { content: ""; position: absolute; left: 0; right: 0; top: calc(-1 * var(--tbup) - 6px); bottom: 0; }
-.tab-hoy .hb { position: relative; z-index: 1; display: grid; place-items: center;
-  width: var(--tbd); height: var(--tbd); margin: calc(-1 * (var(--tbup) + 9px)) 0 5px; border-radius: 50%;
+.tab-hoy .hb { --hbt: 17%; position: relative; z-index: 1; display: grid; place-items: center;
+  width: var(--tbd); height: var(--tbd); margin: calc(-1 * (var(--tbup) + 9px)) 0 11px; border-radius: 50%;
   color: var(--tint);
-  background: radial-gradient(120% 90% at 30% 8%, rgba(255,255,255,.42), transparent 55%), color-mix(in srgb, var(--tint) 17%, rgba(255,255,255,.10));
+  background: radial-gradient(120% 90% at 30% 8%, rgba(255,255,255,.42), transparent 55%), color-mix(in srgb, var(--tint) var(--hbt), var(--tbp));
   -webkit-backdrop-filter: blur(22px) saturate(200%) brightness(var(--tbbr)); backdrop-filter: blur(22px) saturate(200%) brightness(var(--tbbr));
-  box-shadow: 0 0 0 4px var(--tbp), inset 0 0 0 1px color-mix(in srgb, var(--tint) 34%, transparent), inset 0 1.5px 0 rgba(255,255,255,.55), inset 0 -6px 12px -6px color-mix(in srgb, var(--tint) 35%, transparent), 0 8px 16px -8px rgba(0,0,0,.4); }
-.tab-hoy .hb svg { width: 26px; height: 26px; }
-.tab-hoy .hb::after { content: ""; position: absolute; inset: -6px; border-radius: 50%;
-  border: 2px solid var(--tint); opacity: 0; transform: scale(.88); }
-.tab-hoy[aria-current="page"] .hb::after { opacity: 1; transform: none; }
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tint) 34%, transparent), inset 0 1.5px 0 rgba(255,255,255,.55), inset 0 -5px 10px -5px color-mix(in srgb, var(--tint) 35%, transparent), 0 6px 14px -7px rgba(0,0,0,.4); }
+.tab-hoy[aria-current="page"] .hb { --hbt: 26%; }
+.tab-hoy .hb svg { width: 21px; height: 21px; }
 .tab-hoy .sun { fill: transparent; }
-.tab-hoy[aria-current="page"] .sun { fill: color-mix(in srgb, var(--tint) 34%, transparent); }
+.tab-hoy[aria-current="page"] .sun { fill: color-mix(in srgb, var(--tint) 40%, transparent); }
 .tabs a:focus-visible { outline: none; }
 .tabs a:focus-visible .tbi { outline: 2px solid var(--tint); outline-offset: 2px; border-radius: 15px; }
-.tab-hoy:focus-visible .hb::after { opacity: 1; transform: none; }
+.tab-hoy:focus-visible .hb { outline: 2px solid var(--tint); outline-offset: 2px; }
 @media (max-width: 339px) { .tabs a { font-size: 10.5px; } }
 @media (prefers-reduced-motion: no-preference) {
-  .tabs .tbi::before, .tab-hoy .hb::after { transition: opacity .25s, transform .45s var(--spring); }
+  .tabs .tbi::before { transition: opacity .25s, transform .45s var(--spring); }
   .tabs svg, .tab-hoy .hb { transition: transform .3s var(--spring); }
   .tabs a:active svg { transform: scale(.9); }
   .tab-hoy:active .hb { transform: scale(.94); }
@@ -795,6 +800,7 @@ body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 3
   .tabs .wrap > a:nth-child(5) { --tbk: -2; animation-delay: 0s; }
   @keyframes tabfan { from { transform: translateX(calc(var(--tbk) * 100%)); opacity: 0; } }
 }
+
 .xopt { align-items: flex-start; } .xopt .ico { margin-top: 2px; } .xopt .m { gap: 4px; }
 .xopt .xbtn { justify-self: start; margin-top: 4px; border: 0; cursor: pointer; font: inherit; font-size: 14px; font-weight: 600; padding: 8px 14px; } .xopt .xbtn::after { content: none; }
 .xopt.on .xbtn { background: var(--tint); color: var(--on); }
