@@ -736,14 +736,16 @@ body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 3
 /* ===== BARRA DE PESTAÑAS · única definición =====
    5 columnas iguales (p = (ancho − 12) / 5): «Hoy» es la columna 3 y cae en el centro exacto.
    Las etiquetas van en una misma línea (y = 42) y la cápsula activa mide lo mismo en todas (48×30). */
-.tabs { --tbh: 64px; --tbd: 52px; --tbup: 18px; --tbp: color-mix(in srgb, var(--bg) 86%, transparent);
+.tabs { --tbh: 64px; --tbd: 52px; --tbup: 18px; --tbp: color-mix(in srgb, var(--bg) 52%, transparent); --tbbr: 1.14;
   position: fixed; z-index: 20; left: 50%; right: auto; bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   width: min(440px, calc(100% - 20px)); height: var(--tbh); padding: 0; border: 0; border-radius: calc(var(--tbh) / 2);
   transform: translateX(-50%); overflow: visible;
   background: var(--tbp);
-  -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(26px) saturate(190%) brightness(var(--tbbr)); backdrop-filter: blur(26px) saturate(190%) brightness(var(--tbbr));
   box-shadow: inset 0 0 0 .5px var(--bar-rim), inset 0 1px 0 var(--bar-hi), inset 0 -1px 0 var(--bar-lo),
     0 16px 36px -14px rgba(0,0,0,.42), 0 3px 10px -3px rgba(0,0,0,.12); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tabs { --tbbr: .84; } }
+:root[data-theme="dark"] .tabs { --tbbr: .84; }
 .tabs::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
   background: linear-gradient(180deg, var(--bar-sheen), transparent 52%); }
 .tabs .wrap { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -757,22 +759,24 @@ body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 3
 /* cápsula del icono: mismo tamaño en las 4 pestañas laterales */
 .tabs .tbi { position: relative; display: grid; place-items: center; width: 48px; height: 30px; }
 .tabs .tbi::before { content: ""; position: absolute; inset: 0; border-radius: 15px; opacity: 0; transform: scale(.6);
-  background: color-mix(in srgb, var(--tint) 14%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tint) 30%, transparent); }
+  background: color-mix(in srgb, var(--tint) 14%, rgba(255,255,255,.10));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tint) 30%, transparent), inset 0 1px 0 rgba(255,255,255,.45); }
 .tabs a[aria-current="page"] .tbi::before { opacity: 1; transform: none; }
 /* «Hoy»: disco sólido que sobresale 18 px; el anillo del color de la barra hace de muesca */
 .tabs .tab-hoy { color: var(--tint); font-weight: 700; }
 .tabs .tab-hoy::after { content: ""; position: absolute; left: 0; right: 0; top: calc(-1 * var(--tbup) - 6px); bottom: 0; }
 .tab-hoy .hb { position: relative; z-index: 1; display: grid; place-items: center;
   width: var(--tbd); height: var(--tbd); margin: calc(-1 * (var(--tbup) + 9px)) 0 5px; border-radius: 50%;
-  background: var(--tint); color: var(--on);
-  box-shadow: 0 0 0 4px var(--tbp), inset 0 1px 0 color-mix(in srgb, var(--on) 28%, transparent), 0 6px 12px -6px rgba(0,0,0,.35); }
+  color: var(--tint);
+  background: radial-gradient(120% 90% at 30% 8%, rgba(255,255,255,.42), transparent 55%), color-mix(in srgb, var(--tint) 17%, rgba(255,255,255,.10));
+  -webkit-backdrop-filter: blur(22px) saturate(200%) brightness(var(--tbbr)); backdrop-filter: blur(22px) saturate(200%) brightness(var(--tbbr));
+  box-shadow: 0 0 0 4px var(--tbp), inset 0 0 0 1px color-mix(in srgb, var(--tint) 34%, transparent), inset 0 1.5px 0 rgba(255,255,255,.55), inset 0 -6px 12px -6px color-mix(in srgb, var(--tint) 35%, transparent), 0 8px 16px -8px rgba(0,0,0,.4); }
 .tab-hoy .hb svg { width: 26px; height: 26px; }
 .tab-hoy .hb::after { content: ""; position: absolute; inset: -6px; border-radius: 50%;
   border: 2px solid var(--tint); opacity: 0; transform: scale(.88); }
 .tab-hoy[aria-current="page"] .hb::after { opacity: 1; transform: none; }
 .tab-hoy .sun { fill: transparent; }
-.tab-hoy[aria-current="page"] .sun { fill: color-mix(in srgb, var(--on) 32%, transparent); }
+.tab-hoy[aria-current="page"] .sun { fill: color-mix(in srgb, var(--tint) 34%, transparent); }
 .tabs a:focus-visible { outline: none; }
 .tabs a:focus-visible .tbi { outline: 2px solid var(--tint); outline-offset: 2px; border-radius: 15px; }
 .tab-hoy:focus-visible .hb::after { opacity: 1; transform: none; }
