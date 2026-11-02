@@ -582,7 +582,7 @@ body::before, .nav { background: transparent; }
 .pet .tb i { width: 6px; height: 6px; border-radius: 50%; background: var(--pc); }
 .pet.think .tb { display: flex; }
 .pet.talk::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--pc); pointer-events: none; }
-.dock { position: sticky; bottom: calc(104px + env(safe-area-inset-bottom, 0px)); z-index: 5; display: flex; gap: 8px; align-items: flex-end; }
+.dock { position: sticky; bottom: calc(92px + env(safe-area-inset-bottom, 0px)); z-index: 5; display: flex; gap: 8px; align-items: flex-end; }
 .dock .composer { flex: 1; min-width: 0; box-shadow: var(--lift); }
 @media (prefers-reduced-motion: no-preference) {
   .pet .tb i { animation: typing 1.1s infinite; } .pet .tb i:nth-child(2) { animation-delay: .15s; } .pet .tb i:nth-child(3) { animation-delay: .3s; }
@@ -685,7 +685,7 @@ body::before { left: 0; right: 0; top: 0; bottom: auto; height: calc(env(safe-ar
   -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 52%, transparent 100%); mask-image: linear-gradient(180deg, #000 0%, #000 52%, transparent 100%); }
 body.scrolled::before { opacity: 1; background: linear-gradient(180deg, var(--edge-tint) 0%, color-mix(in srgb, var(--edge-tint) 70%, transparent) 55%, transparent 100%); -webkit-backdrop-filter: blur(18px) saturate(180%); backdrop-filter: blur(18px) saturate(180%); }
 .nav, body.scrolled .nav { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; border-bottom-color: transparent; }
-.edge-b { position: fixed; left: 0; right: 0; bottom: 0; height: calc(env(safe-area-inset-bottom, 0px) + 88px); z-index: 19; pointer-events: none;
+.edge-b { position: fixed; left: 0; right: 0; bottom: 0; height: calc(env(safe-area-inset-bottom, 0px) + 76px); z-index: 19; pointer-events: none;
   background: linear-gradient(0deg, color-mix(in srgb, var(--edge-tint) 75%, transparent) 0%, transparent 100%);
   -webkit-backdrop-filter: blur(10px) saturate(160%); backdrop-filter: blur(10px) saturate(160%);
   -webkit-mask-image: linear-gradient(0deg, #000 0%, #000 40%, transparent 100%); mask-image: linear-gradient(0deg, #000 0%, #000 40%, transparent 100%); }
@@ -735,10 +735,10 @@ body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 3
    Columnas 1.5 + 1.5 | Hoy | 1 + 1 + 1: las dos mitades miden lo mismo y Hoy queda centrado. */
 /* ===== BARRA DE PESTAÑAS · única definición =====
    5 columnas iguales (p = (ancho − 12) / 5): «Hoy» es la columna 3 y cae en el centro exacto.
-   Las etiquetas van en una misma línea (y = 42) y la cápsula activa mide lo mismo en todas (48×30).
+   Barra de 51 px. Las etiquetas van en una misma línea (y = 33) y la cápsula activa mide lo mismo en todas (44×26).
    El cristal de la barra vive en ::before y lleva un recorte circular donde se asienta el botón «Hoy»:
    así la barra no pasa por detrás del botón (que también es de cristal). */
-.tabs { --tbh: 64px; --tbd: 42px; --tbup: 14px; --tbcy: 7px; --tbn: 26px;   /* disco de 42 px, sobresale 14 px; centro en y = 7; recorte de radio 26 (5 px de aire) */
+.tabs { --tbh: 51px; --tbd: 42px; --tbup: 16px; --tbcy: 5px; --tbn: 25px;   /* disco de 42 px, sobresale 16 px; centro en y = 5; recorte de radio 25 (4 px de aire) */
   --tbp: color-mix(in srgb, var(--bg) 52%, transparent); --tbbr: 1.14;
   position: fixed; z-index: 20; left: 50%; right: auto; bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   width: min(440px, calc(100% - 20px)); height: var(--tbh); padding: 0; border: 0; border-radius: calc(var(--tbh) / 2);
@@ -757,15 +757,15 @@ body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 3
   background: radial-gradient(circle at 50% var(--tbcy), transparent calc(var(--tbn) - .2px), var(--bar-rim) calc(var(--tbn) + .4px), transparent calc(var(--tbn) + 1.4px)); }
 .tabs .wrap { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
   height: 100%; max-width: none; margin: 0; padding: 0 6px; }
-.tabs a { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0;
-  padding: 9px 0 0; color: var(--label2); font-size: 11px; line-height: 12px; font-weight: 600;
+.tabs a { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0;
+  padding: 5px 0 0; color: var(--label2); font-size: 11px; line-height: 12px; font-weight: 600;
   letter-spacing: 0; white-space: nowrap; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
 .tabs a[aria-current="page"] { color: var(--tint); }
-.tabs svg { position: relative; width: 24px; height: 24px; fill: none; stroke: currentColor;
+.tabs svg { position: relative; width: 22px; height: 22px; fill: none; stroke: currentColor;
   stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 /* cápsula del icono: mismo tamaño en las 4 pestañas laterales */
-.tabs .tbi { position: relative; display: grid; place-items: center; width: 48px; height: 30px; }
-.tabs .tbi::before { content: ""; position: absolute; inset: 0; border-radius: 15px; opacity: 0; transform: scale(.6);
+.tabs .tbi { position: relative; display: grid; place-items: center; width: 44px; height: 26px; }
+.tabs .tbi::before { content: ""; position: absolute; inset: 0; border-radius: 13px; opacity: 0; transform: scale(.6);
   background: color-mix(in srgb, var(--tint) 14%, rgba(255,255,255,.10));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tint) 30%, transparent), inset 0 1px 0 rgba(255,255,255,.45); }
 .tabs a[aria-current="page"] .tbi::before { opacity: 1; transform: none; }
@@ -773,7 +773,7 @@ body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 3
 .tabs .tab-hoy { color: var(--tint); font-weight: 700; }
 .tabs .tab-hoy::after { content: ""; position: absolute; left: 0; right: 0; top: calc(-1 * var(--tbup) - 6px); bottom: 0; }
 .tab-hoy .hb { --hbt: 17%; position: relative; z-index: 1; display: grid; place-items: center;
-  width: var(--tbd); height: var(--tbd); margin: calc(-1 * (var(--tbup) + 9px)) 0 11px; border-radius: 50%;
+  width: var(--tbd); height: var(--tbd); margin: calc(-1 * (var(--tbup) + 5px)) 0 5px; border-radius: 50%;
   color: var(--tint);
   background: radial-gradient(120% 90% at 30% 8%, rgba(255,255,255,.42), transparent 55%), color-mix(in srgb, var(--tint) var(--hbt), var(--tbp));
   -webkit-backdrop-filter: blur(22px) saturate(200%) brightness(var(--tbbr)); backdrop-filter: blur(22px) saturate(200%) brightness(var(--tbbr));
@@ -783,7 +783,7 @@ body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 3
 .tab-hoy .sun { fill: transparent; }
 .tab-hoy[aria-current="page"] .sun { fill: color-mix(in srgb, var(--tint) 40%, transparent); }
 .tabs a:focus-visible { outline: none; }
-.tabs a:focus-visible .tbi { outline: 2px solid var(--tint); outline-offset: 2px; border-radius: 15px; }
+.tabs a:focus-visible .tbi { outline: 2px solid var(--tint); outline-offset: 2px; border-radius: 13px; }
 .tab-hoy:focus-visible .hb { outline: 2px solid var(--tint); outline-offset: 2px; }
 @media (max-width: 339px) { .tabs a { font-size: 10.5px; } }
 @media (prefers-reduced-motion: no-preference) {
