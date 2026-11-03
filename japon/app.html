@@ -146,6 +146,7 @@ a.r:active, button.r:active { background: var(--fill2); }
 .tile span { display: block; font-size: 13px; color: var(--label2); }
 .tile b { font-size: 17px; font-weight: 600; display: block; line-height: 22px; }
 .tile .prog { margin-top: 6px; }
+.r.buycity { display: block; padding-block: 8px; }
 /* clima en vivo: mosaico de color por condición, dibujo animado, tarjeta, gráfica por hora y hoja */
 .wxi { --s: 30px; flex: none; width: var(--s); height: var(--s); border-radius: calc(var(--s) * .27); display: inline-grid; place-items: center; background: linear-gradient(160deg, var(--g1), var(--g2)); box-shadow: inset 0 0 0 .5px rgba(255,255,255,.3); }
 .wxi svg { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -1672,6 +1673,7 @@ function viewToday(n, hm, preview) {
   ${!ended && MORNING[day.n] && hm < MORNING[day.n].leave ? morningHtml(day) : ''}
   ${leaveHtml(day, hm)}
   ${card}
+  ${!ended ? buysNowHtml(day, it) : ''}
   ${!ended && hm >= '18:00' ? prepHtml(tomorrow, day.base) : ''}
   ${route || dayRouteRow(day) ? grp(route ? 'Ruta rápida' : null, (route || '') + dayRouteRow(day)) : ''}
   ${grp('Plan de hoy', items.map((x, i) => {
@@ -1729,7 +1731,7 @@ function viewDay(n, opts = {}) {
         ${it.d ? `<div class="d">${esc(it.d)}</div>` : ''}${it.f ? `<div class="food"><b>Comer:</b> ${esc(it.f)}</div>` : ''}${it.r ? `<div class="rec">${esc(it.r)}</div>` : ''}
         ${(it.p || []).length ? `<div class="chips">${it.p.map(k => `<a href="${gmSearch(k)}" target="_blank" rel="noopener">${esc(place(k).n)}</a>`).join('')}</div>` : ''}</div></div>`;
     }).join(''), null, `${done} de ${tot}`) +
-    extrasHtml(day) +
+    extrasHtml(day) + buysDayHtml(day) +
     daySetHtml(day, 'Sellos e imanes del día') +
     grp('Alojamiento', row({ tag: 'button', cls: 'ld', lead: ico(I.bed, cityVar(day.city)), t: esc(base.n), s: esc(base.in + ' → ' + base.out), attrs: `data-base="${day.base}"`, chev: 1 }) +
       row({ tag: 'button', cls: 'ld', lead: ico(I.car, 'var(--orange)'), t: 'Mostrar dirección al taxista', attrs: `data-taxi="${day.base}"`, chev: 1 }));
@@ -2053,6 +2055,7 @@ function prepHtml(tom, nightBase) {
     docsFor([...tks.map(([, i]) => 'tk:' + i), ...(moving ? ['b:' + tom.base] : [])]).map(docRow).join('') +
     (tom.n === 1 ? mem.docs.filter(d => d.cat === 'vuelo').map(docRow).join('') : '') +
     task('ropa', `Ropa para ${hi}° / ${lo}°: ${ropa}`, TS ? wxParaguas(TS).join('. ') + '.' : rk === 'alta' ? 'Lleven paraguas.' : rk === 'nieve' ? 'Posible nieve: calzado antiderrapante.' : rk === 'moderada' ? 'Paraguas plegable por si acaso.' : CITY[tom.city].n + ' suele estar seco.') +
+    (() => { const l = BUYS.filter(b => b.must && BUY_DAYS[b.id].includes(tom.n) && !buyState(b)); return l.length ? task('buys', 'Compras imperdibles de mañana', l.slice(0, 4).map(b => b.n).join(', ')) : ''; })() +
     (CASH_CITY[tom.city] && (!nightBase || BASES[nightBase].city !== tom.city) ? task('cash', 'Efectivo en yenes', CASH_CITY[tom.city]) : '') +
     task('bat', 'Cargar teléfonos y batería externa', 'Google Maps y los QR gastan batería todo el día.') +
     ALERTS.filter(a => a.d === tom.date).map(a => row({ cls: 'ld', lead: ico(I.bulb, 'var(--yellow)'), t: esc(a.t), sm: 1 })).join('') +
@@ -2932,14 +2935,79 @@ function gastosHtml(rate) {
 /* ---------- souvenirs y compras ----------
    Lista compartida en tiempo real (colección shop): qué comprar, para quién, presupuesto
    y ciudad. Sin la base de la app se guarda solo en este teléfono. */
-const SOUVENIRS = [
-  ['Tokyo Banana', 'TK', 'Tokyo Station o el aeropuerto'], ['Pokémon Center', 'TK', 'Mega Tokyo (Ikebukuro) o Shibuya PARCO'], ['Kit Kat de sabores japoneses', 'TK', 'Don Quijote o konbinis'],
-  ['Shingen mochi', 'FJ', 'Dulce típico de Yamanashi'],
-  ['Yatsuhashi', 'KY', 'Dulce de canela de Kioto'], ['Matcha y hojicha', 'KY', 'Tiendas de té de Uji o Nishiki'],
-  ['Pokémon Center Osaka DX', 'OS', 'Shinsaibashi PARCO'], ['Recuerdos de Universal', 'OS', 'Universal Studios Japan'],
-  ['Kobe Pudding', 'KB', 'Tiendas de recuerdos de Kobe'], ['Sake de Nada', 'KB', 'El distrito de sake de Kobe'],
-  ['Algo con hoja de oro', 'KZ', 'Dulces y artesanías con oro'],
-  ['Sarubobo', 'HD', 'Amuleto de Takayama'],
+/* ---------- Qué comprar en cada ciudad ----------
+   Imperdibles por destino (dulces, artesanía, personajes, bebidas), con la tienda, el precio aproximado y cuánto aguantan.
+   «at» es el lugar del itinerario más cercano (o «xy» si la tienda queda aparte): con eso la app sabe en qué días y en qué
+   momento del plan les queda cerca, y lo sugiere en Hoy, en el día y en «Para mañana». Investigado en oct–nov 2026. */
+const BUY_K = { dulce: ['Dulce', 'var(--pink)'], comida: ['Para comer allá', 'var(--orange)'], bebida: ['Bebida', 'var(--teal)'], arte: ['Artesanía', 'var(--purple)'], pers: ['Personajes', 'var(--tint)'], amuleto: ['Amuleto', 'var(--red)'], otro: ['Útil', 'var(--green)'] };
+const NO_MX = 'Lleva carne: para comer en Japón, México no deja pasar productos cárnicos.';
+const BUYS = [
+  // Tokio
+  { id: 'ningyo', c: 'TK', at: 'nakamise', k: 'dulce', must: 1, n: 'Ningyō-yaki', jp: '人形焼', what: 'Pastelitos esponjosos con forma de pagoda, linterna y paloma, rellenos de anko. Los hacen enfrente de ti.', where: 'Kimuraya Ningyoyaki Honpo, Nakamise-dōri', q: 'Kimuraya Ningyoyaki Honpo Asakusa', price: '≈ ¥600 por 8', tip: 'Duran alrededor de una semana. Coman parados junto al puesto: en Nakamise no se camina comiendo.' },
+  { id: 'okoshi', c: 'TK', at: 'nakamise', k: 'dulce', n: 'Kaminari-okoshi', jp: '雷おこし', what: 'Galleta crujiente de arroz inflado con cacahuate, el dulce de la puerta Kaminarimon.', where: 'Tokiwadō, junto a Kaminarimon', q: 'Tokiwado Kaminari Okoshi Asakusa', price: '¥500–1,500', tip: 'Aguanta semanas: buena para regalar en México.' },
+  { id: 'imoyokan', c: 'TK', at: 'nakamise', k: 'dulce', n: 'Imo-yōkan', jp: '芋ようかん', what: 'Barritas de camote dulce, receta de Asakusa desde 1902.', where: 'Funawa, Asakusa', q: 'Funawa Asakusa imo yokan', price: '≈ ¥800 por 5', tip: 'Dura pocos días: para comer en el viaje.' },
+  { id: 'tenugui', c: 'TK', at: 'nakamise', k: 'arte', n: 'Tenugui', jp: '手ぬぐい', what: 'Pañuelos de algodón estampados con diseños de temporada. Ligeros y no se rompen.', where: 'Kamawanu Asakusa (o tiendas de Denbōin-dōri)', q: 'Kamawanu Asakusa', price: '¥1,000–1,800', tip: 'Regalo práctico para varios: no ocupa espacio en la maleta.' },
+  { id: 'omamori', c: 'TK', at: 'sensoji', k: 'amuleto', n: 'Omamori del Sensō-ji', jp: 'お守り', what: 'Amuletos del templo: salud, estudios, viajes seguros.', where: 'Oficina del Sensō-ji', q: 'Senso-ji Temple Asakusa', price: '¥500–1,000', tip: 'No se abren. Se llevan en la mochila o la cartera.' },
+  { id: 'gacha', c: 'TK', at: 'akiba', k: 'pers', must: 1, n: 'Gachapon', jp: 'ガチャポン', what: 'Cientos de máquinas de cápsulas con figuritas: Pokémon, anime, comida en miniatura.', where: 'Akihabara Gachapon Kaikan', q: 'Akihabara Gachapon Kaikan', price: '¥200–500 cada una', tip: 'Abre de 11:00 a 20:00 y solo acepta monedas de ¥100 (hay cambiadoras). Imperdible para Sam.' },
+  { id: 'radio', c: 'TK', at: 'akiba', k: 'pers', n: 'Figuras y cartas en Radio Kaikan', jp: 'ラジオ会館', what: 'Diez pisos de figuras, cartas Pokémon y juguetes de colección.', where: 'Akihabara Radio Kaikan', q: 'Akihabara Radio Kaikan', price: 'Desde ¥500', tip: 'Revisen que las cartas sean en el idioma que quieren.' },
+  { id: 'nintokyo', c: 'TK', at: 'shibuya', k: 'pers', must: 1, n: 'Nintendo TOKYO y Pokémon Center Shibuya', jp: 'ニンテンドートウキョウ', what: 'Artículos exclusivos de Mario, Zelda, Kirby y Pokémon en Shibuya PARCO, 6.º piso.', where: 'Shibuya PARCO 6F', q: 'Nintendo TOKYO Shibuya PARCO', price: 'Desde ¥800', tip: 'Temprano hay menos fila.' },
+  { id: 'pkmega', c: 'TK', at: 'sunshine', k: 'pers', must: 1, n: 'Pokémon Center MEGA TOKYO', jp: 'ポケモンセンターメガトウキョー', what: 'La tienda Pokémon más grande de Tokio, con peluches y artículos que solo hay ahí.', where: 'Sunshine City, Ikebukuro', q: 'Pokemon Center Mega Tokyo', price: 'Peluches desde ¥1,500', tip: 'Con pasaporte y compras de ¥5,000 o más aplica el tax-free.' },
+  { id: 'pkdx', c: 'TK', at: 'pokecafe', k: 'pers', n: 'Pokémon Center TOKYO DX', jp: 'ポケモンセンタートウキョーDX', what: 'Junto al Pokémon Café: artículos del café y de la tienda DX.', where: 'Nihombashi Takashimaya S.C., 5F', q: 'Pokemon Center Tokyo DX', price: 'Desde ¥800', tip: 'Recojan aquí los productos del pedido del Pokémon Café.' },
+  { id: 'charst', c: 'TK', at: 'charst', k: 'pers', n: 'Tokyo Character Street', jp: '東京キャラクターストリート', what: 'Unas 30 tiendas de personajes: Ghibli (Donguri), Jump Shop, Kirby, Sanrio, Pokémon.', where: 'Tokyo Station, piso B1', q: 'Tokyo Character Street', price: 'Desde ¥500', tip: 'Abre temprano y cierra tarde: buena para el último día.' },
+  { id: 'banana', c: 'TK', at: 'tokyost', k: 'dulce', must: 1, n: 'Tokyo Banana', jp: '東京ばな奈', what: 'El pastelito de plátano más famoso de Tokio. Hay ediciones de Pokémon y de panda.', where: 'Tokyo Station (Gransta), Ueno (atré) y Narita', q: 'Tokyo Banana Tokyo Station', price: '¥1,200–2,000 por 8', tip: 'Dura unas 2 semanas: cómprenlo al final del viaje.' },
+  { id: 'gransta', c: 'TK', at: 'tokyost', k: 'dulce', n: 'Dulces exclusivos de Tokyo Station', jp: '東京駅限定', what: 'Yōkan de Toraya con caja de la estación, galletas COCORIS y bocaditos «Cheesecake Now»: solo se venden ahí.', where: 'Gransta Tokyo, dentro de los torniquetes', q: 'Gransta Tokyo', price: '¥1,200–2,500', tip: 'Muchos están dentro de los torniquetes: necesitan un boleto o pasar con la Suica.' },
+  { id: 'kitkat', c: 'TK', at: 'donki', k: 'dulce', must: 1, n: 'Kit Kat de sabores japoneses', jp: 'キットカット', what: 'Matcha, sake, fresa, hojicha y ediciones regionales.', where: 'Don Quijote (Donki) Ueno y konbinis', q: 'Don Quijote Ueno', price: '¥300–1,000', tip: 'En Donki salen más baratos y abre hasta tarde.' },
+  { id: 'niki', c: 'TK', at: 'ameyoko', k: 'dulce', n: 'Snacks a granel en Ameyoko', jp: '二木の菓子', what: 'Chocolates, galletas y dulces japoneses a precio de mayoreo.', where: 'Niki no Kashi, Ameyoko (Ueno)', q: 'Niki no Kashi Ameyoko', price: 'Desde ¥100', tip: 'Ideal para llenar la maleta de dulces para la familia.' },
+  { id: 'kawaii', c: 'TK', at: 'takeshita', k: 'otro', n: 'Accesorios kawaii y tienda de ¥100', jp: '竹下通り', what: 'Calcetines, accesorios y papelería en Takeshita-dōri; DAISO Harajuku para regalitos baratos.', where: 'Takeshita-dōri y DAISO Harajuku', q: 'DAISO Harajuku', price: 'Desde ¥110', tip: 'Los domingos se llena; mejor temprano.' },
+  { id: 'kirby', c: 'TK', at: 'solamachi', k: 'pers', n: 'Tienda del Kirby Café', jp: 'カービィカフェ', what: 'Artículos de Kirby que no venden en otro lado, junto al café.', where: 'Tokyo Solamachi 4F (Skytree)', q: 'Kirby Cafe Tokyo Solamachi', price: 'Desde ¥600', tip: 'La tienda no requiere reserva; el café sí.' },
+  { id: 'itoya', c: 'TK', at: 'ginza', k: 'otro', n: 'Papelería Itoya', jp: '伊東屋', what: 'Doce pisos de papelería japonesa: plumas, libretas, washi y cartas.', where: 'G.Itoya, Ginza', q: 'Ginza Itoya', price: 'Desde ¥300', tip: 'Buena para libretas de sellos y plumas.' },
+  // Fuji
+  { id: 'fujicookie', c: 'FJ', at: 'lake', xy: [35.5045, 138.7713], k: 'dulce', must: 1, n: 'Fujiyama Cookie', jp: 'フジヤマクッキー', what: 'Galletas con forma del monte Fuji y la cima nevada de chocolate blanco: vainilla, matcha, fresa, Earl Grey y chocolate.', where: 'Fujiyama Cookie, frente al teleférico Kachi Kachi', q: 'Fujiyama Cookie Kawaguchiko', price: '¥200 la pieza · cajas desde ¥1,500', tip: 'Abre de 10:00 a 17:00 y cierra el 2.º y 4.º martes del mes. Dan a probar.' },
+  { id: 'shingen', c: 'FJ', at: 'kawaguchiko', k: 'dulce', must: 1, n: 'Shingen mochi', jp: '信玄餅', what: 'Mochi con kinako (harina de soya tostada) y miel negra, el dulce típico de Yamanashi.', where: 'Kikyōya: estación Kawaguchiko y tiendas de recuerdos', q: 'Kikyo Shingen Mochi Kawaguchiko', price: '≈ ¥1,000 por 8', tip: 'Dura unos 10 días; se come en el viaje.' },
+  { id: 'koshu', c: 'FJ', at: 'kawaguchiko', k: 'bebida', n: 'Vino Koshu de Yamanashi', jp: '甲州ワイン', what: 'Vino blanco de la uva koshu, la más antigua de Japón.', where: 'Tiendas de la estación Kawaguchiko', q: 'Kawaguchiko Station souvenir shop', price: '¥1,500–4,000', tip: 'Envuélvanlo en ropa y llévenlo en la maleta documentada.' },
+  { id: 'fujiglass', c: 'FJ', at: 'lake', k: 'arte', n: 'Vaso «Fuji-san»', jp: '富士山グラス', what: 'Vaso de vidrio con el Fuji en el fondo: con cerveza o té se ve el monte de colores.', where: 'Tiendas de recuerdos del lago Kawaguchi', q: 'Fujisan glass Kawaguchiko', price: '¥2,500–4,000', tip: 'Frágil: pidan que lo envuelvan doble.' },
+  // Kioto
+  { id: 'namayatsu', c: 'KY', at: 'sannenzaka', k: 'dulce', must: 1, n: 'Nama yatsuhashi', jp: '生八ツ橋', what: 'Triángulos suaves de masa de arroz con canela, rellenos de anko, matcha o chocolate.', where: 'Shōgoin Yatsuhashi o Honke Nishio (Sannenzaka y Kyoto Station)', q: 'Shogoin Yatsuhashi Kyoto', price: '≈ ¥500–1,200', tip: 'Dura alrededor de una semana: para el viaje.' },
+  { id: 'yakiyatsu', c: 'KY', at: 'kyotost', k: 'dulce', n: 'Yatsuhashi horneado', jp: '焼き八ツ橋', what: 'La versión crujiente de canela: aguanta meses.', where: 'Kyoto Station y Sannenzaka', q: 'Kyoto Station souvenir yatsuhashi', price: '≈ ¥600–1,200', tip: 'El mejor yatsuhashi para llevar a México.' },
+  { id: 'chanoka', c: 'KY', at: 'kyotost', k: 'dulce', must: 1, n: 'Cha no Ka de Malebranche', jp: '茶の菓', what: 'Galletas de té matcha con chocolate blanco. El regalo más pedido de Kioto.', where: 'Malebranche: Kyoto Station (Isetan B1) y Kyoto Tower Sando', q: 'Malebranche Kyoto Tower Sando', price: '≈ ¥1,300 por 10', tip: 'Duran unas 2 semanas.' },
+  { id: 'matcha', c: 'KY', at: 'teramachi', k: 'bebida', must: 1, n: 'Matcha de Uji', jp: '宇治抹茶', what: 'Té verde en polvo de primera; también hojicha y sencha.', where: 'Ippodo Tea, tienda principal (Teramachi-Nijō)', q: 'Ippodo Tea Kyoto Main Store', price: '¥1,500–3,000 la lata', tip: 'Una vez abierto, guárdenlo en el refrigerador.' },
+  { id: 'nishiki', c: 'KY', at: 'nishiki', k: 'comida', n: 'Encurtidos y especias del mercado Nishiki', jp: '錦市場', what: 'Tsukemono al vacío, condimentos de yuzu, sésamo y palillos.', where: 'Mercado Nishiki', q: 'Nishiki Market Kyoto', price: 'Desde ¥500', tip: 'Muchos puestos cierran temprano y los miércoles.' },
+  { id: 'shichimi', c: 'KY', at: 'kiyomizu', k: 'comida', n: 'Shichimi de Kioto', jp: '七味家本舗', what: 'Mezcla de siete chiles y especias, de una tienda de 1655.', where: 'Shichimiya Honpo, Sannenzaka (subiendo a Kiyomizu)', q: 'Shichimiya Honpo Kyoto', price: '≈ ¥600–1,200', tip: 'Ligero y aguanta meses.' },
+  { id: 'kiyoyaki', c: 'KY', at: 'kiyomizu', k: 'arte', n: 'Cerámica Kiyomizu-yaki', jp: '清水焼', what: 'Tazas y platos de cerámica hecha a mano.', where: 'Gojōzaka y Chawanzaka', q: 'Kiyomizu-yaki shop Gojozaka', price: 'Desde ¥1,500', tip: 'Frágil: pidan envoltura extra.' },
+  { id: 'sensu', c: 'KY', at: 'gion', k: 'arte', n: 'Abanico Kyō-sensu', jp: '京扇子', what: 'Abanicos plegables de bambú y papel hechos a mano.', where: 'Tiendas tradicionales de Gion y Shijō', q: 'Kyo sensu folding fan shop Gion Kyoto', price: '¥2,000–6,000', tip: 'Ligero y viaja bien.' },
+  { id: 'cacao365', c: 'KY', at: 'gion', k: 'dulce', n: 'Chocolates Cacao 365', jp: 'マールブランシュ', what: 'Bombones de matcha concentrado con un sello distinto para cada día del año.', where: 'Malebranche Cacao 365, Gion', q: 'Malebranche Cacao 365 Gion', price: 'Desde ¥1,000', tip: 'Busquen el del día de cumpleaños de alguien.' },
+  { id: 'kitsune', c: 'KY', at: 'fushimi', k: 'amuleto', n: 'Recuerdos de zorro en Fushimi Inari', jp: 'きつね', what: 'Ema con cara de zorro para pintar, omamori y figuritas de kitsune.', where: 'Fushimi Inari y las tiendas de la entrada', q: 'Fushimi Inari Taisha', price: '¥500–1,500', tip: 'La ema de zorro se puede pintar y dejar, o llevar de recuerdo.' },
+  { id: 'ninmuseo', c: 'KY', at: 'nintendo', k: 'pers', must: 1, n: 'Tienda del Nintendo Museum', jp: 'ニンテンドーミュージアム', what: 'Artículos que solo venden ahí, inspirados en la historia de Nintendo: tazas, playeras y recuerdos retro.', where: 'Nintendo Museum, Uji', q: 'Nintendo Museum Uji', price: 'Desde ¥1,000', tip: 'Algunos artículos tienen límite por persona.' },
+  { id: 'bambu', c: 'KY', at: 'togetsukyo', k: 'arte', n: 'Artesanía de bambú en Arashiyama', jp: '竹細工', what: 'Palillos, cucharas y canastitas de bambú.', where: 'Calle principal de Arashiyama', q: 'Arashiyama bamboo crafts shop', price: 'Desde ¥800', tip: 'Ligero y no se rompe.' },
+  { id: 'kyobaum', c: 'KY', at: 'togetsukyo', k: 'dulce', n: 'Kyō-baum de matcha', jp: '京ばあむ', what: 'Baumkuchen de matcha y soya; la versión suave solo se come en tiendas como la de Arashiyama.', where: 'Kyō-baum, Arashiyama', q: 'Kyobaum Arashiyama', price: '≈ ¥1,300', tip: 'Dura alrededor de un mes.' },
+  // Osaka
+  { id: '551', c: 'OS', at: 'dotonbori', k: 'comida', must: 1, n: 'Butaman de 551 Hōrai', jp: '551蓬莱 豚まん', what: 'El bollo de cerdo al vapor más famoso de Osaka, recién hecho.', where: '551 Hōrai, tienda principal de Namba', q: '551 Horai Namba Honten', price: '≈ ¥500 por 2', tip: NO_MX },
+  { id: 'rikuro', c: 'OS', at: 'dotonbori', k: 'dulce', must: 1, n: 'Pastel de queso Rikurō', jp: 'りくろーおじさんの店', what: 'Cheesecake japonés esponjoso y caliente, con pasas abajo.', where: 'Rikurō Ojisan no Mise, Namba (también en Shin-Osaka)', q: 'Rikuro Ojisan no Mise Namba', price: '≈ ¥1,000 el entero', tip: 'Se come el mismo día o al siguiente.' },
+  { id: 'glico', c: 'OS', at: 'dotonbori', k: 'dulce', n: 'Glico y Pocky de Osaka', jp: 'グリコ', what: 'Pocky gigantes, ediciones de Osaka y artículos del corredor de Glico.', where: 'Glico Shop, Dōtonbori', q: 'Glico Shop Dotonbori', price: 'Desde ¥500', tip: 'Junto al anuncio del corredor: foto de rigor.' },
+  { id: 'kuidaore', c: 'OS', at: 'dotonbori', k: 'dulce', n: 'Pudín de Kuidaore Tarō', jp: 'くいだおれ太郎プリン', what: 'Pudín en un sombrero del muñeco payaso de Dōtonbori.', where: 'Nakaza Kuidaore Building', q: 'Nakaza Kuidaore Building', price: '≈ ¥400', tip: 'Refrigerado: para comer en Osaka.' },
+  { id: 'pkosaka', c: 'OS', at: 'pkosaka', k: 'pers', must: 1, n: 'Pokémon Center Osaka DX', jp: 'ポケモンセンターオーサカDX', what: 'Tienda grande con artículos de la región de Kansai y el Pokémon Café de Osaka.', where: 'Daimaru Shinsaibashi 9F', q: 'Pokemon Center Osaka DX', price: 'Desde ¥800', tip: 'Tax-free con pasaporte a partir de ¥5,000.' },
+  { id: 'usj', c: 'OS', at: 'usj', k: 'pers', must: 1, n: 'Recuerdos de Universal', jp: 'ユニバーサル', what: 'Super Nintendo World (bloques «?», power-ups), ranas de chocolate y grageas de Harry Potter, Minions.', where: 'Tiendas dentro de USJ', q: 'Universal Studios Japan', price: 'Desde ¥1,000', tip: 'Compren al final del día y guarden la bolsa en un casillero.' },
+  { id: 'takoyaki', c: 'OS', at: 'dotonbori', k: 'dulce', n: 'Snacks de takoyaki', jp: 'たこ焼き', what: 'Galletas y botanas sabor takoyaki en lata (Takomasa y otras marcas).', where: 'Dōtonbori y Shin-Osaka', q: 'Takomasa Dotonbori', price: '¥600–1,200', tip: 'Aguantan semanas.' },
+  // Kobe
+  { id: 'frantz', c: 'KB', at: 'harborland', k: 'dulce', must: 1, n: 'Kobe Frantz', jp: '神戸フランツ', what: 'Fresas secas cubiertas de chocolate y el pudín en «olla mágica».', where: 'Kobe Frantz: umie Mosaic (Harborland) y estación de Kobe', q: 'Kobe Frantz umie MOSAIC', price: '¥1,000–2,000', tip: 'Las fresas con chocolate aguantan semanas; el pudín es refrigerado.' },
+  { id: 'kobepudding', c: 'KB', at: 'harborland', k: 'dulce', n: 'Kobe Pudding', jp: '神戸プリン', what: 'Pudín de caramelo, el recuerdo clásico de Kobe.', where: 'Tiendas de recuerdos de Harborland y Sannomiya', q: 'Kobe Pudding souvenir Harborland', price: '≈ ¥1,000 por 4', tip: 'Hay versión que no necesita refrigerador: fíjense en la etiqueta.' },
+  { id: 'gaufre', c: 'KB', at: 'steakland', xy: [34.6905, 135.1885], k: 'dulce', n: 'Gaufres de Kobe Fūgetsudō', jp: '神戸風月堂 ゴーフル', what: 'Obleas finas con crema de vainilla, fresa y chocolate en lata.', where: 'Kobe Fūgetsudō, Motomachi', q: 'Kobe Fugetsudo Motomachi', price: '≈ ¥1,000–2,000', tip: 'Duran meses: perfectas para México.' },
+  { id: 'nada', c: 'KB', at: 'steakland', k: 'bebida', n: 'Sake de Nada', jp: '灘の酒', what: 'Nada es la zona de sake más grande de Japón.', where: 'Tiendas departamentales de Sannomiya', q: 'Nada sake shop Sannomiya', price: '¥1,500–5,000', tip: 'Envuélvanlo en ropa para la maleta.' },
+  // Kanazawa
+  { id: 'aburatori', c: 'KZ', at: 'higashi', k: 'arte', must: 1, n: 'Papel secante de hoja de oro', jp: 'あぶらとり紙', what: 'Kanazawa hace el 99 % de la hoja de oro de Japón; este papel facial es ligero y útil.', where: 'Hakuichi y Hakuza, Higashi Chaya', q: 'Hakuichi Higashiyama Kanazawa', price: '¥500–1,500', tip: 'Las tiendas de Higashi Chaya cierran a las 17:00–17:30.' },
+  { id: 'goldice', c: 'KZ', at: 'higashi', k: 'comida', must: 1, n: 'Helado con hoja de oro', jp: '金箔ソフト', what: 'Helado cubierto con una hoja entera de oro comestible.', where: 'Hakuichi Higashiyama', q: 'Hakuichi Higashiyama Kanazawa', price: '≈ ¥1,000', tip: 'Para la foto. Cómanlo ahí mismo.' },
+  { id: 'goldsweets', c: 'KZ', at: 'higashi', k: 'dulce', n: 'Dulces y sake con oro', jp: '金箔', what: 'Caramelos y konpeitō con hoja de oro; sake con hojuelas doradas flotando.', where: 'Hakuichi y tiendas de Higashi Chaya', q: 'Hakuichi Higashiyama Kanazawa', price: '¥500–3,000', tip: 'El sake con oro es un regalo vistoso para adultos.' },
+  { id: 'kintsuba', c: 'KZ', at: 'higashi', k: 'dulce', n: 'Kintsuba de Nakataya', jp: '中田屋 きんつば', what: 'Cuadritos de frijol dulce en masa fina, el dulce clásico de Kanazawa.', where: 'Nakataya Higashiyama (también en la estación)', q: 'Nakataya Higashiyama Kanazawa', price: '≈ ¥200 cada uno', tip: 'Dura unos días.' },
+  { id: 'bocha', c: 'KZ', at: 'kanazawast', k: 'bebida', n: 'Kaga bōcha', jp: '加賀棒茶', what: 'Té tostado de tallos, suave y aromático, típico de Kanazawa.', where: 'Anto, Kanazawa Station (abre más tarde que Higashi Chaya)', q: 'Kanazawa Hyakubangai Anto', price: '≈ ¥700–1,500', tip: 'Ligero y aguanta meses.' },
+  { id: 'omicho', c: 'KZ', at: 'omicho', k: 'comida', n: 'Algas y botanas del mar en Ōmichō', jp: '近江町市場', what: 'Algas, galletas de pescado y condimentos del Mar de Japón.', where: 'Mercado Ōmichō', q: 'Omicho Market Kanazawa', price: 'Desde ¥500', tip: 'Varios puestos cierran los miércoles.' },
+  // Hida: Shirakawa-gō y Takayama
+  { id: 'sarubobo', c: 'HD', at: 'sanmachi', k: 'amuleto', must: 1, n: 'Sarubobo', jp: 'さるぼぼ', what: 'Muñeco «bebé mono» sin cara, amuleto de Hida para la familia. Cada color pide algo distinto.', where: 'Kabochaya-san (tiene el sarubobo dorado que no hay en otro lado) o Hidatchi Sarubobo Shop', q: 'Kabochayasan Takayama', price: '¥500–2,000', tip: 'Cierran alrededor de las 17:00 (16:30 en invierno).' },
+  { id: 'hidasake', c: 'HD', at: 'sanmachi', k: 'bebida', must: 1, n: 'Sake de Takayama', jp: '飛騨の地酒', what: 'Seis cervecerías de sake en Sanmachi; las marcadas con una bola de cedro (sugidama) dan degustación.', where: 'Cervecerías de Sanmachi Suji', q: 'Sanmachi Suji sake brewery Takayama', price: '¥1,200–4,000', tip: 'Degustación desde ¥300. Solo adultos.' },
+  { id: 'hidabeef', c: 'HD', at: 'sanmachi', k: 'comida', n: 'Sushi de carne de Hida en senbei', jp: '飛騨牛握り', what: 'Nigiri de carne de res de Hida servido sobre una galleta de arroz.', where: 'Puestos de Sanmachi', q: 'Hida beef sushi Sanmachi Takayama', price: '≈ ¥800–1,000', tip: NO_MX },
+  { id: 'hoba', c: 'HD', at: 'asaichi', k: 'comida', n: 'Hoba miso y encurtidos del mercado', jp: '朴葉味噌', what: 'Miso para asar sobre hoja de magnolia, encurtidos de nabo rojo y especias.', where: 'Mercado matutino Miyagawa (7:00–12:00)', q: 'Miyagawa Morning Market Takayama', price: 'Desde ¥300', tip: 'En invierno hay menos puestos. Revisen que el miso esté sellado.' },
+  { id: 'ittobori', c: 'HD', at: 'asaichi', k: 'arte', n: 'Tallado Ichii Ittōbori', jp: '一位一刀彫', what: 'Figuras talladas en madera de tejo, artesanía tradicional de Hida.', where: 'Tiendas del mercado Miyagawa y de Sanmachi', q: 'Ichii Ittobori Takayama', price: 'Desde ¥1,500', tip: 'Las pequeñas viajan bien.' },
+  { id: 'temari', c: 'HD', at: 'shirakawa', k: 'arte', n: 'Temari de seda con sarubobo', jp: '絹てまり', what: 'Bolita de hilo de seda con un sarubobo adentro; también dulces de frijol y encurtidos.', where: 'Kobikiya, Ogimachi (Shirakawa-gō)', q: 'Kobikiya Kakinokiten Shirakawa-go', price: '¥1,000–3,000', tip: 'Los autobuses no esperan: compren antes de volver a la terminal.' },
+  { id: 'hobacha', c: 'HD', at: 'shirakawa', k: 'bebida', n: 'Té de hoja de magnolia', jp: '朴葉茶', what: 'Té suave de hoja de magnolia, especialidad de Shirakawa-gō.', where: 'Tiendas de recuerdos de Ogimachi', q: 'Shirakawa-go souvenir shop Ogimachi', price: '≈ ¥600–1,000', tip: 'Ligero y aguanta meses.' }
 ];
 mem.shopDb = null;
 function startShop(db) {
@@ -2951,6 +3019,53 @@ function startShop(db) {
   }, () => {});
 }
 const shopItems = () => (mem.shopDb || store.get('shopLocal', [])).slice().sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+// en qué días del plan y en qué momento queda cerca cada compra (por distancia a los lugares del itinerario)
+const buyXY = b => b.xy || [P[b.at][1], P[b.at][2]];
+const kmTo = ([a, b], [c, d]) => { const r = Math.PI / 180; return Math.hypot((d - b) * r * Math.cos((a + c) / 2 * r), (c - a) * r) * 6371; };
+const keyXY = k => { const p = place(k); return [p.lat, p.lng]; };
+const dayKeys = day => [...new Set([...day.items.flatMap(it => it.p || []), ...day.legs.flatMap(l => [l.o, l.d])])];
+const BUY_DAYS = Object.fromEntries(BUYS.map(b => [b.id, DAYS.filter(d => dayKeys(d).some(k => kmTo(keyXY(k), buyXY(b)) <= (k.startsWith('b:') ? .6 : 1))).map(d => d.n)]));   // del alojamiento, solo lo que está a unos pasos
+const buyMap = b => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(b.q);
+const buyGo = b => 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(b.q) + '&travelmode=walking';
+const buyState = b => { const x = shopItems().find(s => s.name === b.n); return x ? (x.bought ? 'bought' : 'list') : ''; };
+const byMust = (a, b) => (b.must || 0) - (a.must || 0);
+function buysNear(keys, km = .8) {
+  const xs = keys.map(keyXY);
+  return BUYS.map(b => [b, Math.min(...xs.map(p => kmTo(p, buyXY(b))))]).filter(([b, d]) => d <= km && buyState(b) !== 'bought')
+    .sort((a, b) => byMust(a[0], b[0]) || a[1] - b[1]).map(([b]) => b);
+}
+function buyRow(b, sub, inPlan) {
+  const st = buyState(b), today = !inPlan && todayDay();
+  const tag = st === 'bought' ? ' <span class="pill ok">Comprado</span>' : st === 'list' ? ' <span class="pill tint">En la lista</span>' : b.must ? ' <span class="pill hot">Imperdible</span>' : '';
+  const near = today && BUY_DAYS[b.id].includes(today.n) && st !== 'bought' ? ' · les queda cerca hoy' : '';
+  return row({ tag: 'button', cls: 'ld', attrs: `data-buy="${b.id}"`, lead: ico(I.gift, BUY_K[b.k][1]), t: esc(b.n) + tag, s: esc((sub || `${b.where} · ${b.price}`) + near), chev: 1 });
+}
+function buySheet(id) {
+  const b = BUYS.find(x => x.id === id); if (!b) return;
+  const st = buyState(b), dd = BUY_DAYS[b.id].map(n => DAYS[n - 1]);
+  openSheet(b.n, grp(null, row({ cls: 'ld', lead: ico(I.gift, BUY_K[b.k][1]), t: `<b>${esc(b.n)}</b>`, s: `${CITY[b.c].n} · ${BUY_K[b.k][0]}${b.must ? ' · imperdible' : ''}` }) +
+      row({ t: esc(b.what), sm: 1 }) + row({ t: 'Dónde', s: esc(b.where) }) + row({ t: 'Precio', tr: esc(b.price) }) +
+      (b.tip ? row({ cls: 'ld', lead: ico(I.bulb, 'var(--yellow)'), t: esc(b.tip), sm: 1 }) : '')) +
+    (dd.length ? grp('Les queda cerca', dd.map(d => { const p = ymdParts(d.date); return row({ href: '#dia' + d.n, t: `Día ${d.n} · ${esc(d.title)}`, s: `${p.d} ${MES[p.m - 1]}`, chev: 1 }); }).join('')) : '') +
+    grp(null, row({ href: buyMap(b), ext: 1, cls: 'link', t: 'Ver la tienda en Google Maps' }) + row({ href: buyGo(b), ext: 1, cls: 'link', t: 'Cómo llegar desde donde estoy' }) +
+      (st ? row({ t: st === 'bought' ? 'Ya lo compraron' : 'Ya está en su lista de compras', tr: `<span class="pill ok">${st === 'bought' ? 'Comprado' : 'En la lista'}</span>` })
+        : row({ tag: 'button', cls: 'center', t: 'Agregar a la lista de compras', attrs: `data-shop-idea="${b.id}"` }))) +
+    showCard('Pídanlo así', b.jp, 'Muestren el nombre en japonés en la tienda', b.jp));
+}
+// Hoy: lo que se puede comprar junto a la actividad de ahora (o la siguiente)
+function buysNowHtml(day, it) {
+  if (!it) return '';
+  const keys = [...new Set([...(it.p || []), ...legsForItem(day, it).map(l => l.d)])].filter(k => !k.startsWith('b:'));
+  const near = keys.length ? buysNear(keys).slice(0, 4) : [];
+  if (!near.length) return '';
+  return grp('Para comprar aquí', near.map(b => buyRow(b, null, true)).join('') + row({ tag: 'button', cls: 'link', attrs: `data-buy-city="${day.city}" data-buy-go`, t: `Todo lo que vale la pena en ${CITY[day.city].n}`, chev: 1 }), null, esc(place(keys[0]).n));
+}
+// día del itinerario: compras que quedan en el camino
+function buysDayHtml(day) {
+  const l = BUYS.filter(b => BUY_DAYS[b.id].includes(day.n)).sort(byMust);
+  if (!l.length) return '';
+  return grp('Para comprar en este día', l.slice(0, 6).map(b => buyRow(b, null, true)).join('') + row({ tag: 'button', cls: 'link', attrs: `data-buy-city="${day.city}" data-buy-go`, t: `Todo lo que vale la pena en ${CITY[day.city].n}`, chev: 1 }), null, String(l.length));
+}
 async function shopWrite(op, id, data) {
   if (mem.db) {
     if (op === 'add') await mem.db.collection('shop').add(data);
@@ -2987,8 +3102,10 @@ function comprasHtml() {
       row({ tag: 'button', cls: 'center', t: 'Agregar a la lista', attrs: 'type="submit"' }).replace(' type="button"', ''))}</form>` +
     (sorted.length ? grp('Por comprar', sorted.map(itemRow).join(''), null, String(sorted.length)) : '') +
     (done.length ? grp('Comprado', done.map(itemRow).join(''), null, String(done.length)) : '') +
-    grp('Ideas por ciudad', SOUVENIRS.map(([n, c, w], i) => row({ t: esc(n), s: `${CITY[c].n} · ${esc(w)}`, tr: items.some(x => x.name === n) ? '<span class="pill ok">En la lista</span>' : `<button class="tbtn" type="button" data-shop-idea="${i}">Agregar</button>` })).join('')) +
-    grp('Tax-free', tipRows(['Lleven el pasaporte. <b>Desde el 1 nov 2026</b> pagas el 10% en la tienda y te lo devuelven al salir de Japón: guarden recibos y no abran los productos hasta salir de Japón.']));
+    (() => { const nx = DAYS.find(d => d.date >= jstNow().ymd), bc = store.get('buyCity', null) || here || (nx ? nx.city : 'TK');
+      return grp('Qué comprar en cada ciudad', `<div class="r buycity"><div class="cchips">${cityOrder.map(k => `<button type="button" data-buy-city="${k}" aria-pressed="${k === bc}">${CITY[k].n}</button>`).join('')}</div></div>` +
+        BUYS.filter(b => b.c === bc).sort(byMust).map(b => buyRow(b)).join(''), 'Toquen uno para ver la tienda, el precio, el mapa y cómo pedirlo en japonés. En Hoy y en cada día aparecen solos los que quedan cerca del plan.', String(BUYS.filter(b => b.c === bc).length)); })() +
+    grp('Tax-free y aduana', tipRows(['México no deja entrar productos con carne (como los bollos de cerdo o la carne de Hida): esos, para comer allá. Dulces empacados, té y artesanía pasan sin problema.', 'Lleven el pasaporte. <b>Desde el 1 nov 2026</b> pagas el 10% en la tienda y te lo devuelven al salir de Japón: guarden recibos y no abran los productos hasta salir de Japón.']));
 }
 
 /* ---------- hojas ---------- */
@@ -4166,7 +4283,7 @@ function attachSwipe(card) {
 }
 document.addEventListener('click', e => { if (mem.swallowClick) { e.preventDefault(); e.stopPropagation(); } }, true);
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-say],[data-check],[data-extra],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket],[data-step],[data-focus],[data-food],[data-theme-set],[data-stamp],[data-ask],[data-chat-stop],[data-chat-clear],[data-doc],[data-doc-add],[data-doc-del],[data-offline-all],[data-doc-edit],[data-pet-pick],[data-pet],[data-me],[data-unstamp],[data-sheet-close],[data-scene-phase],[data-scene-wx],[data-wx],[data-scene-city],[data-shop-buy],[data-shop-del],[data-shop-idea],[data-wxopen],[data-wxrefresh]');
+  const t = e.target.closest('[data-say],[data-check],[data-extra],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket],[data-step],[data-focus],[data-food],[data-theme-set],[data-stamp],[data-ask],[data-chat-stop],[data-chat-clear],[data-doc],[data-doc-add],[data-doc-del],[data-offline-all],[data-doc-edit],[data-pet-pick],[data-pet],[data-me],[data-unstamp],[data-sheet-close],[data-scene-phase],[data-scene-wx],[data-wx],[data-scene-city],[data-shop-buy],[data-shop-del],[data-shop-idea],[data-wxopen],[data-wxrefresh],[data-buy],[data-buy-city]');
   if (!t) return;
   const d = t.dataset;
   const sg = t.closest('.seg');
@@ -4177,7 +4294,9 @@ document.addEventListener('click', e => {
     if (mem.shopArm === d.shopDel) { mem.shopArm = null; shopWrite('delete', d.shopDel).then(() => hud('Quitado de la lista'), () => hud('No se pudo quitar')); }
     else { mem.shopArm = d.shopDel; rerender(); setTimeout(() => { if (mem.shopArm === d.shopDel) { mem.shopArm = null; rerender(); } }, 3000); }
   }
-  else if (d.shopIdea != null) { const [nm, c] = SOUVENIRS[+d.shopIdea]; shopWrite('add', null, { name: nm, who: '', budget: 0, city: c, bought: false, by: meKey(), createdAt: new Date().toISOString() }).then(() => hud('Agregado a la lista'), () => hud('No se pudo agregar')); }
+  else if (d.shopIdea != null) { const b = BUYS.find(x => x.id === d.shopIdea), wasOpen = !$('#sheet').hidden; if (b) shopWrite('add', null, { name: b.n, who: '', budget: 0, city: b.c, bought: false, by: meKey(), createdAt: new Date().toISOString() }).then(() => { hud('Agregado a la lista'); if (wasOpen) setTimeout(() => buySheet(b.id), 300); }, () => hud('No se pudo agregar')); }
+  else if (d.buy) buySheet(d.buy);
+  else if (d.buyCity) { store.set('buyCity', d.buyCity); if ('buyGo' in d) location.hash = '#guia-compras'; else rerender(); }
   else if (d.check) { toggleCheck(d.check); if (checks()[d.check]) mem.pop = d.check; rerender(); }
   else if (d.themeSet) setTheme(d.themeSet, e);
   else if (d.scenePhase) setScenePart('scenePhase', d.scenePhase, e);
