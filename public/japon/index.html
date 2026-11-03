@@ -15,7 +15,7 @@
 :root {
   /* «Washi & Sumi»: papel, tinta y colores tradicionales japoneses. Todo texto ≥ 7:1 (AAA). */
   --bg: #F7F5F0; --card: #FFFFFF; --fill: rgba(22,23,28,.06); --fill2: rgba(22,23,28,.10); --segsel: #FFFFFF;
-  --label: #16171C; --label2: #3B3C45; --label3: #8A8B94; --label-h: #2E2F37; --sep: rgba(22,23,28,.14); --gray: #43444D;
+  --label: #16171C; --label2: #33343C; --label3: #8A8B94; --label-h: #2E2F37; --sep: rgba(22,23,28,.14); --gray: #43444D;
   --tint: #153E76; --green: #175A33; --orange: #573A00; --red: #7A2318; --yellow: #644200; --indigo: #3B3FA8; --teal: #07565E; --purple: #5A3689; --pink: #8C1B43;
   --on: #FFFFFF; --chip: #FFFFFF; --halo: rgba(247,245,240,.95);
   --bar: rgba(249,249,249,.84); --barline: rgba(0,0,0,.2);
@@ -673,10 +673,10 @@ main, .grp { grid-template-columns: minmax(0, 1fr); }
 :root[data-theme="dark"] { --bar-tint: rgba(16,18,26,.46); --bar-rim: rgba(255,255,255,.16); --bar-hi: rgba(255,255,255,.16); --bar-lo: rgba(0,0,0,.3); --bar-sheen: rgba(255,255,255,.09); --bar-pill: rgba(6,8,14,.35); --bar-halo: rgba(0,0,0,.55); --bar-br: .6; --edge-tint: rgba(14,16,24,.72); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bar-tint: rgba(16,18,26,.46); --bar-rim: rgba(255,255,255,.16); --bar-hi: rgba(255,255,255,.16); --bar-lo: rgba(0,0,0,.3); --bar-sheen: rgba(255,255,255,.09); --bar-pill: rgba(6,8,14,.35); --bar-halo: rgba(0,0,0,.55); --bar-br: .6; --edge-tint: rgba(14,16,24,.72); } }
 /* con sol bajo brillante detrás (amanecer y golden hour), el cristal oscuro se tiñe más para que el texto no pierda contraste */
-:root[data-theme="dark"][data-phase="sunset"], :root[data-theme="dark"][data-phase="dawn"] { --card: rgba(24,26,36,.58); --glass: rgba(24,26,36,.7); --glass-fx: blur(26px) saturate(120%) brightness(.3); }
+:root[data-theme="dark"][data-phase="sunset"], :root[data-theme="dark"][data-phase="dawn"], :root[data-theme="dark"][data-phase="day"][data-sky="clear"] { --card: rgba(24,26,36,.58); --glass: rgba(24,26,36,.7); --glass-fx: blur(26px) saturate(120%) brightness(.3); }
 :root[data-theme="light"][data-phase="sunset"], :root[data-theme="light"][data-phase="dawn"] { --glass-fx: blur(24px) saturate(140%) brightness(1.55); --tint: #153E76; }
 @media (prefers-color-scheme: light) { :root:not([data-theme])[data-phase="sunset"], :root:not([data-theme])[data-phase="dawn"] { --glass-fx: blur(24px) saturate(140%) brightness(1.55); --tint: #153E76; } }
-@media (prefers-color-scheme: dark) { :root:not([data-theme])[data-phase="sunset"], :root:not([data-theme])[data-phase="dawn"] { --card: rgba(24,26,36,.58); --glass: rgba(24,26,36,.7); --glass-fx: blur(26px) saturate(120%) brightness(.3); } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme])[data-phase="sunset"], :root:not([data-theme])[data-phase="dawn"], :root:not([data-theme])[data-phase="day"][data-sky="clear"] { --card: rgba(24,26,36,.58); --glass: rgba(24,26,36,.7); --glass-fx: blur(26px) saturate(120%) brightness(.3); } }
 :root[data-sky="rain"] { --bar-tint: rgba(250,249,246,.55); }
 :root[data-theme="dark"][data-sky="rain"] { --bar-tint: rgba(16,18,26,.55); }
 body::before { left: 0; right: 0; top: 0; bottom: auto; height: calc(env(safe-area-inset-top, 0px) + 88px); z-index: 19; pointer-events: none; opacity: 0; transition: opacity .35s ease;
@@ -3168,6 +3168,9 @@ const BG = (() => {
       dawn:   { sky: '#F4DCE6', hz: '#FDDCA8', paper: '#F9F1E9', sun: '#F7906F', glow: '#FFD49A', core: '#FFF4DC', shade: '#7B6AA8', sunAt: [.7, .62], sunR: 8.5, ink: '#5A3A52', far: '#E4B3B5', mid: '#C68FA0', water: '#F6CDB8', lit: .2,
         grad: [[0, '#F4DCE6'], [.28, '#F8D3D3'], [.46, '#FBCFB8'], [.6, '#FDDCA8'], [.7, '#FDE8C4'], [.86, '#F9EFE2'], [1, '#F9F1E9']] },
       day:    { sky: '#DDE7F0', hz: '#EDF0EC', sun: '#F1DDA8', ink: '#2E3340', far: '#AFBCCB', mid: '#8E9AAB', water: '#C2D4E4', lit: 0 },
+      // día despejado: azul limpio que se aclara hacia el horizonte (la parte de arriba sigue clara para el texto)
+      dayClear: { sky: '#C3DFF6', hz: '#E8F1F3', sun: '#FFE7A0', ink: '#2B3242', far: '#AFBCCB', mid: '#8E9AAB', water: '#B2D1EC', lit: 0,
+        grad: [[0, '#BCDBF5'], [.22, '#C4E0F6'], [.42, '#D6E9F7'], [.58, '#E8F1F4'], [.72, '#F1F4F0'], [1, '#F7F5F0']] },
       // golden hour en claro: crema → miel → ámbar profundo en el horizonte
       sunset: { sky: '#F5E4C8', hz: '#F09A55', paper: '#F8EEDF', sun: '#FF9F45', glow: '#FFC25E', core: '#FFF0C8', shade: '#5E3F78', sunAt: [.68, .64], sunR: 10, ink: '#4A2A24', far: '#D79468', mid: '#A0645A', water: '#F2B070', lit: .45,
         grad: [[0, '#F5E4C8'], [.26, '#F7D49E'], [.44, '#F6B877'], [.58, '#F09A55'], [.66, '#EC8A4A'], [.74, '#F6C48E'], [.86, '#F8E6CF'], [1, '#F8EEDF']] },
@@ -3180,6 +3183,8 @@ const BG = (() => {
       dawn:   { sky: '#0C1030', hz: '#D2766E', paper: '#12132A', sun: '#FF9A7A', glow: '#FF8F6A', core: '#FFD9B8', shade: '#0A0C24', sunAt: [.7, .71], sunR: 7, ink: '#F3C2B0', far: '#3E2E58', mid: '#241C3C', water: '#2A2244', lit: .5,
         grad: [[0, '#0C1030'], [.3, '#1A1D4C'], [.48, '#3B2A60'], [.6, '#8A4A6E'], [.68, '#D2766E'], [.74, '#F2A27A'], [.8, '#3A2A48'], [1, '#141428']] },
       day:    { sky: '#11161F', hz: '#29323F', sun: '#B9AA82', ink: '#C3CCDA', far: '#212A37', mid: '#18202B', water: '#1A2230', lit: .3 },
+      dayClear: { sky: '#14274A', hz: '#2F4B6F', sun: '#E8D8A8', ink: '#C6D1E2', far: '#22344E', mid: '#182639', water: '#1B2C45', lit: .25,
+        grad: [[0, '#0D1D3B'], [.3, '#152E57'], [.5, '#21416B'], [.64, '#33557B'], [.8, '#1A2433'], [1, '#10121B']] },
       // golden hour en oscuro: ciruela → vino → óxido → ámbar y oro en el horizonte; contraluz con borde dorado
       sunset: { sky: '#171230', hz: '#F7A246', paper: '#170F18', sun: '#FFB347', glow: '#FF9A3C', core: '#FFF0C0', shade: '#140A18', sunAt: [.68, .71], sunR: 11, ink: '#FFC98A', far: '#6E3A36', mid: '#341A26', water: '#3A2026', lit: .75,
         grad: [[0, '#171230'], [.28, '#2A1838'], [.44, '#4E2236'], [.56, '#8E3A32'], [.64, '#D86A2E'], [.71, '#F7A246'], [.76, '#FFC46A'], [.82, '#3C2028'], [1, '#1A1018']] },
@@ -3187,7 +3192,7 @@ const BG = (() => {
       night:  { sky: '#080A14', hz: '#1A1F36', moon: '#E3DBC0', ink: '#BFC6DE', far: '#141931', mid: '#0E1226', water: '#101429', lit: 1 },
     }
   };
-  const WXT = { clear: 0, cloudy: .35, rain: .45, snow: .3 };
+  const WXT = { clear: 0, cloudy: .5, rain: .45, snow: .3 };
   const PIG = { ver: '#D2553A', gold: '#D8A43A', crim: '#B8403A', cel: '#6FA596', pine: '#3F5E4A', moss: '#6E8A62', straw: '#CDB27C', wood: '#8A6A4A', stone: '#97928A', thatch: '#A98B5F', sky: '#9FB3CC' };
   let W = 0, H = 0, dpr = 1, scene = { phase: 'night', weather: 'clear', city: 'TK', dark: true }, base = null, M = null;
   let lights = [], waters = [], fx = [], rain = null, glitter = [], flakes = [], clouds = [], stars = [], raf = 0, last = 0;
@@ -3197,7 +3202,7 @@ const BG = (() => {
   const mix = (a, b, t) => '#' + hex(a).map((v, i) => Math.round(v + (hex(b)[i] - v) * t).toString(16).padStart(2, '0')).join('');
   const rgba = (h, a) => `rgba(${hex(h).join(',')},${a})`;
   function mood() {
-    const D = scene.dark ? MOOD.dark : MOOD.light, m = D[scene.phase] || D.night, t = WXT[scene.weather] || 0, gt = Math.min(.8, t * 1.6);
+    const D = scene.dark ? MOOD.dark : MOOD.light, m = scene.phase === 'day' && scene.weather === 'clear' ? D.dayClear : D[scene.phase] || D.night, t = WXT[scene.weather] || 0, gt = Math.min(.8, t * 1.6);
     return { ...m, dark: scene.dark, paper: m.paper || D.paper, sky: mix(m.sky, D.grey, t), hz: mix(m.hz, D.grey, t * .8), far: mix(m.far, D.grey, t * .4), water: mix(m.water, D.grey, t * .5),
       grad: m.grad && m.grad.map(([q, col]) => [q, mix(col, D.grey, gt)]), glow: m.glow && mix(m.glow, D.grey, gt * .6) };
   }
@@ -3709,7 +3714,7 @@ const BG = (() => {
     lights = []; waters = []; fx = []; glitter = [];
     const K = kit(k);
     // una aguada irregular encima del degradado para que el cielo tenga textura de acuarela
-    K.wash([[-20, -20, 0], [W + 20, -20, 0], [W + 20, H * rnd(.3, .4), 1], [W * .6, H * rnd(.38, .46), 1], [W * .25, H * rnd(.32, .42), 1], [-20, H * rnd(.36, .44), 1]], M.sky, dark ? .25 : .22, { amt: .05, n: 5, edge: 0, op: 'source-over', soft: 14, tex: 0 });
+    K.wash([[-20, -20, 0], [W + 20, -20, 0], [W + 20, H * rnd(.3, .4), 1], [W * .6, H * rnd(.38, .46), 1], [W * .25, H * rnd(.32, .42), 1], [-20, H * rnd(.36, .44), 1]], M.sky, (dark ? .25 : .22) * (wx === 'cloudy' ? .35 : 1), { amt: .05, n: 5, edge: 0, op: 'source-over', soft: 14, tex: 0 });
     // sol o luna: disco suave a media altura, detrás de lo emblemático
     // de día solo un resplandor cálido; al amanecer y al atardecer, el disco del sol (hinomaru) con borde mojado
     if (M.glow && scene.city !== 'FJ') drawSun(K);
@@ -3718,6 +3723,24 @@ const BG = (() => {
       hl.addColorStop(0, rgba(M.sun, (clear ? 1 : .4) * (dark ? .22 : day ? .35 : .4))); hl.addColorStop(1, rgba(M.sun, 0));
       k.fillStyle = hl; k.fillRect(sx - R, sy - R, R * 2, R * 2);
       if (!day && clear) { const r = K.u * 7.5; K.wash(K.ellP(sx, sy, r, r, 20), M.sun, dark ? .45 : .5, { amt: .025, n: 6, edge: .45, ew: 1.4 }); }
+      if (day && clear) {
+        // sol de mediodía: halo amplio, rayos suaves y un disco blanco cálido
+        k.save(); if (dark) k.globalCompositeOperation = 'screen';
+        const halo = k.createRadialGradient(sx, sy, 0, sx, sy, K.u * 62);
+        const hc = dark ? '#FFD27A' : '#FFF1C4'; halo.addColorStop(0, rgba(dark ? '#FFE2A0' : '#FFF6D6', dark ? .26 : .8)); halo.addColorStop(.16, rgba(hc, dark ? .1 : .42)); halo.addColorStop(.5, rgba(hc, dark ? .03 : .1)); halo.addColorStop(1, rgba(hc, 0));
+        k.fillStyle = halo; k.fillRect(0, 0, W, H);
+        k.filter = 'blur(6px)';
+        for (let i = 0; i < 10; i++) {
+          const a0 = i / 10 * Math.PI * 2 + gauss() * .08, sp = rnd(.03, .05), L = K.u * rnd(26, 40), rg = k.createRadialGradient(sx, sy, 0, sx, sy, L);
+          rg.addColorStop(0, rgba(dark ? '#FFDA8A' : '#FFF4D0', dark ? .1 : .32)); rg.addColorStop(1, rgba(dark ? '#FFDA8A' : '#FFF4D0', 0));
+          k.fillStyle = rg; k.beginPath(); k.moveTo(sx, sy); k.arc(sx, sy, L, a0 - sp, a0 + sp); k.closePath(); k.fill();
+        }
+        k.filter = 'none';
+        const r = K.u * 6.5, core = k.createRadialGradient(sx, sy, 0, sx, sy, r);
+        core.addColorStop(0, rgba(dark ? '#FFF6DC' : '#FFFFFF', dark ? .9 : 1)); core.addColorStop(.72, rgba(dark ? '#FFDC8E' : '#FFF8DE', dark ? .8 : .95)); core.addColorStop(1, rgba(dark ? '#FFC860' : '#FFEFC0', 0));
+        k.fillStyle = core; k.beginPath(); k.arc(sx, sy, r, 0, 7); k.fill();
+        k.restore();
+      }
     }
     if (M.moon && clear) {
       const R = K.u * 4.2, mx = W * .78, my = H * .44, hl = k.createRadialGradient(mx, my, 0, mx, my, R * 6);
@@ -3770,18 +3793,18 @@ const BG = (() => {
       ripples: [], gust: [{ x: rnd(-W * .9, W), v: rnd(26, 42) }]
     } : null;
     flakes = wx === 'snow' || scene.city === 'HD' ? Array.from({ length: Math.round(W * H / (wx === 'snow' ? 7000 : 16000)) }, () => ({ x: rnd(0, W), y: rnd(0, H), r: rnd(1, 2.4), v: rnd(16, 40), ph: rnd(0, 6) })) : [];
-    clouds = clear ? [] : Array.from({ length: wx === 'cloudy' ? 5 : 4 }, (_, i) => {
+    clouds = clear ? [] : Array.from({ length: wx === 'cloudy' ? 8 : 4 }, (_, i) => {
       // nubes como bandas largas de aguada, al estilo de los rollos japoneses
-      const cw = rnd(W * .55, W * .95), chh = cw * .16, cv = document.createElement('canvas'); cv.width = cw * dpr; cv.height = chh * dpr;
+      const cw = rnd(W * .6, W * (wx === 'cloudy' ? 1.15 : .95)), chh = cw * (wx === 'cloudy' ? .2 : .16), cv = document.createElement('canvas'); cv.width = cw * dpr; cv.height = chh * dpr;
       const q = cv.getContext('2d'); q.scale(dpr, dpr);
-      const col = dark ? '#3A3F55' : '#AEB6C4', ca = dark ? .2 : .16;
+      const col = dark ? '#3A3F55' : '#AEB6C4', ca = (dark ? .2 : .16) * (wx === 'cloudy' ? 1.6 : 1);
       for (let b = 0; b < 5; b++) {
         const bx = rnd(cw * .22, cw * .78), by = chh * rnd(.42, .6), rx = cw * rnd(.18, .3), ry = chh * rnd(.22, .36);
         q.save(); q.translate(bx, by); q.scale(1, ry / rx);
         const rg = q.createRadialGradient(0, 0, 0, 0, 0, rx); rg.addColorStop(0, rgba(col, ca)); rg.addColorStop(.6, rgba(col, ca * .55)); rg.addColorStop(1, rgba(col, 0));
         q.fillStyle = rg; q.fillRect(-rx, -rx, rx * 2, rx * 2); q.restore();
       }
-      return { cv, w: cw, h: chh, x: rnd(-cw, W), y: rnd(H * .2, H * .44), v: rnd(3, 8) * (i % 2 ? 1 : .7) };
+      return { cv, w: cw, h: chh, x: rnd(-cw, W), y: rnd(H * (wx === 'cloudy' ? .08 : .2), H * .44), v: rnd(3, 8) * (i % 2 ? 1 : .7) };
     });
     fx.forEach(f => {
       if (f.kind === 'leaves') f.p = Array.from({ length: f.n }, () => ({ x: rnd(f.x0, f.x1), y: rnd(f.y0, H), vx: rnd(-6, 6), vy: rnd(10, 18), r: rnd(0, 6), vr: rnd(-1.5, 1.5), s: rnd(2.2, 3.6) }));
