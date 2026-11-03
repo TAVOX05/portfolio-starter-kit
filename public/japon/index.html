@@ -748,8 +748,8 @@ body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: 3
   width: min(440px, calc(100% - 20px)); height: var(--tbh); padding: 0; border: 0; border-radius: calc(var(--tbh) / 2);
   transform: translateX(-50%); overflow: visible; background: none;
   box-shadow: 0 16px 36px -14px rgba(0,0,0,.42), 0 8px 12px -7px rgba(0,0,0,.14); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tabs { --tbbr: .84; } }
-:root[data-theme="dark"] .tabs { --tbbr: .84; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tabs { --tbbr: .7; --tbp: color-mix(in srgb, var(--bg) 68%, transparent); } }
+:root[data-theme="dark"] .tabs { --tbbr: .7; --tbp: color-mix(in srgb, var(--bg) 68%, transparent); }
 .tabs::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
   background: linear-gradient(180deg, var(--bar-sheen), transparent 52%), var(--tbp);
   -webkit-backdrop-filter: blur(26px) saturate(190%) brightness(var(--tbbr)); backdrop-filter: blur(26px) saturate(190%) brightness(var(--tbbr));
@@ -998,8 +998,8 @@ const X = (min, t, n, alt) => ({ m: 'line', line: 'taxi', t, min, n, alt });
 const DAYS = [
  { n: 1, date: '2026-11-20', city: 'TK', base: 'tokyo1', title: 'Llegada y Asakusa', wx: [15, 8], sun: '16:31',
    items: [
-    { t: '06:30', e: '10:30', h: 'Llegada a Narita', d: 'Migración y maletas. Tener a la mano el QR de Visit Japan Web. Sacar yenes en un cajero de 7-Eleven y cargar la Suica.', p: ['narita'], r: 'El horario exacto depende del vuelo.' },
-    { t: '10:30', e: '12:00', h: 'Traslado Narita → Ueno / Asakusa', d: 'Skyliner a Keisei Ueno. Si el Airbnb no guarda maletas antes de las 16:00, usar lockers en Ueno/Asakusa.', p: ['keiseiUeno'], r: 'No asumir entrada al departamento antes de las 16:00.' },
+    { t: '06:30', e: '08:30', h: 'Llegada a Narita', d: 'Migración y maletas. Tener a la mano el QR de Visit Japan Web. Sacar yenes en un cajero de 7-Eleven y cargar la Suica.', p: ['narita'], r: 'El horario exacto depende del vuelo.' },
+    { t: '08:30', e: '10:00', h: 'Traslado Narita → Ueno / Asakusa', d: 'Skyliner a Keisei Ueno. Si el Airbnb no guarda maletas antes de las 16:00, usar lockers en Ueno/Asakusa.', p: ['keiseiUeno'], r: 'No asumir entrada al departamento antes de las 16:00.' },
     { t: '12:00', e: '15:00', h: 'Comida, descanso y libreta para sellos de estación', d: 'Almuerzo tranquilo cerca de Asakusa. Comprar una libreta para los sellos de estación (eki stamps): sirve cualquier cuaderno de hojas lisas de Daiso, Loft, una papelería o un konbini. Pongan el primer sello en la estación Ueno.', f: 'Tempura o soba en Asakusa; melonpan en Nakamise.', p: [], r: 'Los sellos de estación son gratis y la tinta mancha: dejen secar unos segundos antes de cerrar la libreta.' },
     { t: '15:00', e: '18:00', h: 'Sensō-ji + Nakamise-dōri · libreta de goshuin', d: 'Primer templo memorable: puerta Kaminarimon, Nakamise y el salón principal. Al anochecer se ilumina. Ahí mismo compren la libreta para los sellos de templos (goshuinchō, 御朱印帳) y pidan su primer goshuin.', f: 'Snacks en Nakamise (ningyo-yaki, kibi dango).', p: ['sensoji', 'nakamise'], r: 'Vayan primero a la oficina de goshuin: suele cerrar alrededor de las 16:30. El goshuin cuesta unos ¥500 y la libreta se usa solo para templos y santuarios, no para sellos de estación.' },
     { t: '18:00', e: '20:30', h: 'Check-in Airbnb Motoasakusa y cena cerca', d: 'Entrada con teclado desde las 16:00. Cena cercana y a dormir temprano por el jet lag.', p: ['b:tokyo1'], k: 'base' }
@@ -1061,7 +1061,7 @@ const DAYS = [
    items: [
     { t: '07:40', e: '08:40', h: 'Salida hacia teamLab Planets', d: 'Desayuno en el Airbnb con lo del konbini de anoche. QR cargados y batería llena.', p: ['b:tokyo1'], r: 'El QR aparece desde la medianoche del día de visita.' },
     { t: '09:00', e: '11:30', h: 'teamLab Planets · ENTRADA PAGADA', d: 'Ventana de ingreso 09:00–09:30, 2 adultos + 1 niño, sin límite de permanencia. Se camina descalzo y hay agua hasta la rodilla.', p: ['teamlab'], k: 'res', r: 'Pantalones que se puedan arremangar arriba de la rodilla; hay lockers gratis.' },
-    { t: '11:15', e: '15:00', h: 'Toyosu / Ginza ligero', d: 'Comida en Toyosu o Ginza. Para Sam: Hakuhinkan Toy Park, juguetería de varios pisos en Ginza.', f: 'Comida en Toyosu, Ginza o Tokyo Station.', p: ['hakuhinkan', 'ginza'] },
+    { t: '12:00', e: '15:00', h: 'Toyosu / Ginza ligero', d: 'Comida en Toyosu o Ginza. Para Sam: Hakuhinkan Toy Park, juguetería de varios pisos en Ginza.', f: 'Comida en Toyosu, Ginza o Tokyo Station.', p: ['hakuhinkan', 'ginza'] },
     { t: '15:00', e: '20:00', h: 'Regreso, lavandería y maletas', d: 'Recoger bolsas, lavar ropa y organizar el check-out de mañana a las 10:00.', f: 'Cena cerca del Airbnb.', p: ['b:tokyo1'], r: 'Dejar maletas listas para Ubuya/Fuji. Valorar enviar maletas grandes a Kyoto.' }
    ],
    legs: [
@@ -1074,12 +1074,12 @@ const DAYS = [
  { n: 6, date: '2026-11-25', city: 'FJ', base: 'ubuya', title: 'Llegada a Fuji y Ryokan Ubuya', wx: [11, 1], sun: '16:35',
    items: [
     { t: '09:00', e: '12:24', h: 'Check-out y tren Fuji Excursion 15 · RESERVADO', d: 'Salir de Motoasakusa a las 9:00. Fuji Excursion 15 sale de JR Shinjuku a las 10:30 y llega a Kawaguchiko a las 12:24. Coche 3, asientos 2-C, 3-C y 3-D.', f: 'Bento o konbini para el camino (en Shinjuku hay ekiben).', p: ['b:tokyo1', 'shinjuku', 'kawaguchiko'], k: 'res', r: 'Es boleto electrónico de asiento: además pasen el torniquete con Suica/PASMO con saldo (o compren boleto de tarifa básica). No hay que recoger nada.' },
-    { t: '12:30', e: '15:15', h: 'Almuerzo y lago Kawaguchi', d: 'Visita breve a la orilla del lago o a un mirador accesible.', f: 'Hōtō (fideos gruesos de Yamanashi) frente al lago.', p: ['lake'], r: 'No planear cena fuera: el ryokan incluye buffet.' },
+    { t: '12:45', e: '15:15', h: 'Almuerzo y lago Kawaguchi', d: 'Visita breve a la orilla del lago o a un mirador accesible.', f: 'Hōtō (fideos gruesos de Yamanashi) frente al lago.', p: ['lake'], r: 'No planear cena fuera: el ryokan incluye buffet.' },
     { t: '16:00', e: '21:00', h: 'Check-in Ryokan Ubuya · CONFIRMADO', d: 'Habitación Deluxe japonesa con baño privado al aire libre, 2 camas. Yukata, onsen y CENA BUFFET incluida.', p: ['b:ubuya'], k: 'res', r: 'Plan JAPANiCAN: buffet + desayuno; no kaiseki. Preguntar hora de check-out.' }
    ],
    legs: [
     { o: 'b:tokyo1', d: 'shinjuku', steps: [W(8, 'A Shin-Okachimachi'), T('oedo', 'Shin-Okachimachi → Shinjuku-nishiguchi (sentido Iidabashi)', 20, 'Un solo tren y con elevadores.'), W(8, 'A JR Shinjuku / Busta Shinjuku (salida Nueva Sur)'), X(40, 'Con muchas maletas: taxi directo', '≈ ¥6,000–7,000', true)] },
-    { o: 'shinjuku', d: 'kawaguchiko', steps: [T('fujiex', 'Fuji Excursion 15 · Shinjuku 10:30 → Kawaguchiko 12:24', 114, 'Coche 3 · asientos 2-C, 3-C y 3-D. Pasen con Suica/PASMO para la tarifa básica.')] },
+    { o: 'shinjuku', d: 'kawaguchiko', dep: '10:30', steps: [T('fujiex', 'Fuji Excursion 15 · Shinjuku 10:30 → Kawaguchiko 12:24', 114, 'Coche 3 · asientos 2-C, 3-C y 3-D. Pasen con Suica/PASMO para la tarifa básica.')] },
     { o: 'kawaguchiko', d: 'lake', steps: [W(10, 'Hacia la orilla del lago')] },
     { o: 'lake', d: 'b:ubuya', steps: [X(8, 'Taxi a Ubuya (o preguntar por su shuttle)')] }
    ],
@@ -1087,10 +1087,10 @@ const DAYS = [
 
  { n: 7, date: '2026-11-26', city: 'FJ', base: 'funatsu', title: 'Tour Fuji y Funatsu', wx: [11, 0], sun: '16:34',
    items: [
-    { t: '07:00', e: '09:30', h: 'Desayuno en Ubuya y check-out', d: 'Preguntar si el Airbnb de Funatsu acepta maletas antes de las 15:00; si no, consigna en Kawaguchiko Station.', p: ['b:ubuya', 'kawaguchiko'], r: 'La hora de salida de Ubuya no consta en el correo: verificar al llegar.' },
-    { t: '09:30', e: '11:15', h: 'Pagoda Chūreitō (Arakurayama Sengen)', d: 'La vista icónica del Fuji con la pagoda. ~400 escalones.', f: 'Snack o café local.', p: ['chureito'], r: 'Temprano: más luz, menos gente y más probabilidad de Fuji despejado.' },
-    { t: '11:30', e: '13:15', h: 'Oshino Hakkai', d: 'Pueblo con estanques de agua del Fuji, muy transparentes.', f: 'Kusa-mochi asado y snacks.', p: ['oshino'], r: 'Japón rural con vista al Fuji sin repetir el lago.' },
-    { t: '13:30', e: '15:00', h: 'Fujiyoshida · Honchō-dōri y comida', d: 'La calle con el Fuji al fondo. La 5.ª estación solo como alternativa si el clima y la apertura lo permiten.', f: 'Hōtō, tempura o udon de Yoshida.', p: ['honcho'], r: 'No sumar la 5.ª estación si compromete la llegada al alojamiento.' },
+    { t: '07:00', e: '09:00', h: 'Desayuno en Ubuya y check-out', d: 'Preguntar si el Airbnb de Funatsu acepta maletas antes de las 15:00; si no, consigna en Kawaguchiko Station.', p: ['b:ubuya', 'kawaguchiko'], r: 'La hora de salida de Ubuya no consta en el correo: verificar al llegar.' },
+    { t: '09:45', e: '11:15', h: 'Pagoda Chūreitō (Arakurayama Sengen)', d: 'La vista icónica del Fuji con la pagoda. ~400 escalones.', f: 'Snack o café local.', p: ['chureito'], r: 'Temprano: más luz, menos gente y más probabilidad de Fuji despejado.' },
+    { t: '11:35', e: '13:15', h: 'Oshino Hakkai', d: 'Pueblo con estanques de agua del Fuji, muy transparentes.', f: 'Kusa-mochi asado y snacks.', p: ['oshino'], r: 'Japón rural con vista al Fuji sin repetir el lago.' },
+    { t: '13:30', e: '14:30', h: 'Fujiyoshida · Honchō-dōri y comida', d: 'La calle con el Fuji al fondo. La 5.ª estación solo como alternativa si el clima y la apertura lo permiten.', f: 'Hōtō, tempura o udon de Yoshida.', p: ['honcho'], r: 'No sumar la 5.ª estación si compromete la llegada al alojamiento.' },
     { t: '15:00', e: '21:00', h: 'Check-in Airbnb Funatsu 4805', d: 'Cena simple, descanso y preparar la salida a Kioto.', f: 'Cena práctica cerca de Kawaguchiko Station.', p: ['b:funatsu'], r: 'Dejar boletos y ruta a Kioto listos desde esta noche.' }
    ],
    legs: [
@@ -1110,8 +1110,8 @@ const DAYS = [
    ],
    legs: [
     { o: 'b:funatsu', d: 'kawaguchiko', steps: [W(8, 'A Kawaguchiko Station')] },
-    { o: 'kawaguchiko', d: 'mishima', steps: [T('bus', 'Bus Fujikyū 09:20 Kawaguchiko → Mishima salida norte (10:50)', 90, 'Reservado: asientos 3-A, 3-B y 3-C. QR en Fujiyama Connect.')] },
-    { o: 'mishima', d: 'kyotost', steps: [T('shinkansen', 'Kodama 819 · Mishima 11:55 → Kioto 14:34', 159, 'Reservado: Green, coche 8, asientos 6-B, 6-C y 6-D. Sin transbordos.')] },
+    { o: 'kawaguchiko', d: 'mishima', dep: '09:20', steps: [T('bus', 'Bus Fujikyū 09:20 Kawaguchiko → Mishima salida norte (10:50)', 90, 'Reservado: asientos 3-A, 3-B y 3-C. QR en Fujiyama Connect.')] },
+    { o: 'mishima', d: 'kyotost', dep: '11:55', steps: [T('shinkansen', 'Kodama 819 · Mishima 11:55 → Kioto 14:34', 159, 'Reservado: Green, coche 8, asientos 6-B, 6-C y 6-D. Sin transbordos.')] },
     { o: 'kyotost', d: 'b:kyoto', steps: [X(15, 'Taxi a Miyagawasuji 5-chōme', '≈ ¥1,500–2,000')] },
     { o: 'b:kyoto', d: 'gion', steps: [W(10, 'Por Miyagawachō hacia Shijō')] },
     { o: 'gion', d: 'pontocho', steps: [W(8, 'Cruzar el puente Shijō')] },
@@ -1139,7 +1139,7 @@ const DAYS = [
     { t: '07:00', e: '08:30', h: 'Bosque de bambú temprano', d: 'Antes de las 8:00 casi no hay gente.', f: 'Café o snack.', p: ['bamboo'], r: 'Taxi directo desde el Airbnb (≈ 30 min, ¥4,000–5,000).' },
     { t: '08:45', e: '10:15', h: 'Tenryū-ji · templo y jardín memorable', d: 'Abre 8:30. Santuario Nonomiya solo de paso.', f: 'Café o postre.', p: ['tenryuji'] },
     { t: '10:30', e: '13:30', h: 'Puente Togetsukyō, río Katsura y comida', d: 'Día visual y familiar.', f: 'Soba, yudōfu o matcha.', p: ['togetsukyo'] },
-    { t: '14:00', e: '17:00', h: 'Tiendas, Ōkōchi Sansō opcional o regreso', d: 'No añadir más templos.', f: 'Cena ligera.', p: ['b:kyoto'] },
+    { t: '14:15', e: '17:00', h: 'Tiendas, Ōkōchi Sansō opcional o regreso', d: 'No añadir más templos.', f: 'Cena ligera.', p: ['b:kyoto'] },
     { t: '14:00', e: '14:30', h: 'Nintendo Museum: descargar QR', d: 'Los QR de mañana se habilitan desde las 14:00 de hoy.', k: 'res', p: [] }
    ],
    legs: [
@@ -1155,7 +1155,7 @@ const DAYS = [
     { t: '06:45', e: '08:30', h: 'Fushimi Inari temprano', d: 'Recorrido parcial por los torii rojos (Senbon Torii) sin subir demasiado.', f: 'Snack o desayuno sencillo antes o después.', p: ['fushimi'], r: 'Recorrido corto: el objetivo del día es el Nintendo Museum a las 11:00.' },
     { t: '08:45', e: '10:45', h: 'Traslado a Ogura (Uji) con margen', d: 'Llegar 30–45 min antes. QR listos e identificación.', f: 'Café en la estación.', p: ['nintendo'] },
     { t: '11:00', e: '14:00', h: 'Nintendo Museum · PAGADO', d: 'Franja de acceso 11:00–11:30, 2 adultos + 1 niño. Llevar pasaportes y QR.', p: ['nintendo'], k: 'res', r: 'No dejarlo justo por conexiones.' },
-    { t: '14:00', e: '19:00', h: 'Uji (té) o regreso según energía', d: 'Byōdō-in y calle del té en Uji si hay energía.', f: 'Matcha de Uji; cena en Gion/Kawaramachi.', p: ['byodoin'] }
+    { t: '14:15', e: '19:00', h: 'Uji (té) o regreso según energía', d: 'Byōdō-in y calle del té en Uji si hay energía.', f: 'Matcha de Uji; cena en Gion/Kawaramachi.', p: ['byodoin'] }
    ],
    legs: [
     { o: 'b:kyoto', d: 'fushimi', steps: [W(5, 'A Kiyomizu-Gojō (Keihan)'), T('keihan', 'Kiyomizu-Gojō → Fushimi-Inari (tren local, 3 paradas)', 5), W(3, 'Al gran torii')] },
@@ -1186,7 +1186,7 @@ const DAYS = [
     { t: '09:00', e: '11:30', h: 'Primer bloque sin Express', d: 'Zonas fotográficas, tiendas, snacks y atracciones con fila baja.', p: ['usj'], r: 'No gastar tiempo en filas largas si el Express ya las cubre.' },
     { t: '11:30', e: '16:30', h: 'Horarios del Express Pass 8 Minion & MineCart', d: 'Seguir las horas exactas. Prioridad: Super Nintendo World / Donkey Kong.', p: ['usj'], k: 'res', r: 'Pagados ¥114,300. No suponer entrada libre a áreas si el QR marca hora.' },
     { t: '16:30', e: '18:30', h: 'Compras y fotos finales', d: 'Super Nintendo World, Harry Potter o Minions según la ruta real.', f: 'Cena temprana dentro del parque.', p: ['usj'], r: 'Con Express 8 ya van muy bien: no intenten hacerlo todo.' },
-    { t: '18:30', e: '20:30', h: 'Últimas atracciones y regreso', f: 'Cena ligera en Universal CityWalk o de regreso.', p: ['b:osaka'] }
+    { t: '18:30', e: '20:30', h: 'Últimas atracciones y regreso', f: 'Cena ligera en Universal CityWalk o de regreso.', p: ['usj'] }
    ],
    legs: [
     { o: 'b:osaka', d: 'usj', steps: [W(10, 'A Osaka-Namba (Hanshin / Kintetsu)'), T('hanshin', 'Osaka-Namba → Nishikujō (línea Hanshin Namba)', 7), T('jryume', 'Nishikujō → Universal City (JR Yumesaki)', 5), W(5, 'A la entrada')] },
@@ -1211,8 +1211,8 @@ const DAYS = [
 
  { n: 15, date: '2026-12-04', city: 'KZ', base: 'kanazawa', title: 'Osaka → Kanazawa', wx: [11, 4], sun: '16:41',
    items: [
-    { t: '08:30', e: '12:30', h: 'Check-out (antes de las 10:00) y tren a Kanazawa', d: 'Thunderbird a Tsuruga + Hokuriku Shinkansen a Kanazawa.', f: 'Bento de estación.', p: ['b:osaka', 'shinosaka', 'tsuruga', 'kanazawast'], r: 'Salir con margen por las maletas. Considerar enviar la maleta grande.' },
-    { t: '13:00', e: '15:00', h: 'Almuerzo en Ōmichō y check-in (15:00)', d: 'Vacation Rent Kanazawa G-02, a 1 min del mercado.', f: 'Kaisendon (tazón de mariscos), sushi; temporada de cangrejo.', p: ['omicho', 'b:kanazawa'] },
+    { t: '08:30', e: '11:45', h: 'Check-out (antes de las 10:00) y tren a Kanazawa', d: 'Thunderbird a Tsuruga + Hokuriku Shinkansen a Kanazawa.', f: 'Bento de estación.', p: ['b:osaka', 'shinosaka', 'tsuruga', 'kanazawast'], r: 'Salir con margen por las maletas. Considerar enviar la maleta grande.' },
+    { t: '12:00', e: '15:00', h: 'Almuerzo en Ōmichō y check-in (15:00)', d: 'Vacation Rent Kanazawa G-02, a 1 min del mercado.', f: 'Kaisendon (tazón de mariscos), sushi; temporada de cangrejo.', p: ['omicho', 'b:kanazawa'] },
     { t: '15:30', e: '18:30', h: 'Higashi Chaya y calles tradicionales', d: 'Casas de té de madera. Santuario Oyama de paso si queda cómodo.', f: 'Helado con hoja de oro (Kanazawa produce el 99% del pan de oro de Japón).', p: ['higashi', 'oyama'] }
    ],
    legs: [
@@ -1249,7 +1249,7 @@ const DAYS = [
    ],
    legs: [
     { o: 'b:kanazawa', d: 'kanazawast', steps: [X(7, 'Taxi a la estación (salida Este, terminal de buses)')] },
-    { o: 'kanazawast', d: 'shirakawa', steps: [T('bus', 'Bus Hokutetsu / Nōhi Kanazawa → Shirakawa-gō', 80, 'RESERVA OBLIGATORIA.')] },
+    { o: 'kanazawast', d: 'shirakawa', plan: '08:40', steps: [T('bus', 'Bus Hokutetsu / Nōhi Kanazawa → Shirakawa-gō', 80, 'RESERVA OBLIGATORIA.')] },
     { o: 'shirakawa', d: 'shiroyama', steps: [T('bus', 'Shuttle al mirador', 5), W(20, 'O subir caminando', null, true)] },
     { o: 'shirakawa', d: 'takayamast', steps: [T('bus', 'Bus Nōhi Shirakawa-gō → Takayama', 50, 'RESERVA OBLIGATORIA.')] },
     { o: 'takayamast', d: 'b:takayama', steps: [W(5, 'Al Mercure')] },
@@ -1260,8 +1260,8 @@ const DAYS = [
  { n: 18, date: '2026-12-07', city: 'TK', base: 'tokyo2', title: 'Takayama → Tokio', wx: [12, 4], sun: '16:28',
    items: [
     { t: '07:30', e: '10:00', h: 'Mercado matutino y check-out (hasta 11:00)', d: 'Mercado Miyagawa junto al río: encurtidos, miso, dulces.', f: 'Desayuno local; comprar snacks para el tren.', p: ['asaichi', 'b:takayama'] },
-    { t: '10:30', e: '16:30', h: 'Tren Hida a Nagoya + Shinkansen a Tokio', d: 'Comprar y reservar asientos.', f: 'Bento en el tren.', p: ['takayamast', 'nagoya', 'tokyost'], r: 'Día de traslado real. Transporte sin comprar.' },
-    { t: '17:30', e: '20:30', h: 'Check-in Airbnb de Eiji (Ikenohata)', d: 'Desde las 16:00. Cena ligera cerca del estanque Shinobazu.', f: 'Ueno / Okachimachi.', p: ['b:tokyo2'] }
+    { t: '10:30', e: '15:00', h: 'Tren Hida a Nagoya + Shinkansen a Tokio', d: 'Comprar y reservar asientos.', f: 'Bento en el tren.', p: ['takayamast', 'nagoya', 'tokyost'], r: 'Día de traslado real. Transporte sin comprar.' },
+    { t: '16:00', e: '20:30', h: 'Check-in Airbnb de Eiji (Ikenohata)', d: 'Desde las 16:00: si llegan antes, Tokyo Character Street está en la misma estación de Tokio. Cena ligera cerca del estanque Shinobazu.', f: 'Ueno / Okachimachi.', p: ['b:tokyo2'] }
    ],
    legs: [
     { o: 'b:takayama', d: 'asaichi', steps: [W(15, 'Al río Miyagawa')] },
@@ -1279,8 +1279,8 @@ const DAYS = [
    ],
    legs: [
     { o: 'b:tokyo2', d: 'akiba', steps: [W(5, 'A Ueno-hirokōji'), T('ginza', 'Ueno-hirokōji (G15) → Suehirochō (G14)', 2), W(3, 'A Chūō-dōri'), W(20, 'O caminando', null, true)] },
-    { o: 'akiba', d: 'b:tokyo2', steps: [T('yamanote', 'Akihabara → Okachimachi (1 parada)', 2), W(8, 'A Ikenohata')] },
-    { o: 'b:tokyo2', d: 'ameyoko', steps: [W(8, 'Por Chūō-dōri')] },
+    { o: 'akiba', d: 'b:tokyo2', plan: '12:00', steps: [T('yamanote', 'Akihabara → Okachimachi (1 parada)', 2), W(8, 'A Ikenohata')] },
+    { o: 'b:tokyo2', d: 'ameyoko', plan: '12:45', steps: [W(8, 'Por Chūō-dōri')] },
     { o: 'ameyoko', d: 'takeya', steps: [W(5, 'Bajo las vías hasta Okachimachi')] }
    ],
    tips: ['Tax-free: desde el 1 nov 2026 Japón cambia a sistema de reembolso (pagas el impuesto y te lo devuelven al salir). Guarden recibos y compras sin abrir y pregunten en cada tienda cómo lo procesan.', 'Revisen el límite de peso de su aerolínea antes de comprar maletas extra.'] },
@@ -1292,7 +1292,7 @@ const DAYS = [
    ],
    legs: [
     { o: 'b:tokyo2', d: 'keiseiUeno', steps: [W(5, 'A Keisei Ueno')] },
-    { o: 'keiseiUeno', d: 'narita', steps: [T('skyliner', 'Keisei Ueno → Narita T2/T1', 44, 'Verificar el primer Skyliner del día.'), T('keisei', 'Plan B: Keisei Limited Express (sin reserva)', 75, 'Sale más temprano que el Skyliner.', true)] }
+    { o: 'keiseiUeno', d: 'narita', plan: '06:15', steps: [T('skyliner', 'Keisei Ueno → Narita T2/T1', 44, 'Verificar el primer Skyliner del día.'), T('keisei', 'Plan B: Keisei Limited Express (sin reserva)', 75, 'Sale más temprano que el Skyliner.', true)] }
    ],
    tips: ['Vuelo internacional 09:35: lo ideal es estar en el aeropuerto ~07:00. Si el primer Skyliner llega tarde, tomen el Keisei Limited Express más temprano.', 'Con el nuevo reembolso de impuestos (tax-free) puede haber un trámite extra en Narita: denle tiempo.'] }
 ];
@@ -1746,7 +1746,7 @@ function viewDay(n, opts = {}) {
     grp('Alojamiento', row({ tag: 'button', cls: 'ld', lead: ico(I.bed, cityVar(day.city)), t: esc(base.n), s: esc(base.in + ' → ' + base.out), attrs: `data-base="${day.base}"`, chev: 1 }) +
       row({ tag: 'button', cls: 'ld', lead: ico(I.car, 'var(--orange)'), t: 'Mostrar dirección al taxista', attrs: `data-taxi="${day.base}"`, chev: 1 }));
   } else if (seg === 'rutas') {
-    content = day.legs.map(legGroup).join('');
+    { const T = legTimes(day); content = day.legs.map((l, i) => legGroup(l, T[i])).join(''); }
   } else if (seg === 'paradas') {
     const { pts } = dayMapData(day);
     content = grp('Paradas del día', pts.map(pt => row({ href: pt.href, ext: 1, cls: 'ld', lead: `<span class="dotn${pt.base ? ' base' : ''}" style="--c:${pt.color}">${pt.label}</span>`, t: esc(pt.n), s: pt.base ? esc(BASES[pt.base].addr) : '' })).join('') +
@@ -1774,21 +1774,55 @@ function viewDay(n, opts = {}) {
   return { title: esc(day.title), cap: `${opts.today ? 'Hoy · ' : ''}Día ${n} · ${DOW[p.w]} ${p.d} ${MES[p.m - 1]} · ${CITY[day.city].n}`, lead: roundel(day, 'lg'), back: opts.today ? null : { href: '#itinerario', label: 'Itinerario' }, body, after };
 }
 
-function legGroup(l) {
+/* Horario de cada trayecto: el primero sale a la hora del arranque del día; los que tienen boleto, a la hora del boleto
+   (l.dep); los demás, al terminar la actividad de donde parten y procurando no llegar tarde a la siguiente.
+   Si la actividad de destino es un traslado («Regreso…», «Traslado…»), su hora de inicio es la de salida. */
+const legMins = l => l.steps.filter(s => !s.alt).reduce((a, s) => a + (s.min || 0), 0);
+const isMove = it => /^(Regreso|Traslado|Salida|Salir)|→/.test(it.h);
+const isTravel = it => isMove(it) || /\b(tren|bus|shinkansen|vuelo|viaje)\b/i.test(it.h);
+const legTimesMemo = new Map();
+function legTimes(day) {
+  if (legTimesMemo.has(day.n)) return legTimesMemo.get(day.n);
+  const its = day.items, has = (it, k) => (it.p || []).includes(k), out = [];
+  let ptr = 0, cursor = null, prev = null, prevDi = 0;
+  day.legs.forEach((l, i) => {
+    const dur = legMins(l), di = its.findIndex((it, k) => k >= ptr && has(it, l.d));
+    let oi = -1;
+    for (let k = (di >= 0 ? di - 1 : its.length - 1); k >= (prev && prev.d === l.o ? prevDi : 0); k--) if (has(its[k], l.o)) { oi = k; break; }
+    if (oi < 0 && di >= 0 && has(its[di], l.o)) oi = di;
+    const last = prev && prev.steps.filter(x => !x.alt).slice(-1)[0], buf = !prev ? 0 : last && last.m === 'walk' ? 5 : 10;
+    const dIt = di >= 0 && oi !== di ? its[di] : null, oEnd = oi >= 0 && oi !== di ? toMin(its[oi].e) : 0, from = cursor != null ? cursor + buf : 0;
+    let dep;
+    if (l.dep || l.plan) dep = toMin(l.dep || l.plan);
+    else if (i === 0 && MORNING[day.n]) dep = toMin(MORNING[day.n].leave);
+    else if (oi >= 0 && oi === di) { const it = its[oi]; dep = isTravel(it) ? Math.max(from, prevDi === di && prev ? 0 : toMin(it.t)) : Math.max(from, Math.round((toMin(it.t) + toMin(it.e)) / 2 / 15) * 15); }
+    else if (prev && prev.d === l.o && !l.o.startsWith('b:') && (oi < 0 || isTravel(its[oi]))) dep = from;   // trasbordo: siguen de largo (en el alojamiento sí esperan)
+    else dep = Math.max(from, oEnd, dIt ? toMin(dIt.t) - (isMove(dIt) ? 0 : dur + 10) : 0);
+    const arr = dep + dur;
+    out.push({ dep, arr, fixed: !!l.dep, late: dIt && !isMove(dIt) ? arr - toMin(dIt.t) : 0, tight: (l.dep || l.plan) && cursor != null ? toMin(l.dep || l.plan) - (cursor + buf) : null, di });
+    cursor = arr; prev = l; if (di >= 0 && !l.plan) { prevDi = di; ptr = di; }
+  });
+  legTimesMemo.set(day.n, out); return out;
+}
+const LONG_LINES = ['thunder', 'shinkansen', 'hida', 'fujiex', 'fujikyu', 'bus', 'skyliner', 'keisei'];   // trenes y buses con horario fijo
+function legGroup(l, T) {
   const a = place(l.o), b = place(l.d);
   const main = l.steps.filter(s => !s.alt);
   const total = main.reduce((x, s) => x + (s.min || 0), 0);
   const allWalk = main.every(s => s.m === 'walk');
+  let clock = T ? T.dep : null;   // hora a la que empieza cada paso
   const rows = l.steps.map(s => {
+    const at = !s.alt && clock != null ? clock : null; if (at != null) clock += s.min || 0;
     const ln = s.m === 'walk' ? null : LINES[s.line];
     let lead;
     if (!ln) lead = `<span class="badge walk">${I.walk}</span>`;
     else if (s.line === 'taxi') lead = `<span class="badge" style="${badgeStyle(ln[1])}">${I.car}</span>`;
     else if (s.line === 'bus') lead = `<span class="badge" style="${badgeStyle(ln[1])}">${I.bus}</span>`;
     else lead = `<span class="badge" style="${badgeStyle(ln[1])}">${esc(ln[0])}</span>`;
-    return row({ cls: 'step' + (s.alt ? ' alt' : ''), lead, pre: s.alt ? '<span class="alt-lbl">o bien</span>' : '', t: (ln ? '' : 'A pie · ') + esc(s.t), x: s.n ? esc(s.n) : '', tr: s.min ? `<span class="min">${s.min} min</span>` : '' });
-  }).join('') + row({ href: gmRoute(l.o, l.d, allWalk ? 'walking' : 'transit'), ext: 1, cls: 'link', t: 'Ruta en Google Maps' });
-  return grp(`${esc(a.n)} → ${esc(b.n)}`, rows, l.n ? esc(l.n) : null, `≈ ${total} min`);
+    return row({ cls: 'step' + (s.alt ? ' alt' : ''), lead, pre: s.alt ? '<span class="alt-lbl">o bien</span>' : '', t: (ln ? '' : 'A pie · ') + esc(s.t), x: s.n ? esc(s.n) : '', tr: at != null ? `<span class="min"><b>${fmtHM(at)}</b> · ${s.min || 0} min</span>` : s.min ? `<span class="min">${s.min} min</span>` : '' });
+  }).join('') + (T ? row({ cls: 'ld', lead: ico(T.fixed ? I.ticket : I.route, T.fixed ? 'var(--green)' : 'var(--tint)'), t: `<b>${fmtHM(T.dep)}</b> salen · <b>${fmtHM(T.arr)}</b> llegan`, s: T.fixed ? 'Horario de su boleto: el tren o bus no espera.' : l.plan || main.some(x => LONG_LINES.includes(x.line)) ? 'Horario estimado: el boleto aún no está comprado; al comprarlo, ajusten a la hora real.' : main.some(x => x.m !== 'walk' && x.line !== 'taxi') ? 'Hora aproximada: los trenes de ciudad pasan cada pocos minutos.' : 'Hora sugerida según el plan del día.' }) : '') +
+    row({ href: gmRoute(l.o, l.d, legMode(l)), ext: 1, cls: 'link', t: 'Ruta en Google Maps' });
+  return grp(`${esc(a.n)} → ${esc(b.n)}`, rows, l.n ? esc(l.n) : null, T ? `${fmtHM(T.dep)} → ${fmtHM(T.arr)}` : `≈ ${total} min`);
 }
 
 function viewReservas() {
@@ -2126,9 +2160,9 @@ function leaveInfo(day, hm) {
     const l = legs[0];
     if (k > 0 && (day.items[k - 1].p || []).includes(l.d)) continue; // ya están ahí
     const mins = l.steps.filter(s => !s.alt).reduce((a, s) => a + (s.min || 0), 0);
-    const M = l === day.legs[0] && MORNING[day.n]; // el primer trayecto sale a la hora del arranque del día
-    const leave = M ? toMin(M.leave) : toMin(it.t) - mins - 10;
-    return { it, l, mins, leave, planned: !!M, left: leave - toMin(hm) };
+    const T = legTimes(day)[day.legs.indexOf(l)];   // mismo horario que la pestaña Rutas
+    const leave = T ? T.dep : toMin(it.t) - mins - 10;
+    return { it, l, mins, leave, planned: !!T, left: leave - toMin(hm) };
   }
   return null;
 }
