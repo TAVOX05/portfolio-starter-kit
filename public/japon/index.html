@@ -675,11 +675,11 @@ main, .grp { grid-template-columns: minmax(0, 1fr); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bar-tint: rgba(16,18,26,.46); --bar-rim: rgba(255,255,255,.16); --bar-hi: rgba(255,255,255,.16); --bar-lo: rgba(0,0,0,.3); --bar-sheen: rgba(255,255,255,.09); --bar-pill: rgba(6,8,14,.35); --bar-halo: rgba(0,0,0,.55); --bar-br: .6; --edge-tint: rgba(14,16,24,.72); } }
 /* con sol bajo brillante detrás (amanecer y golden hour), el cristal oscuro se tiñe más para que el texto no pierda contraste */
 :root[data-theme="dark"][data-phase="sunset"], :root[data-theme="dark"][data-phase="dawn"], :root[data-theme="dark"][data-phase="day"][data-sky="clear"] { --card: rgba(24,26,36,.58); --glass: rgba(24,26,36,.7); --glass-fx: blur(26px) saturate(120%) brightness(.3); }
-:root[data-theme="light"][data-phase="sunset"], :root[data-theme="light"][data-phase="dawn"], :root[data-theme="light"][data-phase="day"][data-sky="clear"] { --glass-fx: blur(24px) saturate(140%) brightness(1.55); --tint: #153E76; }
-@media (prefers-color-scheme: light) { :root:not([data-theme])[data-phase="sunset"], :root:not([data-theme])[data-phase="dawn"], :root:not([data-theme])[data-phase="day"][data-sky="clear"] { --glass-fx: blur(24px) saturate(140%) brightness(1.55); --tint: #153E76; } }
-/* día soleado en claro: el paisaje es más oscuro que la bruma de antes; la tinta baja un punto para seguir en AAA */
-:root[data-theme="light"][data-phase="day"][data-sky="clear"] { --tint: #11356A; --red: #6A1E14; --orange: #4C3200; --c-TK: #7A2318; }
-@media (prefers-color-scheme: light) { :root:not([data-theme])[data-phase="day"][data-sky="clear"] { --tint: #11356A; --red: #6A1E14; --orange: #4C3200; --c-TK: #7A2318; } }
+:root[data-theme="light"][data-phase="sunset"], :root[data-theme="light"][data-phase="dawn"], :root[data-theme="light"][data-phase="day"][data-sky="clear"], :root[data-theme="light"][data-phase="night"][data-sky="clear"] { --glass-fx: blur(24px) saturate(140%) brightness(1.55); --tint: #153E76; }
+@media (prefers-color-scheme: light) { :root:not([data-theme])[data-phase="sunset"], :root:not([data-theme])[data-phase="dawn"], :root:not([data-theme])[data-phase="day"][data-sky="clear"], :root:not([data-theme])[data-phase="night"][data-sky="clear"] { --glass-fx: blur(24px) saturate(140%) brightness(1.55); --tint: #153E76; } }
+/* cielo despejado en claro: el paisaje es más oscuro que la bruma de antes; la tinta baja un punto para seguir en AAA */
+:root[data-theme="light"][data-sky="clear"][data-phase] { --tint: #11356A; --red: #6A1E14; --orange: #4C3200; --c-TK: #7A2318; --c-KB: #064A51; --label2: #2C2D34; }
+@media (prefers-color-scheme: light) { :root:not([data-theme])[data-sky="clear"][data-phase] { --tint: #11356A; --red: #6A1E14; --orange: #4C3200; --c-TK: #7A2318; --c-KB: #064A51; --label2: #2C2D34; } }
 @media (prefers-color-scheme: dark) { :root:not([data-theme])[data-phase="sunset"], :root:not([data-theme])[data-phase="dawn"], :root:not([data-theme])[data-phase="day"][data-sky="clear"] { --card: rgba(24,26,36,.58); --glass: rgba(24,26,36,.7); --glass-fx: blur(26px) saturate(120%) brightness(.3); } }
 :root[data-sky="rain"] { --bar-tint: rgba(250,249,246,.55); }
 :root[data-theme="dark"][data-sky="rain"] { --bar-tint: rgba(16,18,26,.55); }
@@ -3296,6 +3296,11 @@ const BG = (() => {
         grad: [[0, '#F5E4C8'], [.26, '#F7D49E'], [.44, '#F6B877'], [.58, '#F09A55'], [.66, '#EC8A4A'], [.74, '#F6C48E'], [.86, '#F8E6CF'], [1, '#F8EEDF']] },
       blue:   { sky: '#DCE0EC', hz: '#E4E3EC', moon: '#E2D6B0', ink: '#323952', far: '#A7AEC8', mid: '#8990AC', water: '#C5CADD', lit: .75 },
       night:  { sky: '#D8DCE9', hz: '#E1E1EA', moon: '#DFD3AC', ink: '#2C3249', far: '#A2A9C2', mid: '#858CA8', water: '#C0C5DA', lit: .85 },
+      nightClear: { sky: '#BAC3E7', hz: '#DCCBE0', paper: '#E3E4F0', moon: '#E2D2A0', ink: '#232A45', far: '#8C96BD', mid: '#6C779C', water: '#AAB3D8', lit: .9,
+        grad: [[0, '#CDD3EF'], [.3, '#C3CAEC'], [.55, '#B9C0E4'], [.7, '#CBBCD8'], [.8, '#BCC0DE'], [1, '#CED2E6']] },
+      // alba y ocaso despejados: color limpio hasta el horizonte, sin el velo crema de abajo
+      dawnClear: { paper: '#F6E8DF', water: '#F2C3AE', grad: [[0, '#F1D6E4'], [.26, '#F5C9CF'], [.44, '#F8C2AE'], [.58, '#FBC791'], [.68, '#FAD3A2'], [.82, '#F1D2BE'], [1, '#EFD9CC']] },
+      sunsetClear: { paper: '#F5E4CF', water: '#EFA46A', grad: [[0, '#F6DDB8'], [.24, '#F8C98C'], [.42, '#F6AE68'], [.56, '#F0924E'], [.64, '#EA7E42'], [.72, '#EC925A'], [.84, '#E9A270'], [1, '#EBB68C']] },
     },
     dark: {
       paper: '#10121B', grey: '#20222B',
@@ -3310,6 +3315,10 @@ const BG = (() => {
         grad: [[0, '#171230'], [.28, '#2A1838'], [.44, '#4E2236'], [.56, '#8E3A32'], [.64, '#D86A2E'], [.71, '#F7A246'], [.76, '#FFC46A'], [.82, '#3C2028'], [1, '#1A1018']] },
       blue:   { sky: '#0C1124', hz: '#232C4C', moon: '#E3DBC0', ink: '#C3CBE6', far: '#1A2140', mid: '#131830', water: '#141A33', lit: 1 },
       night:  { sky: '#080A14', hz: '#1A1F36', moon: '#E3DBC0', ink: '#BFC6DE', far: '#141931', mid: '#0E1226', water: '#101429', lit: 1 },
+      dawnClear: { grad: [[0, '#0C1030'], [.3, '#1A1D4C'], [.48, '#3B2A60'], [.6, '#8A4A6E'], [.66, '#D2766E'], [.7, '#8E4C62'], [.75, '#2C2240'], [1, '#121226']] },
+      sunsetClear: { grad: [[0, '#171230'], [.28, '#2A1838'], [.44, '#4E2236'], [.56, '#8E3A32'], [.63, '#D86A2E'], [.68, '#F29A44'], [.72, '#9A4630'], [.77, '#2E1824'], [1, '#170E16']] },
+      nightClear: { sky: '#0A1026', hz: '#2B2C5E', moon: '#F1E8C8', ink: '#C9D1EA', far: '#121733', mid: '#0B0F24', water: '#121A3A', lit: 1,
+        grad: [[0, '#04060E'], [.3, '#0A1028'], [.5, '#141C44'], [.62, '#232A5C'], [.7, '#3B336A'], [.76, '#4A3A66'], [.84, '#1A1D3A'], [1, '#0B0E1C']] },
     }
   };
   const WXT = { clear: 0, cloudy: .5, rain: .45, snow: .3 };
@@ -3322,8 +3331,8 @@ const BG = (() => {
   const mix = (a, b, t) => '#' + hex(a).map((v, i) => Math.round(v + (hex(b)[i] - v) * t).toString(16).padStart(2, '0')).join('');
   const rgba = (h, a) => `rgba(${hex(h).join(',')},${a})`;
   function mood() {
-    const D = scene.dark ? MOOD.dark : MOOD.light, m = scene.phase === 'day' && scene.weather === 'clear' ? D.dayClear : D[scene.phase] || D.night, t = WXT[scene.weather] || 0, gt = Math.min(.8, t * 1.6);
-    return { ...m, sunny: scene.phase === 'day' && scene.weather === 'clear', dark: scene.dark, paper: m.paper || D.paper, sky: mix(m.sky, D.grey, t), hz: mix(m.hz, D.grey, t * .8), far: mix(m.far, D.grey, t * .4), water: mix(m.water, D.grey, t * .5),
+    const D = scene.dark ? MOOD.dark : MOOD.light, cl = scene.weather === 'clear', m = cl && scene.phase === 'day' ? D.dayClear : cl && scene.phase === 'night' ? D.nightClear : cl && D[scene.phase + 'Clear'] ? { ...D[scene.phase], ...D[scene.phase + 'Clear'] } : D[scene.phase] || D.night, t = WXT[scene.weather] || 0, gt = Math.min(.8, t * 1.6);
+    return { ...m, sunny: scene.phase === 'day' && cl, clearSky: cl, night: scene.phase === 'night' || scene.phase === 'blue', dark: scene.dark, paper: m.paper || D.paper, sky: mix(m.sky, D.grey, t), hz: mix(m.hz, D.grey, t * .8), far: mix(m.far, D.grey, t * .4), water: mix(m.water, D.grey, t * .5),
       grad: m.grad && m.grad.map(([q, col]) => [q, mix(col, D.grey, gt)]), glow: m.glow && mix(m.glow, D.grey, gt * .6) };
   }
 
@@ -3398,7 +3407,7 @@ const BG = (() => {
     };
     // bruma: banda de papel (o de horizonte, de noche) que separa los planos
     const mist = (y, h, a) => {
-      if (M.sunny) return;   // día despejado: sin bruma
+      if (M.clearSky) return;   // cielo despejado: sin bruma
       const mc = dark ? M.hz : M.paper;
       k.save();
       for (let i = 0, n = Math.ceil(W / 45); i < n; i++) {
@@ -3426,14 +3435,15 @@ const BG = (() => {
     const blocks = (y, minH, maxH, col, a, x0 = -10, x1 = W + 10, win = 0) => {
       let px = x0;
       while (px < x1) {
-        const bw = rnd(4, 11) * u, bh = H * rnd(minH, maxH), top = y - bh, cc = mix(col, M.paper, rnd(0, M.sunny ? .1 : .35)), aa = a * rnd(.6, 1.2) * (M.sunny ? 1.5 : 1);
+        const bw = rnd(4, 11) * u, bh = H * rnd(minH, maxH), top = y - bh, cc = mix(col, M.paper, rnd(0, M.clearSky ? .1 : .35)), aa = a * rnd(.6, 1.2) * (M.clearSky ? 1.5 : 1);
         const g = k.createLinearGradient(0, top, 0, y + 6), q = deform(rectP(px, top, bw, bh + 6, .5), 2, .012);
-        g.addColorStop(0, rgba(cc, aa)); g.addColorStop(.55, rgba(cc, aa * .6)); g.addColorStop(1, rgba(cc, M.sunny ? aa * .4 : 0));
+        g.addColorStop(0, rgba(cc, aa)); g.addColorStop(.55, rgba(cc, aa * .6)); g.addColorStop(1, rgba(cc, M.clearSky ? aa * .4 : 0));
         k.save(); k.globalCompositeOperation = dark ? 'source-over' : 'multiply'; k.fillStyle = g; trace(q); k.fill();
         k.strokeStyle = g; k.globalAlpha = .6; k.lineWidth = .8; trace(q); k.stroke();
         if (!dark) { k.globalAlpha = aa * .5; k.fillStyle = mix(cc, M.ink, .3); for (let wy = top + 4; wy < y - bh * .45; wy += rnd(4, 7)) if (Math.random() < .5) k.fillRect(px + 1.5, wy, bw - 3, .6); }
         k.restore();
-        if (win) for (let i = 0; i < 3; i++) if (Math.random() < win) lamp(px + rnd(1, bw - 1), y - bh * rnd(.55, .92), .7, ['#FFD9A0', '#FFE9C4', '#CFE6FF'][i], 'window');
+        const wv = win && M.night && M.clearSky ? Math.min(.95, win * 2.5 + .3) : win;
+        if (wv) for (let i = 0; i < (wv > win ? 6 : 3); i++) if (Math.random() < wv) lamp(px + rnd(1, bw - 1), y - bh * rnd(.55, .92), .7, ['#FFD9A0', '#FFE9C4', '#CFE6FF'][i % 3], 'window');
         px += bw + rnd(-1, 2) * u;
       }
     };
@@ -3559,7 +3569,7 @@ const BG = (() => {
       const top = pagoda(W * .17, Y(.79), H * .13, 5, pig(PIG.ver), pig(mix(PIG.ver, '#3A2A2A', .45)), .55);
       lamp(W * .17, Y(.785), 1.6, '#FFC070', 'up');
       for (let i = 0; i < 4; i++) { const hx = W * (.66 + i * .07); wash(K.rectP(hx, Y(.8) - 2.6 * u, 5.5 * u, 2.6 * u, .2), M.mid, .35, { amt: .01, n: 3 }); ink([[hx - .8 * u, Y(.8) - 2.6 * u], [hx + 2.75 * u, Y(.8) - 4.4 * u], [hx + 6.3 * u, Y(.8) - 2.6 * u]], .9, .5); lamp(hx + 2.75 * u, Y(.8) - 1.3 * u, 1.1, '#FFC870', 'window'); }
-      if (!M.sunny) fx.push({ kind: 'mist', y: Y(.775), a: dark ? .18 : .35 });
+      if (!M.clearSky) fx.push({ kind: 'mist', y: Y(.775), a: dark ? .18 : .35 });
       void top;
     },
     KY(K) { // Kioto: pagoda Yasaka sobre los machiya de Ninenzaka, en pleno momiji
@@ -3836,7 +3846,7 @@ const BG = (() => {
     lights = []; waters = []; fx = []; glitter = [];
     const K = kit(k);
     // una aguada irregular encima del degradado para que el cielo tenga textura de acuarela
-    if (!M.sunny) K.wash([[-20, -20, 0], [W + 20, -20, 0], [W + 20, H * rnd(.3, .4), 1], [W * .6, H * rnd(.38, .46), 1], [W * .25, H * rnd(.32, .42), 1], [-20, H * rnd(.36, .44), 1]], M.sky, (dark ? .25 : .22) * (wx === 'cloudy' ? .35 : 1), { amt: .05, n: 5, edge: 0, op: 'source-over', soft: 14, tex: 0 });
+    if (!M.clearSky) K.wash([[-20, -20, 0], [W + 20, -20, 0], [W + 20, H * rnd(.3, .4), 1], [W * .6, H * rnd(.38, .46), 1], [W * .25, H * rnd(.32, .42), 1], [-20, H * rnd(.36, .44), 1]], M.sky, (dark ? .25 : .22) * (wx === 'cloudy' ? .35 : 1), { amt: .05, n: 5, edge: 0, op: 'source-over', soft: 14, tex: 0 });
     // sol o luna: disco suave a media altura, detrás de lo emblemático
     // de día solo un resplandor cálido; al amanecer y al atardecer, el disco del sol (hinomaru) con borde mojado
     if (M.glow && scene.city !== 'FJ') drawSun(K);
@@ -3864,9 +3874,15 @@ const BG = (() => {
         k.restore();
       }
     }
+    if (M.night && clear && scene.city !== 'FJ' && scene.city !== 'HD') {
+      // resplandor de la ciudad en el horizonte: las siluetas resaltan contra él y la noche se siente viva
+      const gy = H * .76, gl = k.createRadialGradient(W * .5, gy, 0, W * .5, gy, Math.max(W, H) * .6);
+      gl.addColorStop(0, rgba(dark ? '#FF9F63' : '#F2B48E', dark ? .2 : .16)); gl.addColorStop(.35, rgba(dark ? '#C46A7A' : '#E6B2B8', dark ? .1 : .08)); gl.addColorStop(1, rgba('#C46A7A', 0));
+      k.save(); k.setTransform(dpr, 0, 0, dpr * .45, 0, gy * dpr * .55); k.fillStyle = gl; k.fillRect(-W, 0, W * 3, H * 2.2); k.restore();
+    }
     if (M.moon && clear) {
       const R = K.u * 4.2, mx = W * .78, my = H * .44, hl = k.createRadialGradient(mx, my, 0, mx, my, R * 6);
-      hl.addColorStop(0, rgba(M.moon, dark ? .16 : .3)); hl.addColorStop(1, rgba(M.moon, 0)); k.fillStyle = hl; k.fillRect(mx - R * 6, my - R * 6, R * 12, R * 12);
+      hl.addColorStop(0, rgba(M.moon, dark ? .3 : .34)); hl.addColorStop(1, rgba(M.moon, 0)); k.fillStyle = hl; k.fillRect(mx - R * 6, my - R * 6, R * 12, R * 12);
       K.wash(K.ellP(mx, my, R, R, 20), M.moon, dark ? .6 : .55, { amt: .012, n: 4, edge: .25, op: dark ? 'source-over' : 'multiply' });
       K.wash(K.ellP(mx - R * .25, my + R * .1, R * .45, R * .3, 10), dark ? '#BFB79C' : '#CFC4A0', .18, { amt: .1, n: 3, edge: 0 });
     }
@@ -3902,9 +3918,9 @@ const BG = (() => {
     for (let i = 0; i < 70; i++) { const fx0 = rnd(0, W), fy = rnd(0, H), l = rnd(8, 26), a = rnd(0, 6.28); k.beginPath(); k.moveTo(fx0, fy); k.quadraticCurveTo(fx0 + Math.cos(a) * l * .5 + gauss() * 4, fy + Math.sin(a) * l * .5 + gauss() * 4, fx0 + Math.cos(a) * l, fy + Math.sin(a) * l); k.stroke(); }
     k.restore();
     // el borde de abajo se disuelve en el papel (ahí va la barra de pestañas)
-    const fade = k.createLinearGradient(0, H * .9, 0, H); fade.addColorStop(0, rgba(M.paper, 0)); fade.addColorStop(1, rgba(M.paper, M.sunny ? .45 : .85));
+    const fade = k.createLinearGradient(0, H * .9, 0, H); fade.addColorStop(0, rgba(M.paper, 0)); fade.addColorStop(1, rgba(M.paper, M.clearSky ? .45 : .85));
     k.fillStyle = fade; k.fillRect(0, H * .9, W, H * .1);
-    stars = dark && clear && (scene.phase === 'night' || scene.phase === 'blue') ? Array.from({ length: Math.round(W * H / 16000) }, () => ({ x: rnd(0, W), y: rnd(H * .04, H * .5), r: rnd(.5, 1.1), ph: rnd(0, 6) })) : [];
+    stars = dark && clear && (scene.phase === 'night' || scene.phase === 'blue') ? Array.from({ length: Math.round(W * H / 5500) }, () => ({ x: rnd(0, W), y: rnd(H * .02, H * .62), r: Math.random() < .08 ? rnd(1.4, 2) : rnd(.5, 1.2), ph: rnd(0, 6) })) : [];
     // lluvia en tres capas: fina y lenta al fondo, media, y gotas cercanas largas, rápidas y desenfocadas
     rain = wx === 'rain' ? {
       layers: [
@@ -3947,7 +3963,8 @@ const BG = (() => {
     x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.globalCompositeOperation = 'source-over';
     x.drawImage(base, 0, 0);
     x.setTransform(dpr, 0, 0, dpr, 0, 0);
-    for (const s of stars) { x.globalAlpha = .2 + .25 * Math.sin(t * 1.3 + s.ph); x.fillStyle = '#F2EEDF'; x.fillRect(s.x, s.y, s.r, s.r); }
+    for (const s of stars) { const a = .45 + .3 * Math.sin(t * 1.3 + s.ph); x.fillStyle = '#F2EEDF'; if (s.r > 1.3) { x.globalAlpha = a * .25; x.beginPath(); x.arc(s.x, s.y, s.r * 2.6, 0, 7); x.fill(); } x.globalAlpha = a; x.fillRect(s.x - s.r / 2, s.y - s.r / 2, s.r, s.r); }
+    x.globalAlpha = 1;
     x.globalAlpha = 1;
     for (const cl of clouds) { cl.x += cl.v * dt; if (cl.x > W + 20) cl.x = -cl.w; x.drawImage(cl.cv, cl.x, cl.y, cl.w, cl.h); }
     // brillos que se mueven sobre el agua
@@ -3963,7 +3980,7 @@ const BG = (() => {
       if (L.kind === 'window') { if (lf < .15 && scene.city !== 'HD') continue; glowDot(L.x, L.y, L.r, L.c, (dark ? .85 : .55) * Math.max(lf, .3)); continue; }
       if (lf < .3) continue;
       const a = L.kind === 'lantern' ? (.75 + .25 * Math.sin(t * 6 + L.ph) * Math.sin(t * 2.7 + L.ph)) * lf : L.kind === 'up' ? (dark ? .3 : .18) * lf : (.7 + .3 * Math.sin(t * 2 + L.ph)) * lf * (dark ? 1 : .6);
-      if (L.kind === 'up') { x.globalAlpha = a; const rg = x.createRadialGradient(L.x, L.y, 0, L.x, L.y, L.r * 14); rg.addColorStop(0, L.c); rg.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = rg; x.fillRect(L.x - L.r * 14, L.y - L.r * 14, L.r * 28, L.r * 28); }
+      if (L.kind === 'up') { x.globalAlpha = a; const ur = L.r * (M.clearSky ? 9 : 14), rg = x.createRadialGradient(L.x, L.y, 0, L.x, L.y, ur); rg.addColorStop(0, L.c); rg.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = rg; x.fillRect(L.x - ur, L.y - ur, ur * 2, ur * 2); }
       else glowDot(L.x, L.y, L.r, L.c, a);
     }
     x.globalAlpha = 1;
