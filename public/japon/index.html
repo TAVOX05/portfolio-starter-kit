@@ -234,6 +234,10 @@ a.r:active, button.r:active { background: var(--fill2); }
 .it .food { font-size: 15px; line-height: 20px; color: var(--label2); }
 .it .food b { color: var(--label); font-weight: 600; }
 .it .rec { font-size: 13px; line-height: 18px; color: var(--label2); display: flex; gap: 6px; }
+.trn { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; margin: 6px 0 4px; padding: 7px 10px; border-radius: 10px; background: var(--fill); font-size: 14px; line-height: 19px; color: var(--label2); }
+.trn > svg { flex: none; width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.trn > span:not(.pill) { flex: 1 1 180px; min-width: 0; } .trn b { color: var(--label); font-weight: 600; font-variant-numeric: tabular-nums; }
+.trn.ok { box-shadow: inset 3px 0 0 var(--green); } .trn.warn { box-shadow: inset 3px 0 0 var(--orange); }
 .it .rec::before { content: "ⓘ"; color: var(--tint); }
 .it.done .d, .it.done .food { color: var(--label2); }
 .it.done .t { text-decoration: line-through; text-decoration-color: var(--label3); }
@@ -1733,13 +1737,17 @@ function viewDay(n, opts = {}) {
   }
   let content = '';
   if (seg === 'plan') {
+    const LT = legTimes(day), byItem = {}, after = {};
+    day.legs.forEach((l, j) => { let k = LT[j].di;
+      if (k >= 0) (byItem[k] = byItem[k] || []).push(j);
+      else { k = day.items.length - 1; for (let q = day.items.length - 1; q >= 0; q--) if ((day.items[q].p || []).includes(l.o)) { k = q; break; } (after[k] = after[k] || []).push(j); } });
     content = morningHtml(day) + grp('Plan por hora', day.items.map((it, i) => {
       const id = 'd' + n + '-' + i, on = !!c[id];
       const tags = (i === nowIdx ? '<span class="pill now">Ahora</span>' : '') + (it.k === 'res' ? '<span class="pill ok">Reserva</span>' : '') + (it.x ? '<span class="pill tint">Opcional</span>' : '') + (it.s ? '<span class="pill">Sugerencia</span>' : '');
       return `<div class="r li it${on ? ' done' : ''}${i === nowIdx ? ' now' : ''}">${checkBtn(id, it.h)}<div class="m">
-        <div class="when">${it.t} – ${it.e}${tags}</div><div class="t">${esc(it.h)}</div>
+        <div class="when">${it.t} – ${it.e}${tags}</div>${(byItem[i] || []).map(j => trnHtml(day.legs[j], LT[j])).join('')}<div class="t">${esc(it.h)}</div>
         ${it.d ? `<div class="d">${esc(it.d)}</div>` : ''}${it.f ? `<div class="food"><b>Comer:</b> ${esc(it.f)}</div>` : ''}${it.r ? `<div class="rec">${esc(it.r)}</div>` : ''}
-        ${(it.p || []).length ? `<div class="chips">${it.p.map(k => `<a href="${gmSearch(k)}" target="_blank" rel="noopener">${esc(place(k).n)}</a>`).join('')}</div>` : ''}</div></div>`;
+        ${(it.p || []).length ? `<div class="chips">${it.p.map(k => `<a href="${gmSearch(k)}" target="_blank" rel="noopener">${esc(place(k).n)}</a>`).join('')}</div>` : ''}${(after[i] || []).map(j => trnHtml(day.legs[j], LT[j])).join('')}</div></div>`;
     }).join(''), null, `${done} de ${tot}`) +
     extrasHtml(day) + buysDayHtml(day) +
     daySetHtml(day, 'Sellos e imanes del día') +
@@ -1805,6 +1813,19 @@ function legTimes(day) {
   legTimesMemo.set(day.n, out); return out;
 }
 const LONG_LINES = ['thunder', 'shinkansen', 'hida', 'fujiex', 'fujikyu', 'bus', 'skyliner', 'keisei'];   // trenes y buses con horario fijo
+// trenes y buses de larga distancia que se compran con asiento (el metro, Fujikyū y buses cortos se pagan con la Suica)
+const NEED_TICKET = ['thunder', 'shinkansen', 'hida', 'fujiex', 'bus', 'skyliner'];
+const needsTicket = (l, t) => !t.fixed && l.steps.some(x => !x.alt && NEED_TICKET.includes(x.line) && (x.min || 0) >= 30);
+// línea de transporte dentro del Plan: horario, cómo se mueven y si ya tienen boleto
+function trnHtml(l, t) {
+  const main = l.steps.filter(x => !x.alt), lines = [...new Set(main.filter(x => x.m !== 'walk').map(x => (LINES[x.line] || [x.line])[0]))];
+  const walk = main.filter(x => x.m === 'walk').reduce((a, x) => a + (x.min || 0), 0);
+  const how = lines.length ? lines.join(' · ') + (walk ? ` + ${walk} min a pie` : '') : `A pie ${walk} min`;
+  const ic = main.some(x => x.line === 'bus') ? I.bus : main.some(x => x.line === 'taxi') ? I.car : lines.length ? I.train : I.walk;
+  const need = needsTicket(l, t);
+  const tag = t.fixed ? '<span class="pill ok">✓ Boleto reservado</span>' : need ? '<span class="pill warn">Falta boleto</span>' : '';
+  return `<div class="trn${t.fixed ? ' ok' : need ? ' warn' : ''}">${ic}<span><b>${fmtHM(t.dep)} → ${fmtHM(t.arr)}</b> · ${esc(how)} · ${esc(place(l.o).n)} → ${esc(place(l.d).n)}</span>${tag}</div>`;
+}
 function legGroup(l, T) {
   const a = place(l.o), b = place(l.d);
   const main = l.steps.filter(s => !s.alt);
@@ -1820,7 +1841,7 @@ function legGroup(l, T) {
     else if (s.line === 'bus') lead = `<span class="badge" style="${badgeStyle(ln[1])}">${I.bus}</span>`;
     else lead = `<span class="badge" style="${badgeStyle(ln[1])}">${esc(ln[0])}</span>`;
     return row({ cls: 'step' + (s.alt ? ' alt' : ''), lead, pre: s.alt ? '<span class="alt-lbl">o bien</span>' : '', t: (ln ? '' : 'A pie · ') + esc(s.t), x: s.n ? esc(s.n) : '', tr: at != null ? `<span class="min"><b>${fmtHM(at)}</b> · ${s.min || 0} min</span>` : s.min ? `<span class="min">${s.min} min</span>` : '' });
-  }).join('') + (T ? row({ cls: 'ld', lead: ico(T.fixed ? I.ticket : I.route, T.fixed ? 'var(--green)' : 'var(--tint)'), t: `<b>${fmtHM(T.dep)}</b> salen · <b>${fmtHM(T.arr)}</b> llegan`, s: T.fixed ? 'Horario de su boleto: el tren o bus no espera.' : l.plan || main.some(x => LONG_LINES.includes(x.line)) ? 'Horario estimado: el boleto aún no está comprado; al comprarlo, ajusten a la hora real.' : main.some(x => x.m !== 'walk' && x.line !== 'taxi') ? 'Hora aproximada: los trenes de ciudad pasan cada pocos minutos.' : 'Hora sugerida según el plan del día.' }) : '') +
+  }).join('') + (T ? row({ cls: 'ld', lead: ico(T.fixed ? I.ticket : I.route, T.fixed ? 'var(--green)' : needsTicket(l, T) ? 'var(--orange)' : 'var(--tint)'), t: `<b>${fmtHM(T.dep)}</b> salen · <b>${fmtHM(T.arr)}</b> llegan` + (T.fixed ? ' <span class="pill ok">✓ Boleto reservado</span>' : needsTicket(l, T) ? ' <span class="pill warn">Falta boleto</span>' : ''), s: T.fixed ? 'Horario de su boleto: el tren o bus no espera.' : l.plan || main.some(x => LONG_LINES.includes(x.line)) ? 'Horario estimado: el boleto aún no está comprado; al comprarlo, ajusten a la hora real.' : main.some(x => x.m !== 'walk' && x.line !== 'taxi') ? 'Hora aproximada: los trenes de ciudad pasan cada pocos minutos.' : 'Hora sugerida según el plan del día.' }) : '') +
     row({ href: gmRoute(l.o, l.d, legMode(l)), ext: 1, cls: 'link', t: 'Ruta en Google Maps' });
   return grp(`${esc(a.n)} → ${esc(b.n)}`, rows, l.n ? esc(l.n) : null, T ? `${fmtHM(T.dep)} → ${fmtHM(T.arr)}` : `≈ ${total} min`);
 }
