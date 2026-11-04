@@ -942,6 +942,7 @@ const P = {
   harborland: ['Harborland · Mosaic', 34.6795, 135.1835, 'Kobe Harborland umie MOSAIC'],
   meriken: ['Meriken Park · Port Tower', 34.6826, 135.1880, 'Meriken Park Kobe'],
   shinosaka: ['Shin-Osaka', 34.7335, 135.5003, 'Shin-Osaka Station'],
+  osakast: ['Est. Osaka (JR)', 34.7025, 135.4959, 'JR Osaka Station'],
   tsuruga: ['Tsuruga (transbordo)', 35.6450, 136.0750, 'Tsuruga Station'],
   kanazawast: ['Kanazawa Station', 36.5781, 136.6480, 'Kanazawa Station'],
   omicho: ['Mercado Ōmichō', 36.5716, 136.6568, 'Omicho Market Kanazawa'],
@@ -1199,24 +1200,24 @@ const DAYS = [
     { o: 'seaworld', d: 'steakland', steps: [W(5, 'A Suma-kaihinkōen'), T('jrw', 'Suma-kaihinkōen → Sannomiya', 15), W(3, 'A Steakland')] },
     { o: 'steakland', d: 'harborland', steps: [T('jrw', 'Sannomiya → Kobe (2 paradas)', 4), W(5, 'A Harborland / Mosaic')] },
     { o: 'harborland', d: 'meriken', steps: [W(10, 'Por el malecón')] },
-    { o: 'meriken', d: 'b:osaka', steps: [W(10, 'A JR Kobe / Motomachi'), T('jrw', 'Kobe → Osaka (Special Rapid)', 27), T('midosuji', 'Umeda → Shinsaibashi', 7), W(8, 'Al departamento')] }
+    { o: 'meriken', d: 'b:osaka', steps: [W(10, 'A JR Kobe / Motomachi'), T('jrw', 'Kobe → Osaka (Special Rapid)', 27), W(10, 'En la estación Osaka: recoger los boletos del 4 dic (Thunderbird + Tsurugi) en una máquina JR West, con la tarjeta física y el número de 4 dígitos'), T('midosuji', 'Umeda → Shinsaibashi', 7), W(8, 'Al departamento')] }
    ],
    tips: ['Kobe Beef auténtico lleva certificado con sello de crisantemo. «Wagyu» o «Japanese beef» no es lo mismo.', 'Meriken Park tiene el letrero «BE KOBE»: buena foto al atardecer (~16:50).'] },
 
  { n: 15, date: '2026-12-04', city: 'KZ', base: 'kanazawa', title: 'Osaka → Kanazawa', wx: [11, 4], sun: '16:41',
    items: [
-    { t: '08:30', e: '11:45', h: 'Check-out (antes de las 10:00) y tren a Kanazawa', d: 'Thunderbird a Tsuruga + Hokuriku Shinkansen a Kanazawa.', f: 'Bento de estación.', p: ['b:osaka', 'shinosaka', 'tsuruga', 'kanazawast'], r: 'Salir con margen por las maletas. Considerar enviar la maleta grande.' },
-    { t: '12:00', e: '15:00', h: 'Almuerzo en Ōmichō y check-in (15:00)', d: 'Vacation Rent Kanazawa G-02, a 1 min del mercado.', f: 'Kaisendon (tazón de mariscos), sushi; temporada de cangrejo.', p: ['omicho', 'b:kanazawa'] },
+    { t: '08:45', e: '12:02', h: 'Check-out, Thunderbird y Shinkansen a Kanazawa · RESERVADO', d: 'Salir del Airbnb a las 08:45 hacia la estación Osaka (Umeda), no Shin-Osaka. Thunderbird 13: Osaka 09:41 → Tsuruga 11:02, Green, coche 1, asientos 6-A, 6-B y 6-C. Transbordo de 15 min. Shinkansen Tsurugi 14: Tsuruga 11:17 → Kanazawa 12:02, coche 8, asientos 7-A, 7-B y 7-C.', f: 'Ekiben en la estación Osaka para comer en el Thunderbird.', p: ['b:osaka', 'osakast', 'tsuruga', 'kanazawast'], k: 'res', r: 'Son boletos físicos: recójanlos antes (lo ideal, el 3 dic al volver de Kobe por la estación Osaka) en una máquina o taquilla JR West con la tarjeta física con la que pagaron y su número de 4 dígitos. Sin boleto en mano hay que volver a pagar.' },
+    { t: '12:20', e: '15:00', h: 'Almuerzo en Ōmichō y check-in (15:00)', d: 'Vacation Rent Kanazawa G-02, a 1 min del mercado.', f: 'Kaisendon (tazón de mariscos), sushi; temporada de cangrejo.', p: ['omicho', 'b:kanazawa'] },
     { t: '15:30', e: '18:30', h: 'Higashi Chaya y calles tradicionales', d: 'Casas de té de madera. Santuario Oyama de paso si queda cómodo.', f: 'Helado con hoja de oro (Kanazawa produce el 99% del pan de oro de Japón).', p: ['higashi', 'oyama'] }
    ],
    legs: [
-    { o: 'b:osaka', d: 'shinosaka', steps: [W(8, 'A Shinsaibashi'), T('midosuji', 'Shinsaibashi → Shin-Osaka', 15)] },
-    { o: 'shinosaka', d: 'tsuruga', steps: [T('thunder', 'Thunderbird Shin-Osaka → Tsuruga', 80)] },
-    { o: 'tsuruga', d: 'kanazawast', steps: [T('shinkansen', 'Hokuriku Shinkansen Tsuruga → Kanazawa', 50, 'Transbordo en el mismo edificio, ~10 min. Un solo boleto para ambos trenes.')] },
+    { o: 'b:osaka', d: 'osakast', steps: [W(8, 'A Shinsaibashi'), T('midosuji', 'Shinsaibashi → Umeda', 7), W(12, 'Umeda → andenes JR de la estación Osaka; con maletas, usen elevador')] },
+    { o: 'osakast', d: 'tsuruga', dep: '09:41', steps: [T('thunder', 'Thunderbird 13 · Osaka 09:41 → Tsuruga 11:02', 81, 'Reservado: Green, coche 1, asientos 6-A, 6-B y 6-C.')] },
+    { o: 'tsuruga', d: 'kanazawast', dep: '11:17', steps: [T('shinkansen', 'Tsurugi 14 · Tsuruga 11:17 → Kanazawa 12:02', 45, 'Reservado: coche 8, asientos 7-A, 7-B y 7-C. Transbordo de 15 min en el mismo edificio: sigan los letreros de Hokuriku Shinkansen.')] },
     { o: 'kanazawast', d: 'b:kanazawa', steps: [X(7, 'Taxi con maletas'), T('bus', 'O bus desde la salida Este a Musashigatsuji', 5, null, true), W(15, 'O caminando', null, true)] },
     { o: 'b:kanazawa', d: 'higashi', steps: [W(20, 'Cruzando el río Asano'), T('bus', 'O bus a Hashiba-chō', 5, null, true)] }
    ],
-   tips: ['Desde 2024 el Shinkansen llega a Tsuruga: el Thunderbird ya no va directo a Kanazawa. Compren ambos tramos juntos (JR West Online).', 'Diciembre es temporada de cangrejo (zuwaigani / kōbako) en Ōmichō.'] },
+   tips: ['El Thunderbird 13 sale de la estación Osaka (Umeda), no de Shin-Osaka. Lleguen a los andenes hacia las 09:20.', 'Desde 2024 el Shinkansen llega a Tsuruga: allí cambian del Thunderbird al Tsurugi 14 en 15 min, sin salir de la estación.', 'Diciembre es temporada de cangrejo (zuwaigani / kōbako) en Ōmichō.'] },
 
  { n: 16, date: '2026-12-05', city: 'KZ', base: 'kanazawa', title: 'Jardín y samuráis', wx: [11, 4], sun: '16:41',
    items: [
@@ -1344,7 +1345,8 @@ const TICKETS = [
   { d: '2026-11-25', day: 6, n: 'Tren Fuji Excursion 15', when: '25 nov · Shinjuku 10:30 → Kawaguchiko 12:24', st: 'ok', stl: 'Pagado ¥4,150', info: '2 adultos + 1 niño, asientos reservados en el coche 3: 2-C, 3-C y 3-D. Es boleto electrónico de tren expreso: no se recoge nada, pero hay que pagar la tarifa básica aparte pasando el torniquete con Suica/PASMO con saldo (o con boleto normal).', place: 'shinjuku' },
   { d: '2026-11-18', day: 1, n: 'Vuelos Aeroméxico', when: 'Ida 18 nov 21:30 · regreso 9 dic 09:35', st: 'ok', stl: 'Confirmado', info: 'Ida AM 58: México T2 21:30 → Monterrey 23:15, sale 00:45 → Narita T1 20 nov 06:30 (asientos 28G, 28J y 28H). Regreso AM 57: Narita T1 9 dic 09:35 → México T2 07:00 (27A, 27C y 27B). Tarifa básica: revisen el equipaje permitido.', place: 'narita' },
   { d: '2026-11-27', day: 8, n: 'Bus Kawaguchiko → Mishima', when: '27 nov · Kawaguchiko 09:20 → Mishima 10:50', st: 'ok', stl: 'Pagado ¥6,250', info: '2 adultos + 1 niño, asientos 3-A, 3-B y 3-C. Sale de la estación Kawaguchiko y llega a la salida norte de Mishima. Mostrar el QR de Fujiyama Connect al subir; el bus no espera.', place: 'kawaguchiko' },
-  { d: '2026-11-27', day: 8, n: 'Shinkansen Kodama 819', when: '27 nov · Mishima 11:55 → Kioto 14:34', st: 'ok', stl: 'Pagado ¥29,820', info: '2 adultos + 1 niño en Green, coche 8: asientos 6-B, 6-C y 6-D. Tarifa Hayatoku: solo vale en este tren. Se aborda con el QR-Ticket de smartEX.', place: 'mishima' }
+  { d: '2026-11-27', day: 8, n: 'Shinkansen Kodama 819', when: '27 nov · Mishima 11:55 → Kioto 14:34', st: 'ok', stl: 'Pagado ¥29,820', info: '2 adultos + 1 niño en Green, coche 8: asientos 6-B, 6-C y 6-D. Tarifa Hayatoku: solo vale en este tren. Se aborda con el QR-Ticket de smartEX.', place: 'mishima' },
+  { d: '2026-12-04', day: 15, n: 'Thunderbird 13 + Shinkansen Tsurugi 14', when: '4 dic · Osaka 09:41 → Kanazawa 12:02', st: 'ok', stl: 'Pagado ¥30,600', info: '2 adultos + 1 niño. Thunderbird 13: Osaka 09:41 → Tsuruga 11:02, Green, coche 1, asientos 6-A, 6-B y 6-C. Tsurugi 14: Tsuruga 11:17 → Kanazawa 12:02, coche 8, asientos 7-A, 7-B y 7-C. Boleto físico: recogerlo antes en una máquina o taquilla JR West con la tarjeta física con la que se pagó y el número de 4 dígitos. Sale de la estación Osaka, no de Shin-Osaka.', place: 'osakast' }
 ];
 
 // Lo que falta comprar (checklist)
@@ -1358,7 +1360,8 @@ const TODO = [
   { pr: 1, why: 'Sin confirmar; define cómo se mueven el 26 nov', id: 't-tour', t: 'Tour o transporte Fuji', date: '2026-11-26', s: 'Chūreitō, Oshino Hakkai y Fujiyoshida. Sin tour, la ruta en tren + taxi del Día 7 funciona.', links: [['Tours en GetYourGuide', 'https://www.getyourguide.com/s/?q=Kawaguchiko%20Chureito%20Oshino%20Hakkai'], ['Tours en Klook', 'https://www.klook.com/search/result/?query=Chureito%20Oshino%20Hakkai']] },
   { pr: 1, why: 'Abre venta el 27 oct; une Fuji con Kioto', id: 't-kyoto', done: 1, t: 'Kawaguchiko → Mishima → Kioto', date: '2026-11-27', opens: '2026-10-27', on: 'Shinkansen ~1 mes antes', s: 'Comprado: bus Fujikyū 09:20 a Mishima + Shinkansen Kodama 819 de las 11:55 a Kioto.', links: [['Bus Fujikyū', 'https://bus-en.fujikyu.co.jp/'], ['SmartEX (Shinkansen)', 'https://smart-ex.jp/en/']], note: 'La venta en línea del bus a veces rechaza tarjetas extranjeras; si pasa, se compra en la taquilla de Kawaguchiko.' },
   { pr: 3, why: 'Comida; se puede llegar temprano sin reserva', id: 't-steak', t: 'Steakland Kobe', date: '2026-12-03', s: 'Reservar o llegar temprano; pedir el curso «Kobe Beef».', links: [['Ver en Google Maps', 'https://www.google.com/maps/search/?api=1&query=Steakland%20Kobe%20Sannomiya']] },
-  { pr: 2, why: 'Abre venta el 4 nov', id: 't-kanazawa', t: 'Osaka → Kanazawa', date: '2026-12-04', opens: '2026-11-04', on: '1 mes antes, 10:00 JST', s: 'Thunderbird a Tsuruga + Hokuriku Shinkansen. Asiento reservado en ambos trenes.', links: [['JR West (reservas)', 'https://www.westjr.co.jp/global/en/'], ['Guía Thunderbird', 'https://ekitan.com/en/article/thunderbird']] },
+  { pr: 2, done: 1, why: 'Abre venta el 4 nov', id: 't-kanazawa', t: 'Osaka → Kanazawa', date: '2026-12-04', opens: '2026-11-04', on: '1 mes antes, 10:00 JST', s: 'Comprado: Thunderbird 13 de las 09:41 desde la estación Osaka + Tsurugi 14, llegan a Kanazawa a las 12:02.', links: [['JR West (reservas)', 'https://www.westjr.co.jp/global/en/'], ['Guía Thunderbird', 'https://ekitan.com/en/article/thunderbird']] },
+  { pr: 1, why: 'Sin boleto en mano hay que volver a pagar', id: 't-kzpick', t: 'Recoger boletos Osaka → Kanazawa', date: '2026-12-03', s: 'En una máquina o taquilla JR West (Osaka, Shin-Osaka, Kioto o Kobe). Necesitan la tarjeta física con la que pagaron y su número de identificación de 4 dígitos. Lo más cómodo: el 3 dic al volver de Kobe por la estación Osaka.', when: 'Antes del 4 dic', links: [['Dónde recogerlos (JR West)', 'https://www.westjr.co.jp/global/en/howto/train-reservation/receive/']] },
   { pr: 1, why: 'Obligatorio, sin confirmar y se agota', id: 't-bus1', t: 'Bus Kanazawa → Shirakawa-gō', date: '2026-12-06', s: 'Reserva obligatoria; Shirakawa-gō se llena.', links: [['Japan Bus Online', 'https://japanbusonline.com/en/DestinationSearch/21'], ['Nōhi Bus', 'https://www.nouhibus.co.jp/english/']], note: 'Por teléfono, en inglés: +81 577-32-1688 (9:00–18:00 JST).' },
   { pr: 1, why: 'Obligatorio, sin confirmar y se agota', id: 't-bus2', t: 'Bus Shirakawa-gō → Takayama', date: '2026-12-06', s: 'Coordinar con la llegada del bus anterior.', links: [['Japan Bus Online', 'https://japanbusonline.com/en/DestinationSearch/21'], ['Nōhi Bus', 'https://www.nouhibus.co.jp/english/']], note: 'Si el tramo no aparece en línea, resérvenlo por teléfono.' },
   { pr: 2, why: 'Abre venta el 7 nov', id: 't-hida', t: 'Takayama → Nagoya → Tokio', date: '2026-12-07', opens: '2026-11-07', on: '~1 mes antes', s: 'Limited Express Hida + Shinkansen Nozomi.', links: [['Hida (revendedor)', 'https://shinkansen-ticket.com/es/products/limitedexpresstrainticket-takayama-nagoya'], ['SmartEX (Nozomi)', 'https://smart-ex.jp/en/']], note: 'El link del Hida es un revendedor, no JR. También se compra en la taquilla JR de Takayama.' },
@@ -1376,6 +1379,7 @@ const ALERTS = [
   { d: '2026-11-24', t: 'teamLab: el QR aparece desde las 00:00 JST' },
   { d: '2026-11-29', t: 'Nintendo Museum: descargar QR desde las 14:00 JST' },
   { d: '2026-12-02', t: 'USJ: llevar los 6 e-tickets y revisar horas del Express' },
+  { d: '2026-12-03', t: 'Al volver de Kobe: recoger en la estación Osaka los boletos del Thunderbird de mañana (tarjeta física + número de 4 dígitos)' },
   { d: '2026-12-06', t: 'Mercure Takayama: confirmar impuestos y desayuno de Sam' },
   { d: '2026-12-08', t: 'Empacar, pesar maletas y elegir Skyliner' }
 ];
@@ -1857,7 +1861,7 @@ function segHtml(key, opts, cur, attr, label) {
 }
 function viewPend() {
   const today = jstNow().ymd, c = checks();
-  const RANK = ['t-toshi', 't-bus1', 't-bus2', 't-fuji', 't-kyoto', 't-tour', 't-kanazawa', 't-hida', 't-sky', 't-vjw', 't-esim', 't-osakain', 't-shibuya', 't-steak'];
+  const RANK = ['t-toshi', 't-bus1', 't-bus2', 't-fuji', 't-kyoto', 't-tour', 't-kanazawa', 't-kzpick', 't-hida', 't-sky', 't-vjw', 't-esim', 't-osakain', 't-shibuya', 't-steak'];
   const open = TODO.filter(t => !c[t.id]).sort((a, b) => RANK.indexOf(a.id) - RANK.indexOf(b.id));
   const done = TODO.filter(t => c[t.id]);
   const pct = done.length / TODO.length;
@@ -2139,7 +2143,7 @@ const MORNING = {
   12: { wake: '07:30', leave: '11:30', note: 'Mañana para empacar sin prisa; check-out antes de las 12:00. En Osaka la entrada es desde las 16:00: pregunten a Emi si pueden dejar maletas antes.' },
   13: { wake: '05:00', leave: '06:30', note: 'Lleguen antes de la apertura con los 6 boletos a la mano. Desayuno de konbini en el camino.' },
   14: { wake: '05:40', leave: '07:10', note: 'Trayecto largo (~1 h 20 min): desayunen antes o compren algo en Namba.' },
-  15: { wake: '07:00', leave: '08:30', note: 'Check-out antes de las 10:00. De Shin-Osaka sigue el Thunderbird a Tsuruga y el Hokuriku Shinkansen a Kanazawa: los trenes aún no están comprados.' },
+  15: { wake: '07:15', leave: '08:45', note: 'Check-out y a la estación Osaka (Umeda), no Shin-Osaka: el Thunderbird 13 sale a las 09:41 y el Tsurugi 14 llega a Kanazawa a las 12:02. Lleven los boletos físicos ya recogidos.' },
   16: { wake: '07:05', leave: '08:35', note: 'Kenroku-en abre temprano: a esta hora hay poca gente.' },
   17: { wake: '06:30', leave: '08:00', note: 'Check-out antes de las 10:00. El bus a Shirakawa-gō sale de la estación de Kanazawa (lado este) y requiere reserva: aún no está confirmado.' },
   18: { wake: '05:45', leave: '07:15', note: 'Check-out hasta las 11:00: después del mercado regresen por las maletas para tomar el tren Hida a Nagoya.' },
