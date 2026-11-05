@@ -10,7 +10,7 @@
   --on: #FFFFFF; --chip: #FFFFFF; --halo: rgba(247,245,240,.95);
   --bar: rgba(249,249,249,.84); --barline: rgba(0,0,0,.2);
   --sea: #D5E4F1; --land: #F8F8F3; --coast: #A5B4C3; --sun: #87271A;
-  --c-TK: #87271A; --c-FJ: #1A4886; --c-KY: #5A3689; --c-OS: #8C1B43; --c-KB: #07565E; --c-KZ: #644200; --c-HD: #5F4227;
+  --c-TK: #87271A; --c-FJ: #1A4886; --c-KY: #5A3689; --c-OS: #8C1B43; --c-KB: #07565E; --c-KZ: #644200; --c-HD: #5F4227; --c-MX: #0E5A36;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Segoe UI", Roboto, "Noto Sans JP", system-ui, sans-serif;
   --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 }
@@ -21,7 +21,7 @@
   --on: #0E1220; --chip: #1A1C26; --halo: rgba(14,16,24,.95);
   --bar: rgba(22,22,24,.84); --barline: rgba(255,255,255,.16);
   --sea: #0E1B28; --land: #1C1C1E; --coast: #3A4756; --sun: #FFB8A6;
-  --c-TK: #FFB8A6; --c-FJ: #A6C6F7; --c-KY: #D3B7F7; --c-OS: #F8ABC2; --c-KB: #86D8E0; --c-KZ: #F2C46B; --c-HD: #DDBD98;
+  --c-TK: #FFB8A6; --c-FJ: #A6C6F7; --c-KY: #D3B7F7; --c-OS: #F8ABC2; --c-KB: #86D8E0; --c-KZ: #F2C46B; --c-HD: #DDBD98; --c-MX: #8FD9A8;
   color-scheme: dark; } }
 :root[data-theme="dark"] {
   --bg: #0E1018; --card: #1A1C26; --fill: rgba(200,205,225,.10); --fill2: rgba(200,205,225,.16); --segsel: #3A3C47;
@@ -30,7 +30,7 @@
   --on: #0E1220; --chip: #1A1C26; --halo: rgba(14,16,24,.95);
   --bar: rgba(22,22,24,.84); --barline: rgba(255,255,255,.16);
   --sea: #0E1B28; --land: #1C1C1E; --coast: #3A4756; --sun: #FFB8A6;
-  --c-TK: #FFB8A6; --c-FJ: #A6C6F7; --c-KY: #D3B7F7; --c-OS: #F8ABC2; --c-KB: #86D8E0; --c-KZ: #F2C46B; --c-HD: #DDBD98;
+  --c-TK: #FFB8A6; --c-FJ: #A6C6F7; --c-KY: #D3B7F7; --c-OS: #F8ABC2; --c-KB: #86D8E0; --c-KZ: #F2C46B; --c-HD: #DDBD98; --c-MX: #8FD9A8;
   color-scheme: dark; }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -942,6 +942,9 @@ const P = {
   harborland: ['Harborland · Mosaic', 34.6795, 135.1835, 'Kobe Harborland umie MOSAIC'],
   meriken: ['Meriken Park · Port Tower', 34.6826, 135.1880, 'Meriken Park Kobe'],
   shinosaka: ['Shin-Osaka', 34.7335, 135.5003, 'Shin-Osaka Station'],
+  casa: ['Casa (Tecámac)', 19.7128, -98.9686, 'Tecámac, Estado de México'],
+  aicm2: ['AICM Terminal 2', 19.4247, -99.0767, 'Terminal 2 Aeropuerto Internacional de la Ciudad de México'],
+  mty: ['Aeropuerto de Monterrey · Terminal B', 25.7785, -100.1069, 'Terminal B Aeropuerto Internacional de Monterrey'],
   osakast: ['Est. Osaka (JR)', 34.7025, 135.4959, 'JR Osaka Station'],
   tsuruga: ['Tsuruga (transbordo)', 35.6450, 136.0750, 'Tsuruga Station'],
   kanazawast: ['Kanazawa Station', 36.5781, 136.6480, 'Kanazawa Station'],
@@ -983,7 +986,7 @@ const LINES = {
   keisei: ['Keisei', '#1D3F8F'], fujiex: ['JR Fuji Excursion', '#C9302C'], fujikyu: ['Fujikyū', '#2E86C9'], bus: ['Bus', '#6B7280'],
   shinkansen: ['Shinkansen', '#1E64C8'], keihan: ['Keihan', '#0B7A4B'], hankyu: ['Hankyū', '#7A1F2B'], kintetsu: ['Kintetsu', '#D4122F'],
   sakaisuji: ['Sakaisuji', '#814721'], midosuji: ['Midōsuji', '#E5171F'], hanshin: ['Hanshin', '#E86A10'], jryume: ['JR Yumesaki', '#F18BB0'],
-  jrw: ['JR', '#0072BC'], thunder: ['Thunderbird', '#3C5A99'], hida: ['Ltd. Exp. Hida', '#4D8F3A'], taxi: ['Taxi', '#C9A200'], jrnara: ['JR', '#0072BC'], tobu: ['Tōbu Skytree', '#0E5E9E']
+  jrw: ['JR', '#0072BC'], thunder: ['Thunderbird', '#3C5A99'], hida: ['Ltd. Exp. Hida', '#4D8F3A'], taxi: ['Taxi', '#C9A200'], plane: ['Vuelo', '#123E7C'], jrnara: ['JR', '#0072BC'], tobu: ['Tōbu Skytree', '#0E5E9E']
 };
 const W = (min, t, n, alt) => ({ m: 'walk', t, min, n, alt });
 const T = (line, t, min, n, alt) => ({ m: 'line', line, t, min, n, alt });
@@ -993,7 +996,7 @@ const X = (min, t, n, alt) => ({ m: 'line', line: 'taxi', t, min, n, alt });
 const DAYS = [
  { n: 1, date: '2026-11-20', city: 'TK', base: 'tokyo1', title: 'Llegada y Asakusa', wx: [15, 8], sun: '16:31',
    items: [
-    { t: '06:30', e: '08:30', h: 'Llegada a Narita', d: 'Migración y maletas. Tener a la mano el QR de Visit Japan Web. Sacar yenes en un cajero de 7-Eleven y cargar la Suica.', p: ['narita'], r: 'El horario exacto depende del vuelo.' },
+    { t: '06:30', e: '08:30', h: 'Llegada a Narita', d: 'Migración y maletas. Tener a la mano el QR de Visit Japan Web. Sacar yenes en un cajero de 7-Eleven y cargar la Suica.', p: ['narita'], r: 'El AM 58 aterriza a las 06:30 en la Terminal 1. Migración, aduana y maletas toman 1 h o más.' },
     { t: '08:30', e: '10:00', h: 'Traslado Narita → Ueno / Asakusa', d: 'Skyliner a Keisei Ueno. Si el Airbnb no guarda maletas antes de las 16:00, usar lockers en Ueno/Asakusa.', p: ['keiseiUeno'], r: 'No asumir entrada al departamento antes de las 16:00.' },
     { t: '12:00', e: '15:00', h: 'Comida, descanso y libreta para sellos de estación', d: 'Almuerzo tranquilo cerca de Asakusa. Comprar una libreta para los sellos de estación (eki stamps): sirve cualquier cuaderno de hojas lisas de Daiso, Loft, una papelería o un konbini. Pongan el primer sello en la estación Ueno.', f: 'Tempura o soba en Asakusa; melonpan en Nakamise.', p: [], r: 'Los sellos de estación son gratis y la tinta mancha: dejen secar unos segundos antes de cerrar la libreta.' },
     { t: '15:00', e: '18:00', h: 'Sensō-ji + Nakamise-dōri · libreta de goshuin', d: 'Primer templo memorable: puerta Kaminarimon, Nakamise y el salón principal. Al anochecer se ilumina. Ahí mismo compren la libreta para los sellos de templos (goshuinchō, 御朱印帳) y pidan su primer goshuin.', f: 'Snacks en Nakamise (ningyo-yaki, kibi dango).', p: ['sensoji', 'nakamise'], r: 'Vayan primero a la oficina de goshuin: suele cerrar alrededor de las 16:30. El goshuin cuesta unos ¥500 y la libreta se usa solo para templos y santuarios, no para sellos de estación.' },
@@ -1333,6 +1336,73 @@ function toggleExtra(id) {
   hud(on[id] ? `Agregado al Día ${x.day}` : 'Quitado del plan');
 }
 
+// Día 0: de Tecámac al avión (horas del centro de México; la llegada a Narita, en hora de Japón)
+const DAY0 = { n: 0, date: '2026-11-18', city: 'MX', title: 'Salida: Tecámac → Tokio', wx: [23, 9], sun: '17:54',
+  items: [
+    { t: '09:00', e: '13:00', h: 'Últimos pendientes y maletas', d: 'Pesen las maletas: cada quien una documentada de hasta 25 kg y, en cabina, maleta de mano + artículo personal que juntos no pasen de 10 kg (tarifa Básica). Baterías externas y cargadores siempre en la mochila, nunca en la documentada.', r: 'Confirmen en «Mis viajes» de la app de Aeroméxico cuántas maletas incluye su boleto. Si falta la documentada, cómprenla en la app: en el mostrador sale más cara.', p: ['casa'] },
+    { t: '13:00', e: '15:30', h: 'Comida en casa y cerrar la casa', d: 'Gas cerrado, boiler apagado, aparatos desconectados, refri sin perecederos, basura fuera, ventanas cerradas y llaves con alguien de confianza.', f: 'Comida ligera en casa; en el avión dan cena y desayuno.', p: ['casa'] },
+    { t: '16:00', e: '17:30', h: 'Traslado Tecámac → AICM Terminal 2', d: 'Uber o DiDi en camioneta (UberXL / DiDi XL) por las 3 personas y las maletas, o que los lleve alguien de la familia. Por el Circuito Exterior Mexiquense y la autopista Peñón–Texcoco se llega a la Terminal 2 sin cruzar la ciudad.', r: 'Salgan a las 16:00: en la tarde se cargan la México–Pachuca y el Circuito. Revisen Waze antes de salir. Dejar el auto 21 días en el estacionamiento del aeropuerto sale caro.', p: ['casa', 'aicm2'] },
+    { t: '17:30', e: '19:00', h: 'Documentar en la Terminal 2 (Aeroméxico)', d: 'Mostradores de Aeroméxico en la zona de salidas de la Terminal 2. Entreguen los 3 pasaportes y documenten las maletas directo hasta Narita: revisen que la etiqueta diga NRT. Después pasen el filtro de seguridad y busquen la puerta del AM 58 en las pantallas.', r: 'El AICM pide llegar 3 h antes en vuelos internacionales y la documentación cierra 60 min antes de la salida.', p: ['aicm2'] },
+    { t: '19:00', e: '21:00', h: 'Cenar y esperar en la sala', d: 'Cenen algo antes de abordar y estén en la puerta a las 20:30, una hora antes del vuelo. Pasen al baño antes de subir.', f: 'Algo ligero dentro de la Terminal 2.', p: ['aicm2'] },
+    { t: '21:30', e: '23:15', h: 'Vuelo AM 58: México → Monterrey · RESERVADO', d: 'Sale de la Terminal 2 a las 21:30 y llega a la Terminal B de Monterrey a las 23:15. Asientos 28G, 28J y 28H.', k: 'res', p: ['aicm2', 'mty'] },
+    { t: '23:15', e: '00:45', h: 'Escala en Monterrey: cambio de avión', d: 'Aunque el número de vuelo es el mismo (AM 58), en Monterrey cambian de avión para ir a Tokio. Bajen con todo su equipaje de mano y sigan al personal de Aeroméxico o los letreros de conexión hasta la puerta del AM 58 a Narita.', r: 'Las maletas documentadas siguen hasta Narita (confírmenlo al documentar en México). Si les piden pasar otro filtro de seguridad, otra vez líquidos de máximo 100 ml.', p: ['mty'] },
+    { t: '00:45', e: '06:30', ez: ' (hora de Japón)', h: 'Vuelo AM 58: Monterrey → Narita · RESERVADO', d: '14 h 45 min de vuelo. Salen el jueves 19 a las 00:45 (hora de México) y llegan el viernes 20 a las 06:30, hora de Japón, a la Terminal 1 de Narita. Asientos 28G, 28J y 28H.', f: 'A bordo sirven cena y desayuno; lleven snacks para Sam.', k: 'res', r: 'Al despegar pongan los relojes en hora de Japón (+15 h) y duerman lo más posible: llegan en la mañana y el Día 1 es completo.', p: ['mty', 'narita'] }
+  ],
+  legs: [
+    { o: 'casa', d: 'aicm2', at: 2, T: { dep: 960, arr: 1050 }, steps: [X(90, 'Uber/DiDi XL o auto familiar: Circuito Exterior Mexiquense → autopista Peñón–Texcoco → Terminal 2', 'Unos 55 km. Sin tráfico es ~1 h; a esta hora calculen hasta 1 h 30 min. Casetas aprox. $150 MXN.'), X(100, 'O por la México–Pachuca, Indios Verdes y Circuito Interior', 'Más semáforos; solo si Waze lo marca más rápido.', true)] },
+    { o: 'aicm2', d: 'mty', at: 5, T: { dep: 1290, arr: 1395, fixed: 1 }, steps: [T('plane', 'AM 58 · México T2 21:30 → Monterrey T-B 23:15', 105, 'Reservado: asientos 28G, 28J y 28H.')] },
+    { o: 'mty', d: 'narita', at: 7, T: { dep: 45, arr: 930, fixed: 1, arrTxt: '06:30 de Japón' }, steps: [T('plane', 'AM 58 · Monterrey T-B 00:45 → Narita T1 06:30 (vie 20, hora de Japón)', 885, 'Cambio de avión en Monterrey. Mismos asientos: 28G, 28J y 28H.')] }
+  ],
+  tips: ['Japón va 15 horas adelante del centro de México: cuando en Tecámac son las 16:00 del miércoles, en Tokio ya son las 07:00 del jueves.',
+    'El jueves 19 casi «desaparece»: lo pasan volando y aterrizan el viernes 20 en la mañana.',
+    'Los mexicanos no necesitan visa para entrar a Japón como turistas (hasta 90 días). Si les llega publicidad de una «eVisa», no la necesitan.',
+    'Enchufes: en Japón son de dos patas planas, como en México, a 100 V. Los cargadores de celular y laptop funcionan; para clavijas de 3 patas lleven un adaptador de 3 a 2.',
+    'En Narita hace unos 8 °C a las 06:30: lleven la chamarra en la mochila, no en la maleta documentada.',
+    'Tengan a la mano el QR de Visit Japan Web de cada uno (también el de Sam) para migración y aduana.',
+    'Check-in en línea desde 24 h antes (martes 17 a las 21:30) en la app de Aeroméxico.'] };
+const CHECK0 = [
+  ['p0-pas', 'Pasaportes de los 3', 'Vigentes y en la mochila de mano, junto con los pases de abordar en la app de Aeroméxico.'],
+  ['p0-chk', 'Check-in en línea hecho', 'Abre el martes 17 a las 21:30 (24 h antes).'],
+  ['p0-vjw', 'QR de Visit Japan Web de cada uno', 'Captura de pantalla de los 3 QR por si no hay señal al aterrizar.'],
+  ['p0-sim', 'eSIM instalada', 'Instálenla en casa con wifi; se activa al aterrizar en Japón.'],
+  ['p0-kg', 'Maletas pesadas', 'Documentada ≤ 25 kg; maleta de mano + artículo personal ≤ 10 kg juntos.'],
+  ['p0-liq', 'Líquidos de mano', 'Bolsa transparente, frascos de 100 ml máximo.'],
+  ['p0-bat', 'Cargadores y baterías en la mochila', 'Batería externa nunca en la documentada. Adaptador de 3 a 2 patas.'],
+  ['p0-med', 'Medicinas a la mano', 'Las de Sam y las de ustedes, en la mochila con su receta si es controlada.'],
+  ['p0-card', 'Tarjetas listas para el extranjero', 'Avisen al banco o activen el uso internacional en la app; lleven algo de efectivo.'],
+  ['p0-ropa', 'Chamarra en la mochila', 'Narita amanece a unos 8 °C.'],
+  ['p0-casa', 'Casa cerrada', 'Gas, boiler, aparatos, refri, basura, ventanas y llaves con alguien de confianza.']
+];
+function viewDay0() {
+  const day = DAY0, c = checks(), n = 0, seg = mem.seg[0] || 'plan';
+  const [done, tot] = dayProgress(day), ready = CHECK0.filter(([id]) => c[id]).length;
+  let content;
+  if (seg === 'plan') {
+    content = grp('Plan · hora de México', day.items.map((it, i) => {
+      const id = 'd0-' + i, on = !!c[id], legs = day.legs.filter(l => l.at === i);
+      return `<div class="r li it${on ? ' done' : ''}">${checkBtn(id, it.h)}<div class="m">
+        <div class="when">${it.t} – ${it.e}${it.ez || ''}${it.k === 'res' ? '<span class="pill ok">Reserva</span>' : ''}</div>${legs.map(l => trnHtml(l, l.T)).join('')}<div class="t">${esc(it.h)}</div>
+        ${it.d ? `<div class="d">${esc(it.d)}</div>` : ''}${it.f ? `<div class="food"><b>Comer:</b> ${esc(it.f)}</div>` : ''}${it.r ? `<div class="rec">${esc(it.r)}</div>` : ''}
+        ${(it.p || []).length ? `<div class="chips">${it.p.map(k => `<a href="${gmSearch(k)}" target="_blank" rel="noopener">${esc(place(k).n)}</a>`).join('')}</div>` : ''}</div></div>`;
+    }).join(''), null, `${done} de ${tot}`) +
+    grp('Lista para salir de casa', CHECK0.map(([id, t, d]) => `<div class="r li it${c[id] ? ' done' : ''}">${checkBtn(id, t)}<div class="m"><div class="t">${esc(t)}</div><div class="d">${esc(d)}</div></div></div>`).join(''), null, `${ready} de ${CHECK0.length}`);
+  } else if (seg === 'rutas') content = day.legs.map(l => legGroup(l, l.T)).join('');
+  else content = grp('Tips para el viaje', tipRows(day.tips.map(esc)), null) +
+    grp('Clima', row({ t: 'Ciudad de México', tr: `${day.wx[0]}° / ${day.wx[1]}°` }) + row({ t: 'Narita al llegar (06:30)', tr: '≈ 8°' }) + row({ t: 'Atardecer en CDMX', tr: '≈ ' + day.sun }), null, 'Promedio de temporada');
+  const body = `
+  <div class="tiles">
+    <div class="tile"><span>Salen de casa</span><b>16:00 · mié 18</b></div>
+    <div class="tile"><span>Vuelo AM 58</span><b>21:30 · Terminal 2</b></div>
+    <div class="tile"><span>Llegan a Narita</span><b>06:30 · vie 20</b></div>
+    <div class="tile"><span>Lista · ${ready} de ${CHECK0.length}</span><div class="prog"><i style="width:${ready / CHECK0.length * 100}%"></i></div></div>
+  </div>
+  ${segHtml('day0', [['plan', 'Plan'], ['rutas', 'Rutas'], ['tips', 'Tips']].map(([k, l]) => ['0:' + k, l]), '0:' + seg, 'data-seg', 'Sección del día')}
+  ${content}
+  ${grp(null, row({ href: '#dia1', t: 'Día 1', s: esc(DAYS[0].title), chev: 1, cls: 'link' }))}`;
+  return { title: esc(day.title), cap: 'Día 0 · Mié 18 nov · Ciudad de México', lead: roundel(day, 'lg'), back: { href: '#itinerario', label: 'Itinerario' }, body };
+}
+const day0Row = () => { const [a, b] = dayProgress(DAY0); return row({ href: '#dia0', cls: 'lr', lead: roundel(DAY0, a === b ? 'done' : ''), t: esc(DAY0.title), s: `${fdate(DAY0.date, true)} · salen de casa a las 16:00 · ${a} de ${b}`, tr: '<span class="pill tint">Reserva</span>', chev: 1 }); };
+
 // Reservas con boleto
 const TICKETS = [
   { d: '2026-11-23', day: 4, n: 'Pokémon Café TOKYO', when: '23 nov · 19:00–20:30', st: 'ok', stl: 'Reserva confirmada', info: '3 personas, asiento tipo A. Llegar 18:45. Nihombashi Takashimaya S.C. East Building, 5F. Recoger productos del pedido.', place: 'pokecafe' },
@@ -1376,6 +1446,8 @@ const PAYMENTS = [
 
 const ALERTS = [
   ...PAYMENTS.map(p => ({ d: p.d, t: 'Pago programado: ' + p.t + ' · ' + p.a })),
+  { d: '2026-11-17', t: 'Check-in en línea del AM 58 desde las 21:30 (24 h antes) en la app de Aeroméxico' },
+  { d: '2026-11-18', t: 'Día 0: salen de casa a las 16:00 rumbo a la Terminal 2 del AICM' },
   { d: '2026-11-24', t: 'teamLab: el QR aparece desde las 00:00 JST' },
   { d: '2026-11-29', t: 'Nintendo Museum: descargar QR desde las 14:00 JST' },
   { d: '2026-12-02', t: 'USJ: llevar los 6 e-tickets y revisar horas del Express' },
@@ -1480,6 +1552,7 @@ const I = {
   gift: sv('<rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M3 9h18M12 9v11M12 9c-2-4-6-4-6-1.5S9 9 12 9zM12 9c2-4 6-4 6-1.5S15 9 12 9z"/>'),
   moon: sv('<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>'),
   check: sv('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+  plane: sv('<path d="M10.5 20.5 12 18l-1-5-6 2.5v-2l6-4.5V4.5a1.5 1.5 0 0 1 3 0V9l6 4.5v2L14 13l-1 5 1.5 2.5z"/>'),
   car: sv('<path d="M5 16.5h14v-4.5l-2-5H7l-2 5z"/><circle cx="8" cy="16.5" r="1.5"/><circle cx="16" cy="16.5" r="1.5"/><path d="M5 12h14"/>'),
   walk: sv('<circle cx="13" cy="4.5" r="1.8"/><path d="M10 21l2.2-6.5L15 17v4M8 11.5l2.5-3.5 3 .5 2 3.5 2.5 1M12.2 14.5 11 9.5"/>'),
   bus: sv('<rect x="5" y="3.5" width="14" height="14" rx="3"/><path d="M5 11h14M8 20.5v-3M16 20.5v-3"/><circle cx="8.5" cy="14.5" r=".8"/><circle cx="15.5" cy="14.5" r=".8"/>'),
@@ -1548,10 +1621,11 @@ function viewHoy() {
   const nextAlerts = ALERTS.filter(a => a.d >= ymd).sort((a, b) => a.d.localeCompare(b.d)).slice(0, 4);
   const body = `
   <section class="widget" aria-label="Cuenta regresiva">
-    <div><div class="k">Salida a Narita</div><h2>Viernes 20 de noviembre</h2><div class="jp" lang="ja">日本まであと${left}日</div></div>
+    <div><div class="k">Llegada a Japón</div><h2>Viernes 20 de noviembre</h2><div class="jp" lang="ja">日本まであと${left}日</div></div>
     <div class="sun"><b class="countup" data-to="${left}">${left}</b><span>${left === 1 ? 'día' : 'días'}</span></div>
     <div class="stats"><div><b>20</b><span>días</span></div><div><b>8</b><span>hospedajes</span></div><div><b>19</b><span>noches</span></div><div><b>4</b><span>entradas</span></div></div>
   </section>
+  ${grp('Día de salida', day0Row())}
   ${grp('Próximas fechas', nextAlerts.map(a => row({ cls: 'ld', lead: cal(a.d), t: esc(a.t), s: inDays(daysBetween(ymd, a.d)) })).join(''))}
   ${grp('Antes de salir', TODO.filter(t => !c[t.id]).slice(0, 5).map(todoRow).join('') + row({ href: '#pendientes', t: 'Ver todos los pendientes', cls: 'link', chev: 1 }), null, `${done} de ${TODO.length}`)}
   ${grp('Vista previa', `<div class="r field"><label for="pv">Día</label><select id="pv">${DAYS.map(d => `<option value="${d.n}">${d.n} · ${fdate(d.date, true)} · ${esc(d.title)}</option>`).join('')}</select></div><div class="r field"><label for="pvh">Hora en Japón</label><input id="pvh" type="time" value="10:00"></div>` +
@@ -1711,12 +1785,13 @@ function viewItin() {
   const runs = [];
   DAYS.forEach(d => { const last = runs[runs.length - 1]; if (last && last.city === d.city) last.days.push(d); else runs.push({ city: d.city, days: [d] }); });
   const body = `<section class="grp"><h2 class="gh"><span>${done} de ${total} actividades</span><span>${Math.round(done / total * 100)}%</span></h2><div class="prog" style="margin:0 16px"><i style="width:${done / total * 100}%"></i></div></section>
+  ${grp('México <span lang="ja">メキシコ</span>', day0Row(), null, fdate(DAY0.date))}
   ${runs.map(r => grp(`${CITY[r.city].n} <span lang="ja">${CITY[r.city].jp}</span>`, r.days.map(d => {
       const [a, b] = dayProgress(d);
       const tr = d.date === today ? '<span class="pill now">Hoy</span>' : d.items.some(it => it.k === 'res') ? '<span class="pill tint">Reserva</span>' : '';
       return row({ href: '#dia' + d.n, cls: 'lr', lead: roundel(d, a === b ? 'done' : ''), t: esc(d.title), s: `${fdate(d.date, true)} · ${a} de ${b}`, tr, chev: 1 });
     }).join(''), null, `${fdate(r.days[0].date)}${r.days.length > 1 ? ' – ' + fdate(r.days[r.days.length - 1].date) : ''}`)).join('')}`;
-  return { title: 'Itinerario', cap: '20 nov – 9 dic 2026', body };
+  return { title: 'Itinerario', cap: '18 nov – 9 dic 2026', body };
 }
 
 function viewDay(n, opts = {}) {
@@ -1758,7 +1833,7 @@ function viewDay(n, opts = {}) {
       grp('Clima', row({ t: 'Máxima / mínima', tr: `${day.wx[0]}° / ${day.wx[1]}°` }) + row({ t: 'Atardecer', tr: '≈ ' + day.sun }), null, 'Promedio de temporada');
   }
   const nav = opts.today ? '' : grp(null,
-    (n > 1 ? row({ href: '#dia' + (n - 1), t: `Día ${n - 1}`, s: esc(DAYS[n - 2].title), chev: 1, cls: 'link' }) : '') +
+    (n > 1 ? row({ href: '#dia' + (n - 1), t: `Día ${n - 1}`, s: esc(DAYS[n - 2].title), chev: 1, cls: 'link' }) : row({ href: '#dia0', t: 'Día 0', s: esc(DAY0.title), chev: 1, cls: 'link' })) +
     (n < DAYS.length ? row({ href: '#dia' + (n + 1), t: `Día ${n + 1}`, s: esc(DAYS[n].title), chev: 1, cls: 'link' }) : ''));
   const body = `
   ${opts.preview ? grp(null, row({ t: `Vista previa del Día ${n} a las ${opts.hm}` }) + row({ tag: 'button', cls: 'center', t: 'Salir de la vista previa', attrs: 'data-preview-off' })) : ''}
@@ -1815,10 +1890,10 @@ function trnHtml(l, t) {
   const main = l.steps.filter(x => !x.alt), lines = [...new Set(main.filter(x => x.m !== 'walk').map(x => (LINES[x.line] || [x.line])[0]))];
   const walk = main.filter(x => x.m === 'walk').reduce((a, x) => a + (x.min || 0), 0);
   const how = lines.length ? lines.join(' · ') + (walk ? ` + ${walk} min a pie` : '') : `A pie ${walk} min`;
-  const ic = main.some(x => x.line === 'bus') ? I.bus : main.some(x => x.line === 'taxi') ? I.car : lines.length ? I.train : I.walk;
+  const ic = main.some(x => x.line === 'plane') ? I.plane : main.some(x => x.line === 'bus') ? I.bus : main.some(x => x.line === 'taxi') ? I.car : lines.length ? I.train : I.walk;
   const need = needsTicket(l, t);
   const tag = t.fixed ? '<span class="pill ok">✓ Boleto reservado</span>' : need ? '<span class="pill warn">Falta boleto</span>' : '';
-  return `<div class="trn${t.fixed ? ' ok' : need ? ' warn' : ''}">${ic}<span><b>${fmtHM(t.dep)} → ${fmtHM(t.arr)}</b> · ${esc(how)} · ${esc(place(l.o).n)} → ${esc(place(l.d).n)}</span>${tag}</div>`;
+  return `<div class="trn${t.fixed ? ' ok' : need ? ' warn' : ''}">${ic}<span><b>${fmtHM(t.dep)} → ${t.arrTxt || fmtHM(t.arr)}</b> · ${esc(how)} · ${esc(place(l.o).n)} → ${esc(place(l.d).n)}</span>${tag}</div>`;
 }
 function legGroup(l, T) {
   const a = place(l.o), b = place(l.d);
@@ -1835,9 +1910,9 @@ function legGroup(l, T) {
     else if (s.line === 'bus') lead = `<span class="badge" style="${badgeStyle(ln[1])}">${I.bus}</span>`;
     else lead = `<span class="badge" style="${badgeStyle(ln[1])}">${esc(ln[0])}</span>`;
     return row({ cls: 'step' + (s.alt ? ' alt' : ''), lead, pre: s.alt ? '<span class="alt-lbl">o bien</span>' : '', t: (ln ? '' : 'A pie · ') + esc(s.t), x: s.n ? esc(s.n) : '', tr: at != null ? `<span class="min"><b>${fmtHM(at)}</b> · ${s.min || 0} min</span>` : s.min ? `<span class="min">${s.min} min</span>` : '' });
-  }).join('') + (T ? row({ cls: 'ld', lead: ico(T.fixed ? I.ticket : I.route, T.fixed ? 'var(--green)' : needsTicket(l, T) ? 'var(--orange)' : 'var(--tint)'), t: `<b>${fmtHM(T.dep)}</b> salen · <b>${fmtHM(T.arr)}</b> llegan` + (T.fixed ? ' <span class="pill ok">✓ Boleto reservado</span>' : needsTicket(l, T) ? ' <span class="pill warn">Falta boleto</span>' : ''), s: T.fixed ? 'Horario de su boleto: el tren o bus no espera.' : l.plan || main.some(x => LONG_LINES.includes(x.line)) ? 'Horario estimado: el boleto aún no está comprado; al comprarlo, ajusten a la hora real.' : main.some(x => x.m !== 'walk' && x.line !== 'taxi') ? 'Hora aproximada: los trenes de ciudad pasan cada pocos minutos.' : 'Hora sugerida según el plan del día.' }) : '') +
-    row({ href: gmRoute(l.o, l.d, legMode(l)), ext: 1, cls: 'link', t: 'Ruta en Google Maps' });
-  return grp(`${esc(a.n)} → ${esc(b.n)}`, rows, l.n ? esc(l.n) : null, T ? `${fmtHM(T.dep)} → ${fmtHM(T.arr)}` : `≈ ${total} min`);
+  }).join('') + (T ? row({ cls: 'ld', lead: ico(T.fixed ? I.ticket : I.route, T.fixed ? 'var(--green)' : needsTicket(l, T) ? 'var(--orange)' : 'var(--tint)'), t: `<b>${fmtHM(T.dep)}</b> salen · <b>${T.arrTxt || fmtHM(T.arr)}</b> llegan` + (T.fixed ? ' <span class="pill ok">✓ Boleto reservado</span>' : needsTicket(l, T) ? ' <span class="pill warn">Falta boleto</span>' : ''), s: T.fixed ? 'Horario de su boleto: el tren o bus no espera.' : l.plan || main.some(x => LONG_LINES.includes(x.line)) ? 'Horario estimado: el boleto aún no está comprado; al comprarlo, ajusten a la hora real.' : main.some(x => x.m !== 'walk' && x.line !== 'taxi') ? 'Hora aproximada: los trenes de ciudad pasan cada pocos minutos.' : 'Hora sugerida según el plan del día.' }) : '') +
+    (l.steps.some(s => s.line === 'plane') ? '' : row({ href: gmRoute(l.o, l.d, legMode(l)), ext: 1, cls: 'link', t: 'Ruta en Google Maps' }));
+  return grp(`${esc(a.n)} → ${esc(b.n)}`, rows, l.n ? esc(l.n) : null, T ? `${fmtHM(T.dep)} → ${T.arrTxt || fmtHM(T.arr)}` : `≈ ${total} min`);
 }
 
 function viewReservas() {
@@ -3255,7 +3330,8 @@ function route(opts = {}) {
   if (h === 'guia-claude') { history.replaceState(null, '', '#chat'); return route(opts); }
   let tab = h, v;
   const m = h.match(/^dia(\d{1,2})$/);
-  if (m && DAYS[+m[1] - 1]) { tab = 'itinerario'; v = viewDay(+m[1]); }
+  if (h === 'dia0') { tab = 'itinerario'; v = viewDay0(); }
+  else if (m && DAYS[+m[1] - 1]) { tab = 'itinerario'; v = viewDay(+m[1]); }
   else if (h === 'itinerario') v = viewItin();
   else if (h === 'pendientes') v = viewPend();
   else if (h === 'chat') v = viewChat();
