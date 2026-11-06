@@ -958,6 +958,8 @@ const P = {
   museum21: ['Museo Siglo XXI', 36.5609, 136.6582, '21st Century Museum of Contemporary Art Kanazawa'],
   shirakawa: ['Shirakawa-gō', 36.2575, 136.9063, 'Shirakawa-go'],
   shiroyama: ['Mirador Shiroyama', 36.2620, 136.9075, 'Shiroyama Viewpoint Shirakawa-go'],
+  kzwest: ['Kanazawa · salida Oeste, andén 4', 36.578272, 136.646489, 'Kanazawa Station West Exit Bus Stop 4'],
+  nohibus: ['Nōhi Bus Center (Takayama)', 36.141933, 137.251443, 'Takayama Nohi Bus Center'],
   takayamast: ['Takayama Station', 36.1414, 137.2512, 'Takayama Station'],
   sanmachi: ['Sanmachi Suji', 36.1405, 137.2600, 'Sanmachi Suji Takayama'],
   asaichi: ['Mercado matutino Miyagawa', 36.1445, 137.2585, 'Miyagawa Morning Market Takayama'],
@@ -1240,20 +1242,20 @@ const DAYS = [
 
  { n: 17, date: '2026-12-06', city: 'HD', base: 'takayama', title: 'Shirakawa-gō y Takayama', wx: [7, -1], sun: '16:41',
    items: [
-    { t: '08:00', e: '10:00', h: 'Check-out (antes de 10:00) y bus a Shirakawa-gō', d: 'Salir con margen a la estación; con maletas, taxi.', f: 'Snack o bento desde Kanazawa Station.', p: ['b:kanazawa', 'kanazawast'], r: 'Buses SIN confirmación: reservar ambos tramos.' },
-    { t: '10:00', e: '13:30', h: 'Shirakawa-gō', d: 'Casas gasshō-zukuri, mirador Shiroyama y pueblo tradicional. Puede haber nieve.', f: 'Comida local sencilla (soba, gohei-mochi).', p: ['shirakawa', 'shiroyama'], r: 'Bloque muy memorable por el paisaje.' },
-    { t: '14:00', e: '15:30', h: 'Bus Shirakawa-gō → Takayama', f: 'Snack.', p: ['takayamast'], r: 'Llegar con margen a la terminal.' },
-    { t: '16:00', e: '20:00', h: 'Check-in Mercure Hida Takayama + Sanmachi', d: 'Check-in desde las 15:00. Sanmachi Suji y cena de carne Hida.', f: 'Carne Hida, sushi de Hida beef, ramen de Takayama.', p: ['b:takayama', 'sanmachi'], r: 'Las tiendas de Sanmachi cierran ~17:00: vayan directo.' }
+    { t: '07:40', e: '09:25', h: 'Check-out, taxi y bus a Shirakawa-gō · RESERVADO', d: 'Salir del Airbnb a las 07:40 en taxi a la salida OESTE de la estación de Kanazawa, andén 4 (no la salida Este). Bus Hokutetsu 08:10 → Shirakawa-gō (parada Ogimachi) 09:25, coche 01, asientos 9A, 9B y 10A.', f: 'Snack o bento de un konbini; desayunen antes de salir.', p: ['b:kanazawa', 'kzwest', 'shirakawa'], k: 'res', r: 'Lleven el boleto IMPRESO: el celular también vale, pero si no lo pueden mostrar hay que volver a pagar. Estén en el andén a las 08:00.' },
+    { t: '09:30', e: '13:15', h: 'Shirakawa-gō', d: 'Casas gasshō-zukuri, mirador Shiroyama y pueblo tradicional. Puede haber nieve.', f: 'Comida local sencilla (soba, gohei-mochi).', p: ['shirakawa', 'shiroyama'], r: 'El bus a Takayama sale a las 13:30 de la misma parada donde los dejó (Ogimachi): estén ahí a las 13:15.' },
+    { t: '13:30', e: '14:20', h: 'Bus Shirakawa-gō → Takayama · RESERVADO', d: 'Bus Nōhi 13:30 desde la parada Ogimachi → Nōhi Bus Center de Takayama 14:20, junto a la estación JR. Coche 01, asientos 2A, 2B y 3A.', f: 'Snack.', p: ['shirakawa', 'nohibus'], k: 'res', r: 'También con el boleto impreso. El bus no espera.' },
+    { t: '14:30', e: '20:00', h: 'Check-in Mercure Hida Takayama + Sanmachi', d: 'Check-in desde las 15:00 (si llegan antes, dejen las maletas en recepción). Sanmachi Suji y cena de carne Hida.', f: 'Carne Hida, sushi de Hida beef, ramen de Takayama.', p: ['b:takayama', 'sanmachi'], r: 'Las tiendas de Sanmachi cierran ~17:00: vayan directo.' }
    ],
    legs: [
-    { o: 'b:kanazawa', d: 'kanazawast', steps: [X(7, 'Taxi a la estación (salida Este, terminal de buses)')] },
-    { o: 'kanazawast', d: 'shirakawa', plan: '08:40', steps: [T('bus', 'Bus Hokutetsu / Nōhi Kanazawa → Shirakawa-gō', 80, 'RESERVA OBLIGATORIA.')] },
+    { o: 'b:kanazawa', d: 'kzwest', steps: [X(10, 'Taxi a la salida Oeste (West Exit) de la estación, andén 4')] },
+    { o: 'kzwest', d: 'shirakawa', dep: '08:10', steps: [T('bus', 'Hokutetsu · Kanazawa 08:10 → Shirakawa-gō 09:25', 75, 'Reservado: coche 01, asientos 9A, 9B y 10A. Boleto impreso.')] },
     { o: 'shirakawa', d: 'shiroyama', steps: [T('bus', 'Shuttle al mirador', 5), W(20, 'O subir caminando', null, true)] },
-    { o: 'shirakawa', d: 'takayamast', steps: [T('bus', 'Bus Nōhi Shirakawa-gō → Takayama', 50, 'RESERVA OBLIGATORIA.')] },
-    { o: 'takayamast', d: 'b:takayama', steps: [W(5, 'Al Mercure')] },
-    { o: 'b:takayama', d: 'sanmachi', steps: [W(15, 'Cruzando el río Miyagawa')] }
+    { o: 'shirakawa', d: 'nohibus', dep: '13:30', steps: [T('bus', 'Nōhi · Shirakawa-gō 13:30 → Takayama 14:20', 50, 'Reservado: coche 01, asientos 2A, 2B y 3A. Boleto impreso.')] },
+    { o: 'nohibus', d: 'b:takayama', steps: [W(5, 'Al Mercure')] },
+    { o: 'b:takayama', d: 'sanmachi', plan: '15:10', steps: [W(15, 'Cruzando el río Miyagawa')] }
    ],
-   tips: ['Shirakawa-gō tiene pocos lockers: viajen ligeros este día. Las maletas grandes pueden ir por takkyūbin a Tokio (si Eiji acepta recibirlas).', 'Botas con suela antiderrapante: en diciembre el pueblo puede estar nevado o helado.'] },
+   tips: ['Los boletos de bus se muestran impresos. Si no los imprimieron en México, las multicopiadoras de los konbini (7-Eleven, Lawson, FamilyMart) imprimen desde el celular.', 'Shirakawa-gō tiene pocos lockers: viajen ligeros este día. Las maletas grandes pueden ir por takkyūbin a Tokio (si Eiji acepta recibirlas).', 'Botas con suela antiderrapante: en diciembre el pueblo puede estar nevado o helado.'] },
 
  { n: 18, date: '2026-12-07', city: 'TK', base: 'tokyo2', title: 'Takayama → Tokio', wx: [12, 4], sun: '16:28',
    items: [
@@ -1371,6 +1373,7 @@ const CHECK0 = [
   ['p0-med', 'Medicinas a la mano', 'Las de Sam y las de ustedes, en la mochila con su receta si es controlada.'],
   ['p0-card', 'Tarjetas listas para el extranjero', 'Avisen al banco o activen el uso internacional en la app; lleven algo de efectivo.'],
   ['p0-ropa', 'Chamarra en la mochila', 'Narita amanece a unos 8 °C.'],
+  ['p0-print', 'Boletos de bus a Shirakawa-gō impresos', 'Los 2 boletos de Japan Bus Online (6 dic): el conductor pide el impreso.'],
   ['p0-casa', 'Casa cerrada', 'Gas, boiler, aparatos, refri, basura, ventanas y llaves con alguien de confianza.']
 ];
 function viewDay0() {
@@ -1411,12 +1414,13 @@ const TICKETS = [
   { d: '2026-12-02', day: 13, n: 'Universal Studios Japan', when: '2 dic · todo el día', st: 'ok', stl: 'Pagado ¥114,300', info: '3 × 1 Day Studio Pass + 3 × Express Pass 8 Minion & MineCart Special (6 e-tickets). Verificar fecha y ventanas en cada e-ticket.', place: 'usj' },
   { d: '2026-11-26', day: 7, n: 'Tour Fuji', when: '26 nov', st: 'warn', stl: 'Pendiente de verificar', info: 'Chūreitō, Oshino Hakkai y Fujiyoshida. 5.ª estación solo como alternativa por clima.', place: 'chureito' },
   { d: '2026-12-03', day: 14, n: 'Steakland Kobe', when: '3 dic · comida', st: 'warn', stl: 'No verificado', info: 'Reservar o llegar temprano; confirmar que el curso diga Kobe Beef.', place: 'steakland' },
-  { d: '2026-12-06', day: 17, n: 'Buses Shirakawa-gō', when: '6 dic', st: 'hot', stl: 'Sin confirmación', info: 'Reservar Kanazawa → Shirakawa-gō y Shirakawa-gō → Takayama por separado, con horarios coordinados.', place: 'shirakawa' },
+  { d: '2026-12-06', day: 17, n: 'Bus Kanazawa → Shirakawa-gō', when: '6 dic · Kanazawa 08:10 → Shirakawa-gō 09:25', st: 'ok', stl: 'Pagado ¥7,250', info: '2 adultos + 1 niño, Hokutetsu, coche 01, asientos 9A, 9B y 10A. Sale de la salida OESTE de la estación de Kanazawa, andén 4, y llega a la parada Ogimachi. Mostrar el boleto impreso al conductor.', place: 'kzwest' },
   { d: '2026-11-25', day: 6, n: 'Tren Fuji Excursion 15', when: '25 nov · Shinjuku 10:30 → Kawaguchiko 12:24', st: 'ok', stl: 'Pagado ¥4,150', info: '2 adultos + 1 niño, asientos reservados en el coche 3: 2-C, 3-C y 3-D. Es boleto electrónico de tren expreso: no se recoge nada, pero hay que pagar la tarifa básica aparte pasando el torniquete con Suica/PASMO con saldo (o con boleto normal).', place: 'shinjuku' },
   { d: '2026-11-18', day: 1, n: 'Vuelos Aeroméxico', when: 'Ida 18 nov 21:30 · regreso 9 dic 09:35', st: 'ok', stl: 'Confirmado', info: 'Ida AM 58: México T2 21:30 → Monterrey 23:15, sale 00:45 → Narita T1 20 nov 06:30 (asientos 28G, 28J y 28H). Regreso AM 57: Narita T1 9 dic 09:35 → México T2 07:00 (27A, 27C y 27B). Tarifa básica: revisen el equipaje permitido.', place: 'narita' },
   { d: '2026-11-27', day: 8, n: 'Bus Kawaguchiko → Mishima', when: '27 nov · Kawaguchiko 09:20 → Mishima 10:50', st: 'ok', stl: 'Pagado ¥6,250', info: '2 adultos + 1 niño, asientos 3-A, 3-B y 3-C. Sale de la estación Kawaguchiko y llega a la salida norte de Mishima. Mostrar el QR de Fujiyama Connect al subir; el bus no espera.', place: 'kawaguchiko' },
   { d: '2026-11-27', day: 8, n: 'Shinkansen Kodama 819', when: '27 nov · Mishima 11:55 → Kioto 14:34', st: 'ok', stl: 'Pagado ¥29,820', info: '2 adultos + 1 niño en Green, coche 8: asientos 6-B, 6-C y 6-D. Tarifa Hayatoku: solo vale en este tren. Se aborda con el QR-Ticket de smartEX.', place: 'mishima' },
-  { d: '2026-12-04', day: 15, n: 'Thunderbird 13 + Shinkansen Tsurugi 14', when: '4 dic · Osaka 09:41 → Kanazawa 12:02', st: 'ok', stl: 'Pagado ¥30,600', info: '2 adultos + 1 niño. Thunderbird 13: Osaka 09:41 → Tsuruga 11:02, Green, coche 1, asientos 6-A, 6-B y 6-C. Tsurugi 14: Tsuruga 11:17 → Kanazawa 12:02, coche 8, asientos 7-A, 7-B y 7-C. Boleto físico: recogerlo antes en una máquina o taquilla JR West con la tarjeta física con la que se pagó y el número de 4 dígitos. Sale de la estación Osaka, no de Shin-Osaka.', place: 'osakast' }
+  { d: '2026-12-04', day: 15, n: 'Thunderbird 13 + Shinkansen Tsurugi 14', when: '4 dic · Osaka 09:41 → Kanazawa 12:02', st: 'ok', stl: 'Pagado ¥30,600', info: '2 adultos + 1 niño. Thunderbird 13: Osaka 09:41 → Tsuruga 11:02, Green, coche 1, asientos 6-A, 6-B y 6-C. Tsurugi 14: Tsuruga 11:17 → Kanazawa 12:02, coche 8, asientos 7-A, 7-B y 7-C. Boleto físico: recogerlo antes en una máquina o taquilla JR West con la tarjeta física con la que se pagó y el número de 4 dígitos. Sale de la estación Osaka, no de Shin-Osaka.', place: 'osakast' },
+  { d: '2026-12-06', day: 17, n: 'Bus Shirakawa-gō → Takayama', when: '6 dic · Shirakawa-gō 13:30 → Takayama 14:20', st: 'ok', stl: 'Pagado ¥7,250', info: '2 adultos + 1 niño, Nōhi Bus, coche 01, asientos 2A, 2B y 3A. Sale de la parada Ogimachi y llega al Nōhi Bus Center, junto a la estación de Takayama. Mostrar el boleto impreso al conductor.', place: 'shirakawa' }
 ];
 
 // Lo que falta comprar (checklist)
@@ -1432,8 +1436,8 @@ const TODO = [
   { pr: 3, why: 'Comida; se puede llegar temprano sin reserva', id: 't-steak', t: 'Steakland Kobe', date: '2026-12-03', s: 'Reservar o llegar temprano; pedir el curso «Kobe Beef».', links: [['Ver en Google Maps', 'https://www.google.com/maps/search/?api=1&query=Steakland%20Kobe%20Sannomiya']] },
   { pr: 2, done: 1, why: 'Abre venta el 4 nov', id: 't-kanazawa', t: 'Osaka → Kanazawa', date: '2026-12-04', opens: '2026-11-04', on: '1 mes antes, 10:00 JST', s: 'Comprado: Thunderbird 13 de las 09:41 desde la estación Osaka + Tsurugi 14, llegan a Kanazawa a las 12:02.', links: [['JR West (reservas)', 'https://www.westjr.co.jp/global/en/'], ['Guía Thunderbird', 'https://ekitan.com/en/article/thunderbird']] },
   { pr: 1, why: 'Sin boleto en mano hay que volver a pagar', id: 't-kzpick', t: 'Recoger boletos Osaka → Kanazawa', date: '2026-12-03', s: 'En una máquina o taquilla JR West (Osaka, Shin-Osaka, Kioto o Kobe). Necesitan la tarjeta física con la que pagaron y su número de identificación de 4 dígitos. Lo más cómodo: el 3 dic al volver de Kobe por la estación Osaka.', when: 'Antes del 4 dic', links: [['Dónde recogerlos (JR West)', 'https://www.westjr.co.jp/global/en/howto/train-reservation/receive/']] },
-  { pr: 1, why: 'Obligatorio, sin confirmar y se agota', id: 't-bus1', t: 'Bus Kanazawa → Shirakawa-gō', date: '2026-12-06', s: 'Reserva obligatoria; Shirakawa-gō se llena.', links: [['Japan Bus Online', 'https://japanbusonline.com/en/DestinationSearch/21'], ['Nōhi Bus', 'https://www.nouhibus.co.jp/english/']], note: 'Por teléfono, en inglés: +81 577-32-1688 (9:00–18:00 JST).' },
-  { pr: 1, why: 'Obligatorio, sin confirmar y se agota', id: 't-bus2', t: 'Bus Shirakawa-gō → Takayama', date: '2026-12-06', s: 'Coordinar con la llegada del bus anterior.', links: [['Japan Bus Online', 'https://japanbusonline.com/en/DestinationSearch/21'], ['Nōhi Bus', 'https://www.nouhibus.co.jp/english/']], note: 'Si el tramo no aparece en línea, resérvenlo por teléfono.' },
+  { pr: 1, done: 1, why: 'Obligatorio y se agota', id: 't-bus1', t: 'Bus Kanazawa → Shirakawa-gō', date: '2026-12-06', s: 'Comprado: bus de las 08:10 desde la salida Oeste (andén 4), llega a las 09:25.', links: [['Japan Bus Online', 'https://japanbusonline.com/en/DestinationSearch/21'], ['Nōhi Bus', 'https://www.nouhibus.co.jp/english/']], note: 'Por teléfono, en inglés: +81 577-32-1688 (9:00–18:00 JST).' },
+  { pr: 1, done: 1, why: 'Obligatorio y se agota', id: 't-bus2', t: 'Bus Shirakawa-gō → Takayama', date: '2026-12-06', s: 'Comprado: bus de las 13:30, llega a Takayama a las 14:20.', links: [['Japan Bus Online', 'https://japanbusonline.com/en/DestinationSearch/21'], ['Nōhi Bus', 'https://www.nouhibus.co.jp/english/']], note: 'Si el tramo no aparece en línea, resérvenlo por teléfono.' },
   { pr: 2, why: 'Abre venta el 7 nov', id: 't-hida', t: 'Takayama → Nagoya → Tokio', date: '2026-12-07', opens: '2026-11-07', on: '~1 mes antes', s: 'Limited Express Hida + Shinkansen Nozomi.', links: [['Hida (revendedor)', 'https://shinkansen-ticket.com/es/products/limitedexpresstrainticket-takayama-nagoya'], ['SmartEX (Nozomi)', 'https://smart-ex.jp/en/']], note: 'El link del Hida es un revendedor, no JR. También se compra en la taquilla JR de Takayama.' },
   { pr: 2, why: 'Abre venta el 9 nov; vuelo temprano', id: 't-sky', t: 'Skyliner Ueno → Narita', date: '2026-12-09', opens: '2026-11-09', on: 'desde 30 días antes', s: 'E-ticket con descuento (¥2,310 adulto, ¥1,150 niño). Se canjea con pasaporte.', links: [['Skyliner e-ticket', 'https://www.keisei.co.jp/keisei/tetudou/skyliner/e-ticket/en/']] }
 ];
@@ -1452,6 +1456,7 @@ const ALERTS = [
   { d: '2026-11-29', t: 'Nintendo Museum: descargar QR desde las 14:00 JST' },
   { d: '2026-12-02', t: 'USJ: llevar los 6 e-tickets y revisar horas del Express' },
   { d: '2026-12-03', t: 'Al volver de Kobe: recoger en la estación Osaka los boletos del Thunderbird de mañana (tarjeta física + número de 4 dígitos)' },
+  { d: '2026-12-05', t: 'Mañana: bus 08:10 desde la salida OESTE de Kanazawa (andén 4). Tengan listos los boletos impresos' },
   { d: '2026-12-06', t: 'Mercure Takayama: confirmar impuestos y desayuno de Sam' },
   { d: '2026-12-08', t: 'Empacar, pesar maletas y elegir Skyliner' }
 ];
@@ -1910,7 +1915,7 @@ function legGroup(l, T) {
     else if (s.line === 'bus') lead = `<span class="badge" style="${badgeStyle(ln[1])}">${I.bus}</span>`;
     else lead = `<span class="badge" style="${badgeStyle(ln[1])}">${esc(ln[0])}</span>`;
     return row({ cls: 'step' + (s.alt ? ' alt' : ''), lead, pre: s.alt ? '<span class="alt-lbl">o bien</span>' : '', t: (ln ? '' : 'A pie · ') + esc(s.t), x: s.n ? esc(s.n) : '', tr: at != null ? `<span class="min"><b>${fmtHM(at)}</b> · ${s.min || 0} min</span>` : s.min ? `<span class="min">${s.min} min</span>` : '' });
-  }).join('') + (T ? row({ cls: 'ld', lead: ico(T.fixed ? I.ticket : I.route, T.fixed ? 'var(--green)' : needsTicket(l, T) ? 'var(--orange)' : 'var(--tint)'), t: `<b>${fmtHM(T.dep)}</b> salen · <b>${T.arrTxt || fmtHM(T.arr)}</b> llegan` + (T.fixed ? ' <span class="pill ok">✓ Boleto reservado</span>' : needsTicket(l, T) ? ' <span class="pill warn">Falta boleto</span>' : ''), s: T.fixed ? 'Horario de su boleto: el tren o bus no espera.' : l.plan || main.some(x => LONG_LINES.includes(x.line)) ? 'Horario estimado: el boleto aún no está comprado; al comprarlo, ajusten a la hora real.' : main.some(x => x.m !== 'walk' && x.line !== 'taxi') ? 'Hora aproximada: los trenes de ciudad pasan cada pocos minutos.' : 'Hora sugerida según el plan del día.' }) : '') +
+  }).join('') + (T ? row({ cls: 'ld', lead: ico(T.fixed ? I.ticket : I.route, T.fixed ? 'var(--green)' : needsTicket(l, T) ? 'var(--orange)' : 'var(--tint)'), t: `<b>${fmtHM(T.dep)}</b> salen · <b>${T.arrTxt || fmtHM(T.arr)}</b> llegan` + (T.fixed ? ' <span class="pill ok">✓ Boleto reservado</span>' : needsTicket(l, T) ? ' <span class="pill warn">Falta boleto</span>' : ''), s: T.fixed ? 'Horario de su boleto: el tren o bus no espera.' : (l.plan && main.some(x => x.m !== 'walk')) || main.some(x => LONG_LINES.includes(x.line)) ? 'Horario estimado: el boleto aún no está comprado; al comprarlo, ajusten a la hora real.' : main.some(x => x.m !== 'walk' && x.line !== 'taxi') ? 'Hora aproximada: los trenes de ciudad pasan cada pocos minutos.' : 'Hora sugerida según el plan del día.' }) : '') +
     (l.steps.some(s => s.line === 'plane') ? '' : row({ href: gmRoute(l.o, l.d, legMode(l)), ext: 1, cls: 'link', t: 'Ruta en Google Maps' }));
   return grp(`${esc(a.n)} → ${esc(b.n)}`, rows, l.n ? esc(l.n) : null, T ? `${fmtHM(T.dep)} → ${T.arrTxt || fmtHM(T.arr)}` : `≈ ${total} min`);
 }
@@ -2220,7 +2225,7 @@ const MORNING = {
   14: { wake: '05:40', leave: '07:10', note: 'Trayecto largo (~1 h 20 min): desayunen antes o compren algo en Namba.' },
   15: { wake: '07:15', leave: '08:45', note: 'Check-out y a la estación Osaka (Umeda), no Shin-Osaka: el Thunderbird 13 sale a las 09:41 y el Tsurugi 14 llega a Kanazawa a las 12:02. Lleven los boletos físicos ya recogidos.' },
   16: { wake: '07:05', leave: '08:35', note: 'Kenroku-en abre temprano: a esta hora hay poca gente.' },
-  17: { wake: '06:30', leave: '08:00', note: 'Check-out antes de las 10:00. El bus a Shirakawa-gō sale de la estación de Kanazawa (lado este) y requiere reserva: aún no está confirmado.' },
+  17: { wake: '06:10', leave: '07:40', note: 'Taxi a la salida OESTE de la estación de Kanazawa, andén 4: el bus a Shirakawa-gō sale a las 08:10 y no espera. Lleven los boletos impresos.' },
   18: { wake: '05:45', leave: '07:15', note: 'Check-out hasta las 11:00: después del mercado regresen por las maletas para tomar el tren Hida a Nagoya.' },
   19: { wake: '07:15', leave: '08:45', note: 'Último día completo: empiecen con calma.' },
   20: { wake: '04:30', leave: '06:00', note: 'Maletas listas desde la noche anterior. Skyliner de Keisei Ueno a Narita (~45 min); el vuelo AM 57 sale a las 09:35, lleguen antes de las 07:30.' }
