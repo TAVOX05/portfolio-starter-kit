@@ -1175,7 +1175,7 @@ const DAYS = [
     { t: '17:00', e: '20:30', h: 'Dōtonbori, Namba y Shinsaibashi', d: 'Cartel de Glico, puente Ebisu y la galería Shinsaibashi-suji. Pokémon Center Osaka DX en Daimaru Shinsaibashi.', f: 'Takoyaki, okonomiyaki, ramen o kushikatsu.', p: ['dotonbori', 'shinsaibashi', 'pkosaka'], r: 'Osaka arranca sin traslados pesados.' }
    ],
    legs: [
-    { o: 'b:kyoto', d: 'b:osaka', steps: [W(10, 'A Keihan Gion-Shijō'), T('keihan', 'Gion-Shijō → Yodoyabashi (Limited Express)', 52, 'Opcional: vagón Premium Car con asiento reservado.'), T('midosuji', 'Yodoyabashi → Shinsaibashi (2 paradas)', 4), W(8, 'Salida 7, hacia Amerikamura y Nishishinsaibashi 2-11-3'), X(15, 'Alternativa: taxi a Kyoto Station + JR Special Rapid a Osaka (29 min) + taxi', null, true)] },
+    { o: 'b:kyoto', d: 'b:osaka', steps: [W(10, 'A Keihan Gion-Shijō'), T('keihan', 'Gion-Shijō → Yodoyabashi (Limited Express)', 52, 'Opcional: vagón Premium Car con asiento reservado.'), T('midosuji', 'Yodoyabashi → Shinsaibashi (2 paradas)', 4), W(8, 'Salida 7, hacia Amerikamura y Nishishinsaibashi 2-11-3'), X(15, 'Alternativa: taxi a Kyoto Station + JR Special Rapid a Osaka (29 min) + taxi', 'Cada taxi ≈ ¥1,200–1,800 (los 3 juntos), más el boleto de JR.', true)] },
     { o: 'b:osaka', d: 'dotonbori', steps: [W(5, 'Por Amerikamura hacia Dōtonbori')] },
     { o: 'dotonbori', d: 'shinsaibashi', steps: [W(5, 'Galería Shinsaibashi-suji')] },
     { o: 'shinsaibashi', d: 'b:osaka', steps: [W(6, 'Cruzar Midōsuji hacia Amerikamura')] }
@@ -1354,7 +1354,7 @@ const DAY0 = { n: 0, date: '2026-11-18', city: 'MX', title: 'Salida: Tecámac �
     { t: '00:45', e: '06:30', ez: ' (hora de Japón)', h: 'Vuelo AM 58: Monterrey → Narita · RESERVADO', d: '14 h 45 min de vuelo. Salen el jueves 19 a las 00:45 (hora de México) y llegan el viernes 20 a las 06:30, hora de Japón, a la Terminal 1 de Narita. Asientos 28G, 28J y 28H.', f: 'A bordo sirven cena y desayuno; lleven snacks para Sam.', k: 'res', r: 'Al despegar pongan los relojes en hora de Japón (+15 h) y duerman lo más posible: llegan en la mañana y el Día 1 es completo.', p: ['mty', 'narita'] }
   ],
   legs: [
-    { o: 'casa', d: 'aicm2', at: 2, T: { dep: 960, arr: 1050 }, steps: [X(90, 'Uber/DiDi XL o auto familiar: Circuito Exterior Mexiquense → autopista Peñón–Texcoco → Terminal 2', 'Unos 55 km. Sin tráfico es ~1 h; a esta hora calculen hasta 1 h 30 min. Casetas aprox. $150 MXN.'), X(100, 'O por la México–Pachuca, Indios Verdes y Circuito Interior', 'Más semáforos; solo si Waze lo marca más rápido.', true)] },
+    { o: 'casa', d: 'aicm2', at: 2, T: { dep: 960, arr: 1050 }, steps: [X(90, 'Uber/DiDi XL o auto familiar: Circuito Exterior Mexiquense → autopista Peñón–Texcoco → Terminal 2', 'Unos 55 km. Sin tráfico es ~1 h; a esta hora calculen hasta 1 h 30 min.'), X(100, 'O por la México–Pachuca, Indios Verdes y Circuito Interior', 'Más semáforos; solo si Waze lo marca más rápido.', true)] },
     { o: 'aicm2', d: 'mty', at: 5, T: { dep: 1290, arr: 1395, fixed: 1 }, steps: [T('plane', 'AM 58 · México T2 21:30 → Monterrey T-B 23:15', 105, 'Reservado: asientos 28G, 28J y 28H.')] },
     { o: 'mty', d: 'narita', at: 7, T: { dep: 45, arr: 930, fixed: 1, arrTxt: '06:30 de Japón' }, steps: [T('plane', 'AM 58 · Monterrey T-B 00:45 → Narita T1 06:30 (vie 20, hora de Japón)', 885, 'Cambio de avión en Monterrey. Mismos asientos: 28G, 28J y 28H.')] }
   ],
@@ -1366,6 +1366,35 @@ const DAY0 = { n: 0, date: '2026-11-18', city: 'MX', title: 'Salida: Tecámac �
     'Tengan a la mano el QR de Visit Japan Web de cada uno (también el de Sam) para migración y aduana.',
     'Check-in en línea desde 24 h antes (martes 17 a las 21:30) en la app de Aeroméxico.'] };
 [...DAYS, DAY0].forEach(d => d.legs.forEach(l => { l.dn = d.n; }));
+/* Tarifa aproximada del taxi: taxímetro oficial de cada zona (普通車, 2026) sobre la distancia por calle
+   (línea recta × 1.35). El rango alto suma tráfico lento. Tokio desde el 20 abr 2026; Osaka desde nov 2025;
+   Kanazawa (zona Ishikawa); Kioto y Uji desde ago 2025. Fuji y Takayama: valores típicos de la región. */
+const TAXI_TARIFF = { TK: [500, 1.0, 232], OS: [600, 1.2, 231], KB: [600, 1.2, 231], KY: [500, 0.9, 255], FJ: [600, 1.2, 250], KZ: [700, 1.22, 226], HD: [700, 1.2, 240] };
+function taxiYen(km, city) {
+  const [base, first, step] = TAXI_TARIFF[city] || TAXI_TARIFF.KY;
+  return base + Math.max(0, Math.ceil((km - first) * 1000 / step)) * 100;
+}
+const yenR = n => '¥' + (Math.round(n / 100) * 100).toLocaleString('en-US');
+function taxiFare(l, city, st) {
+  if (city === 'MX') return '≈ $700–1,100 MXN en UberXL / DiDi XL (casetas incluidas en la tarifa de la app). Revisen el precio en la app antes de pedirlo.';
+  const A = place(l.o), B = place(l.d), r = Math.PI / 180, main = l.steps.filter(x => !x.alt);
+  // si el taxi cubre todo el trayecto, distancia entre los puntos; si es solo un tramo, por minutos (~18 km/h en ciudad)
+  const whole = main.every(x => x.line === 'taxi') || (st.alt && !main.some(x => x.line === 'taxi'));
+  const km = whole ? Math.hypot((B.lng - A.lng) * r * Math.cos((A.lat + B.lat) / 2 * r), (B.lat - A.lat) * r) * 6371 * 1.35 : st.min * .3, lo = taxiYen(km, city);
+  return `≈ ${yenR(lo)}–${yenR(lo * 1.25 + 100).slice(1)} por el taxi (los 3 juntos, ~${km.toFixed(1)} km)`;
+}
+const dayCity = n => n === 0 ? 'MX' : (DAYS[n - 1] || {}).city;
+// pone la tarifa en cada paso de taxi (reemplaza los montos escritos a mano)
+function fareLegs(legs, city) {
+  legs.forEach(l => l.steps.forEach(st => { if (st.line !== 'taxi' || st.fare || /Cada taxi/.test(st.n || '')) return;
+    if (st.alt && l.steps.some(x => !x.alt && x.line === 'taxi')) return;
+    st.fare = taxiFare(l, city, st);
+    const n = (st.n || '').replace(/\s*≈\s*¥[\d,]+(\s*–\s*[\d,]+)?(\s*entre los 3)?\.?/g, '').trim();
+    st.n = (n ? n.replace(/\.?$/, '. ') : '') + st.fare;
+  }));
+}
+[...DAYS, DAY0].forEach(d => fareLegs(d.legs, d.city));
+EXTRAS.forEach(x => fareLegs(x.legs, (DAYS[x.day - 1] || {}).city));
 const CHECK0 = [
   ['p0-pas', 'Pasaportes de los 3', 'Vigentes y en la mochila de mano, junto con los pases de abordar en la app de Aeroméxico.'],
   ['p0-chk', 'Check-in en línea hecho', 'Abre el martes 17 a las 21:30 (24 h antes).'],
@@ -1925,7 +1954,8 @@ const needsTicket = (l, t) => !t.fixed && l.steps.some(x => !x.alt && NEED_TICKE
 function trnHtml(l, t) {
   const main = l.steps.filter(x => !x.alt), lines = [...new Set(main.filter(x => x.m !== 'walk').map(x => (LINES[x.line] || [x.line])[0]))];
   const walk = main.filter(x => x.m === 'walk').reduce((a, x) => a + (x.min || 0), 0);
-  const how = lines.length ? lines.join(' · ') + (walk ? ` + ${walk} min a pie` : '') : `A pie ${walk} min`;
+  const tx = main.find(x => x.line === 'taxi' && x.fare), cost = tx ? ' · ' + tx.fare.split(' por el taxi')[0].split(' en UberXL')[0] : '';
+  const how = (lines.length ? lines.join(' · ') + (walk ? ` + ${walk} min a pie` : '') : `A pie ${walk} min`) + cost;
   const ic = main.some(x => x.line === 'plane') ? I.plane : main.some(x => x.line === 'bus') ? I.bus : main.some(x => x.line === 'taxi') ? I.car : lines.length ? I.train : I.walk;
   const need = needsTicket(l, t);
   const tag = t.fixed ? tkBtn(legTicket(l, t), '✓ Boleto reservado') : need ? '<span class="pill warn">Falta boleto</span>' : '';
