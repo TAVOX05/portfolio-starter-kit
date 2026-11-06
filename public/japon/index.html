@@ -105,6 +105,9 @@ a.r:active, button.r:active { background: var(--fill2); }
 /* pastillas */
 .pill { display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; background: var(--fill); color: var(--label2); }
 .pill.ok { background: color-mix(in srgb, var(--green) 18%, transparent); color: var(--green); }
+.pill.tkb { border: 0; font: inherit; font-size: 13px; font-weight: 600; min-height: 30px; padding: 4px 11px; gap: 6px; cursor: pointer; -webkit-tap-highlight-color: transparent; vertical-align: middle; }
+.pill.tkb .tkv { font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.pill.tkb:active { filter: brightness(.9); }
 .pill.warn { background: color-mix(in srgb, var(--orange) 18%, transparent); color: var(--orange); }
 .pill.hot { background: color-mix(in srgb, var(--red) 16%, transparent); color: var(--red); }
 .pill.now { background: var(--red); color: var(--on); }
@@ -1372,6 +1375,7 @@ const DAY0 = { n: 0, date: '2026-11-18', city: 'MX', title: 'Salida: Tecámac �
     'En Narita hace unos 8 °C a las 06:30: lleven la chamarra en la mochila, no en la maleta documentada.',
     'Tengan a la mano el QR de Visit Japan Web de cada uno (también el de Sam) para migración y aduana.',
     'Check-in en línea desde 24 h antes (martes 17 a las 21:30) en la app de Aeroméxico.'] };
+[...DAYS, DAY0].forEach(d => d.legs.forEach(l => { l.dn = d.n; }));
 const CHECK0 = [
   ['p0-pas', 'Pasaportes de los 3', 'Vigentes y en la mochila de mano, junto con los pases de abordar en la app de Aeroméxico.'],
   ['p0-chk', 'Check-in en línea hecho', 'Abre el martes 17 a las 21:30 (24 h antes).'],
@@ -1394,7 +1398,7 @@ function viewDay0() {
     content = grp('Plan · hora de México', day.items.map((it, i) => {
       const id = 'd0-' + i, on = !!c[id], legs = day.legs.filter(l => l.at === i);
       return `<div class="r li it${on ? ' done' : ''}">${checkBtn(id, it.h)}<div class="m">
-        <div class="when">${it.t} – ${it.e}${it.ez || ''}${it.k === 'res' ? '<span class="pill ok">Reserva</span>' : ''}</div>${legs.map(l => trnHtml(l, l.T)).join('')}<div class="t">${esc(it.h)}</div>
+        <div class="when">${it.t} – ${it.e}${it.ez || ''}${it.k === 'res' ? tkBtn(itemTicket(0, it), 'Reserva') : ''}</div>${legs.map(l => trnHtml(l, l.T)).join('')}<div class="t">${esc(it.h)}</div>
         ${it.d ? `<div class="d">${esc(it.d)}</div>` : ''}${it.f ? `<div class="food"><b>Comer:</b> ${esc(it.f)}</div>` : ''}${it.r ? `<div class="rec">${esc(it.r)}</div>` : ''}
         ${(it.p || []).length ? `<div class="chips">${it.p.map(k => `<a href="${gmSearch(k)}" target="_blank" rel="noopener">${esc(place(k).n)}</a>`).join('')}</div>` : ''}</div></div>`;
     }).join(''), null, `${done} de ${tot}`) +
@@ -1827,7 +1831,7 @@ function viewDay(n, opts = {}) {
       else { k = day.items.length - 1; for (let q = day.items.length - 1; q >= 0; q--) if ((day.items[q].p || []).includes(l.o)) { k = q; break; } (after[k] = after[k] || []).push(j); } });
     content = morningHtml(day) + grp('Plan por hora', day.items.map((it, i) => {
       const id = 'd' + n + '-' + i, on = !!c[id];
-      const tags = (i === nowIdx ? '<span class="pill now">Ahora</span>' : '') + (it.k === 'res' ? '<span class="pill ok">Reserva</span>' : '') + (it.x ? '<span class="pill tint">Opcional</span>' : '') + (it.s ? '<span class="pill">Sugerencia</span>' : '');
+      const tags = (i === nowIdx ? '<span class="pill now">Ahora</span>' : '') + (it.k === 'res' ? resBtn(n, it) : '') + (it.x ? '<span class="pill tint">Opcional</span>' : '') + (it.s ? '<span class="pill">Sugerencia</span>' : '');
       return `<div class="r li it${on ? ' done' : ''}${i === nowIdx ? ' now' : ''}">${checkBtn(id, it.h)}<div class="m">
         <div class="when">${it.t} – ${it.e}${tags}</div>${(byItem[i] || []).map(j => trnHtml(day.legs[j], LT[j])).join('')}<div class="t">${esc(it.h)}</div>
         ${it.d ? `<div class="d">${esc(it.d)}</div>` : ''}${it.f ? `<div class="food"><b>Comer:</b> ${esc(it.f)}</div>` : ''}${it.r ? `<div class="rec">${esc(it.r)}</div>` : ''}
@@ -1899,6 +1903,33 @@ function legTimes(day) {
 const LONG_LINES = ['thunder', 'shinkansen', 'hida', 'fujiex', 'fujikyu', 'bus', 'skyliner', 'keisei'];   // trenes y buses con horario fijo
 // trenes y buses de larga distancia que se compran con asiento (el metro, Fujikyū y buses cortos se pagan con la Suica)
 const NEED_TICKET = ['thunder', 'shinkansen', 'hida', 'fujiex', 'bus', 'skyliner'];
+// boleto (TICKETS) que corresponde a un trayecto con horario fijo o a una actividad con reserva
+const VUELO_TK = () => TICKETS.findIndex(t => /^Vuelos/.test(t.n));
+function legTicket(l, T) {
+  if (!T || !T.fixed) return -1;
+  if (l.dn === 0) return VUELO_TK();
+  const c = TICKETS.map((t, i) => [t, i]).filter(([t]) => t.day === l.dn);
+  const h = c.find(([t]) => t.when.includes(fmtHM(T.dep))) || (c.length === 1 ? c[0] : null);
+  return h ? h[1] : -1;
+}
+function itemTicket(n, it) {
+  if ([0, 1, 20].includes(n) && /Vuelo|Llegada a Narita/.test(it.h)) return VUELO_TK();
+  const at = t => (it.p || []).includes(t.place), i = TICKETS.findIndex(t => t.day === n && at(t));
+  return i >= 0 ? i : Math.max(TICKETS.findIndex(at), TICKETS.findIndex(t => it.h.startsWith(t.n)));
+}
+// en el Plan: boleto si lo hay; si es alojamiento, su ficha con los documentos de la reserva
+function resBtn(n, it) {
+  const i = itemTicket(n, it), b = (it.p || []).find(k => k.startsWith('b:'));
+  if (i >= 0 || !b) return tkBtn(i, 'Reserva');
+  const docs = docsFor([b]), one = docs.length === 1;
+  return `<button type="button" class="pill ok tkb" ${one ? `data-doc="${docs[0].id}"` : `data-base="${b.slice(2)}"`} aria-label="Reserva: ver ${one ? 'documento' : 'alojamiento'}">Reserva<span class="tkv">Ver ›</span></button>`;
+}
+// la marca de reserva abre su documento (o la ficha del boleto si hay varios o ninguno)
+function tkBtn(i, label) {
+  if (i < 0) return `<span class="pill ok">${label}</span>`;
+  const docs = docsFor(['tk:' + i]), one = docs.length === 1;
+  return `<button type="button" class="pill ok tkb" ${one ? `data-doc="${docs[0].id}"` : `data-ticket="${i}"`} aria-label="${esc(label.replace('✓ ', ''))}: ver ${one ? 'documento' : docs.length ? docs.length + ' documentos' : 'detalles'}">${label}<span class="tkv">${one ? 'Ver' : docs.length ? 'Ver ' + docs.length : 'Detalles'} ›</span></button>`;
+}
 const needsTicket = (l, t) => !t.fixed && l.steps.some(x => !x.alt && NEED_TICKET.includes(x.line) && (x.min || 0) >= 30);
 // línea de transporte dentro del Plan: horario, cómo se mueven y si ya tienen boleto
 function trnHtml(l, t) {
@@ -1907,7 +1938,7 @@ function trnHtml(l, t) {
   const how = lines.length ? lines.join(' · ') + (walk ? ` + ${walk} min a pie` : '') : `A pie ${walk} min`;
   const ic = main.some(x => x.line === 'plane') ? I.plane : main.some(x => x.line === 'bus') ? I.bus : main.some(x => x.line === 'taxi') ? I.car : lines.length ? I.train : I.walk;
   const need = needsTicket(l, t);
-  const tag = t.fixed ? '<span class="pill ok">✓ Boleto reservado</span>' : need ? '<span class="pill warn">Falta boleto</span>' : '';
+  const tag = t.fixed ? tkBtn(legTicket(l, t), '✓ Boleto reservado') : need ? '<span class="pill warn">Falta boleto</span>' : '';
   return `<div class="trn${t.fixed ? ' ok' : need ? ' warn' : ''}">${ic}<span><b>${fmtHM(t.dep)} → ${t.arrTxt || fmtHM(t.arr)}</b> · ${esc(how)} · ${esc(place(l.o).n)} → ${esc(place(l.d).n)}</span>${tag}</div>`;
 }
 function legGroup(l, T) {
@@ -1925,7 +1956,7 @@ function legGroup(l, T) {
     else if (s.line === 'bus') lead = `<span class="badge" style="${badgeStyle(ln[1])}">${I.bus}</span>`;
     else lead = `<span class="badge" style="${badgeStyle(ln[1])}">${esc(ln[0])}</span>`;
     return row({ cls: 'step' + (s.alt ? ' alt' : ''), lead, pre: s.alt ? '<span class="alt-lbl">o bien</span>' : '', t: (ln ? '' : 'A pie · ') + esc(s.t), x: s.n ? esc(s.n) : '', tr: at != null ? `<span class="min"><b>${fmtHM(at)}</b> · ${s.min || 0} min</span>` : s.min ? `<span class="min">${s.min} min</span>` : '' });
-  }).join('') + (T ? row({ cls: 'ld', lead: ico(T.fixed ? I.ticket : I.route, T.fixed ? 'var(--green)' : needsTicket(l, T) ? 'var(--orange)' : 'var(--tint)'), t: `<b>${fmtHM(T.dep)}</b> salen · <b>${T.arrTxt || fmtHM(T.arr)}</b> llegan` + (T.fixed ? ' <span class="pill ok">✓ Boleto reservado</span>' : needsTicket(l, T) ? ' <span class="pill warn">Falta boleto</span>' : ''), s: T.fixed ? 'Horario de su boleto: el tren o bus no espera.' : (l.plan && main.some(x => x.m !== 'walk')) || main.some(x => LONG_LINES.includes(x.line)) ? 'Horario estimado: el boleto aún no está comprado; al comprarlo, ajusten a la hora real.' : main.some(x => x.m !== 'walk' && x.line !== 'taxi') ? 'Hora aproximada: los trenes de ciudad pasan cada pocos minutos.' : 'Hora sugerida según el plan del día.' }) : '') +
+  }).join('') + (T ? row({ cls: 'ld', lead: ico(T.fixed ? I.ticket : I.route, T.fixed ? 'var(--green)' : needsTicket(l, T) ? 'var(--orange)' : 'var(--tint)'), t: `<b>${fmtHM(T.dep)}</b> salen · <b>${T.arrTxt || fmtHM(T.arr)}</b> llegan` + (T.fixed ? ' ' + tkBtn(legTicket(l, T), '✓ Boleto reservado') : needsTicket(l, T) ? ' <span class="pill warn">Falta boleto</span>' : ''), s: T.fixed ? 'Horario de su boleto: el tren o bus no espera.' : (l.plan && main.some(x => x.m !== 'walk')) || main.some(x => LONG_LINES.includes(x.line)) ? 'Horario estimado: el boleto aún no está comprado; al comprarlo, ajusten a la hora real.' : main.some(x => x.m !== 'walk' && x.line !== 'taxi') ? 'Hora aproximada: los trenes de ciudad pasan cada pocos minutos.' : 'Hora sugerida según el plan del día.' }) : '') +
     (l.steps.some(s => s.line === 'plane') ? '' : row({ href: gmRoute(l.o, l.d, legMode(l)), ext: 1, cls: 'link', t: 'Ruta en Google Maps' }));
   return grp(`${esc(a.n)} → ${esc(b.n)}`, rows, l.n ? esc(l.n) : null, T ? `${fmtHM(T.dep)} → ${T.arrTxt || fmtHM(T.arr)}` : `≈ ${total} min`);
 }
@@ -2819,7 +2850,7 @@ mem.docs = []; mem.docsReady = false; mem.offline = new Set();
   }, e => { mem.docsErr = e.code; mem.docsReady = true; refreshDocs(); });
   else { mem.docsReady = true; refreshDocs(); }
 })();
-function refreshDocs() { const h = location.hash || '#hoy'; if (!['#reservas', '#hoy'].includes(h)) return; if ($('#sheet').hidden) rerender(); else mem.docsDirty = true; }
+function refreshDocs() { const h = location.hash || '#hoy'; if (!['#reservas', '#hoy'].includes(h) && !h.startsWith('#dia')) return; if ($('#sheet').hidden) rerender(); else mem.docsDirty = true; }
 const fmtSize = b => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
 const docLinkName = l => !l ? '' : l.startsWith('b:') ? (BASES[l.slice(2)] || {}).n : l.startsWith('tk:') ? (TICKETS[+l.slice(3)] || {}).n : '';
 function docRow(d) {
