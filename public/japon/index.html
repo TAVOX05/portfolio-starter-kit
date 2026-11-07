@@ -685,8 +685,8 @@ main, .grp { grid-template-columns: minmax(0, 1fr); }
 :root[data-theme="light"][data-phase="sunset"], :root[data-theme="light"][data-phase="dawn"], :root[data-theme="light"][data-phase="day"][data-sky="clear"], :root[data-theme="light"][data-phase="night"][data-sky="clear"] { --glass-fx: blur(24px) saturate(140%) brightness(1.55); --tint: #153E76; }
 @media (prefers-color-scheme: light) { :root:not([data-theme])[data-phase="sunset"], :root:not([data-theme])[data-phase="dawn"], :root:not([data-theme])[data-phase="day"][data-sky="clear"], :root:not([data-theme])[data-phase="night"][data-sky="clear"] { --glass-fx: blur(24px) saturate(140%) brightness(1.55); --tint: #153E76; } }
 /* cielo despejado en claro: el paisaje es más oscuro que la bruma de antes; la tinta baja un punto para seguir en AAA */
-:root[data-theme="light"][data-sky="clear"][data-phase] { --tint: #11356A; --red: #6A1E14; --orange: #4C3200; --c-TK: #7A2318; --c-KB: #064A51; --label2: #2C2D34; }
-@media (prefers-color-scheme: light) { :root:not([data-theme])[data-sky="clear"][data-phase] { --tint: #11356A; --red: #6A1E14; --orange: #4C3200; --c-TK: #7A2318; --c-KB: #064A51; --label2: #2C2D34; } }
+:root[data-theme="light"][data-sky="clear"][data-phase] { --tint: #0F3163; --red: #6A1E14; --orange: #4C3200; --c-TK: #7A2318; --c-KB: #064A51; --label2: #2C2D34; }
+@media (prefers-color-scheme: light) { :root:not([data-theme])[data-sky="clear"][data-phase] { --tint: #0F3163; --red: #6A1E14; --orange: #4C3200; --c-TK: #7A2318; --c-KB: #064A51; --label2: #2C2D34; } }
 @media (prefers-color-scheme: dark) { :root:not([data-theme])[data-phase="sunset"], :root:not([data-theme])[data-phase="dawn"], :root:not([data-theme])[data-phase="day"][data-sky="clear"] { --card: rgba(24,26,36,.58); --glass: rgba(24,26,36,.7); --glass-fx: blur(26px) saturate(120%) brightness(.3); } }
 :root[data-sky="rain"] { --bar-tint: rgba(250,249,246,.55); }
 :root[data-theme="dark"][data-sky="rain"] { --bar-tint: rgba(16,18,26,.55); }
@@ -869,7 +869,7 @@ const BASES = {
   tokyo1: { n: 'Airbnb Motoasakusa #401', host: 'Kazu', city: 'TK', lat: 35.7128, lng: 139.7852,
     addr: '3-20-12 Motoasakusa, Taito City, Tokyo 111-0041', ja: '〒111-0041 東京都台東区元浅草3-20-12', say: '東京都台東区元浅草、3丁目20番12号',
     in: '20 nov · 16:00+', out: '25 nov · 10:00', nights: 5, status: 'Confirmado',
-    note: 'Base real: Motoasakusa, no junto a Ueno Station. Entrada con teclado. Dejar maletas antes de las 16:00 solo si lo aceptan. Estaciones cercanas: Inaricho (Ginza) y Shin-Okachimachi (Oedo/TX).' },
+    note: 'Base real: Motoasakusa, no junto a Ueno Station. Entrada con teclado. Kazu confirmó que pueden dejar las maletas en el departamento desde las 12:00 del 20 nov; la entrada antes de las 16:00 depende de la limpieza y hay que preguntarle un día antes. Estaciones cercanas: Inaricho (Ginza) y Shin-Okachimachi (Oedo/TX).' },
   ubuya: { n: 'Ryokan Ubuya', host: 'JAPANiCAN', city: 'FJ', lat: 35.5135, lng: 138.7745,
     addr: '10 Asakawa, Fujikawaguchiko, Yamanashi', ja: '山梨県南都留郡富士河口湖町浅川10　うぶや', say: '山梨県富士河口湖町浅川10番地、うぶやです',
     in: '25 nov · 16:00', out: '26 nov · verificar hora', nights: 1, status: 'Pagado ¥139,352',
@@ -1012,7 +1012,7 @@ const DAYS = [
  { n: 1, date: '2026-11-20', city: 'TK', base: 'tokyo1', title: 'Llegada y Asakusa', wx: [15, 8], sun: '16:31',
    items: [
     { t: '06:30', e: '08:30', h: 'Llegada a Narita', d: 'Migración y maletas. Tener a la mano el QR de Visit Japan Web. Sacar yenes en un cajero de 7-Eleven y cargar la Suica.', p: ['narita'], r: 'El AM 58 aterriza a las 06:30 en la Terminal 1. Migración, aduana y maletas toman 1 h o más.' },
-    { t: '08:30', e: '10:00', h: 'Traslado Narita → Ueno / Asakusa', d: 'Skyliner a Keisei Ueno. Si el Airbnb no guarda maletas antes de las 16:00, usar lockers en Ueno/Asakusa.', p: ['keiseiUeno'], r: 'No asumir entrada al departamento antes de las 16:00.' },
+    { t: '08:30', e: '10:00', h: 'Traslado Narita → Ueno / Asakusa', d: 'Skyliner a Keisei Ueno. Kazu acepta las maletas en el departamento desde las 12:00; antes de esa hora, lockers en Ueno o Asakusa.', p: ['keiseiUeno'], r: 'Entrada antes de las 16:00 solo si Kazu la confirma un día antes. No asumir entrada al departamento antes de las 16:00.' },
     { t: '12:00', e: '15:00', h: 'Comida, descanso y libreta para sellos de estación', d: 'Almuerzo tranquilo cerca de Asakusa. Comprar una libreta para los sellos de estación (eki stamps): sirve cualquier cuaderno de hojas lisas de Daiso, Loft, una papelería o un konbini. Pongan el primer sello en la estación Ueno.', f: 'Tempura o soba en Asakusa; melonpan en Nakamise.', p: [], r: 'Los sellos de estación son gratis y la tinta mancha: dejen secar unos segundos antes de cerrar la libreta.' },
     { t: '15:00', e: '18:00', h: 'Sensō-ji + Nakamise-dōri · libreta de goshuin', d: 'Primer templo memorable: puerta Kaminarimon, Nakamise y el salón principal. Al anochecer se ilumina. Ahí mismo compren la libreta para los sellos de templos (goshuinchō, 御朱印帳) y pidan su primer goshuin.', f: 'Snacks en Nakamise (ningyo-yaki, kibi dango).', p: ['sensoji', 'nakamise'], r: 'Vayan primero a la oficina de goshuin: suele cerrar alrededor de las 16:30. El goshuin cuesta unos ¥500 y la libreta se usa solo para templos y santuarios, no para sellos de estación.' },
     { t: '18:00', e: '20:30', h: 'Check-in Airbnb Motoasakusa y cena cerca', d: 'Entrada con teclado desde las 16:00. Cena cercana y a dormir temprano por el jet lag.', p: ['b:tokyo1'], k: 'base' }
@@ -1418,6 +1418,7 @@ const CHECK0 = [
   ['p0-card', 'Tarjetas listas para el extranjero', 'Avisen al banco o activen el uso internacional en la app; lleven algo de efectivo.'],
   ['p0-ropa', 'Chamarra en la mochila', 'Narita amanece a unos 8 °C.'],
   ['p0-print', 'Boletos de bus a Shirakawa-gō impresos', 'Los 2 boletos de Japan Bus Online (6 dic): el conductor pide el impreso.'],
+  ['p0-kazu', 'Mensaje a Kazu por Airbnb', 'Pregúntenle si pueden entrar antes de las 16:00 el 20 nov (dejar maletas desde las 12:00 ya está confirmado).'],
   ['p0-casa', 'Casa cerrada', 'Gas, boiler, aparatos, refri, basura, ventanas y llaves con alguien de confianza.']
 ];
 function viewDay0() {
@@ -1473,7 +1474,7 @@ const TICKETS = [
 const TODO = [
   { pr: 1, why: 'El pago programado es el 24 oct', id: 't-toshi', t: 'Cancelar / confirmar cancelación del Airbnb anterior de Osaka', s: 'Cambiaron a Chateau DATE. Revisen que la reserva de Toshi en Shimanouchi esté cancelada y que no se cobren $4,340.43 MXN el 24 oct.', when: 'Antes del 24 oct', links: [['Mis viajes en Airbnb', 'https://www.airbnb.mx/trips']] },
   { pr: 2, why: 'Para planear la llegada del 1 dic', id: 't-osakain', t: 'Hora de check-in y equipaje en Chateau DATE', s: 'Pregunten a Emi la hora de entrada y salida y si pueden dejar maletas antes.', when: 'Antes del 1 dic', links: [['Mensajes de Airbnb', 'https://www.airbnb.mx/guest/inbox']] },
-  { pr: 2, why: 'Lo piden en migración; 1–2 semanas antes', id: 't-vjw', t: 'Registrar Visit Japan Web (3 personas)', s: 'QR de migración y aduana para Narita. Háganlo 1–2 semanas antes.', when: 'Antes del 20 nov', links: [['Visit Japan Web', 'https://www.vjw.digital.go.jp/']] },
+  { pr: 2, why: 'Lo piden en migración; 1–2 semanas antes', id: 't-vjw', t: 'Registrar Visit Japan Web (3 personas)', s: 'QR de migración y aduana para Narita. Ya crearon la cuenta (3 nov); falta registrar a los 3 (pasaportes) y el viaje para que salga el QR de cada uno. Háganlo 1–2 semanas antes.', when: 'Antes del 20 nov', links: [['Visit Japan Web', 'https://www.vjw.digital.go.jp/']] },
   { pr: 2, why: 'Sin datos no hay Google Maps', id: 't-esim', t: 'eSIM o pocket wifi', s: 'Datos para Google Maps los 20 días.', when: 'Antes del 20 nov', links: [['eSIM Japón (Airalo)', 'https://www.airalo.com/japan-esim']] },
   { pr: 3, why: 'Opcional', id: 't-shibuya', t: 'Shibuya Sky al atardecer', date: '2026-11-21', s: 'Opcional. El horario de 16:00 es el del atardecer y se agota.', links: [['Boletos Shibuya Sky', 'https://www.shibuya-scramble-square.com/sky/ticket/']] },
   { pr: 1, done: 1, why: 'Abre venta el 25 oct y es todo reservado', id: 't-fuji', t: 'Tokio → Kawaguchiko', date: '2026-11-25', opens: '2026-10-25', on: '1 mes antes, 10:00 JST', s: 'Fuji Excursion (todo reservado) o bus de autopista desde Busta Shinjuku.', links: [['eki-net (JR East)', 'https://www.eki-net.com/en/jreast-train-reservation/Top/Index'], ['Guía Fuji Excursion', 'https://ekitan.com/en/article/fujikaiyu'], ['Bus: Japan Bus Online', 'https://japanbusonline.com/en']], note: 'eki-net solo reserva el tramo JR (Shinjuku–Ōtsuki); revisen cómo cubrir el tramo Fujikyū o tomen el bus.' },
@@ -1498,6 +1499,7 @@ const ALERTS = [
   ...PAYMENTS.map(p => ({ d: p.d, t: 'Pago programado: ' + p.t + ' · ' + p.a })),
   { d: '2026-11-17', t: 'Check-in en línea del AM 58 desde las 21:30 (24 h antes) en la app de Aeroméxico' },
   { d: '2026-11-18', t: 'Día 0: salen de casa a las 16:00 rumbo a la Terminal 2 del AICM' },
+  { d: '2026-11-18', t: 'Antes de salir: escribirle a Kazu por Airbnb para confirmar entrada anticipada el 20 nov (maletas desde las 12:00 ya confirmado)' },
   { d: '2026-11-24', t: 'teamLab: el QR aparece desde las 00:00 JST' },
   { d: '2026-11-29', t: 'Nintendo Museum: descargar QR desde las 14:00 JST' },
   { d: '2026-12-02', t: 'USJ: llevar los 6 e-tickets y revisar horas del Express' },
