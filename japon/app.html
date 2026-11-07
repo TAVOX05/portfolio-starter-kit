@@ -136,9 +136,9 @@ a.r:active, button.r:active { background: var(--fill2); }
 .widget .k { font-size: 13px; font-weight: 600; color: var(--red); text-transform: uppercase; letter-spacing: .02em; }
 .widget h2 { font-size: 22px; font-weight: 700; line-height: 1.2; margin-top: 2px; }
 .widget .jp { font-size: 15px; color: var(--label2); margin-top: 4px; }
-.sun { width: 104px; height: 104px; border-radius: 50%; background: var(--sun); color: var(--on); display: grid; place-content: center; text-align: center; line-height: 1; }
-.sun b { font-size: 44px; font-weight: 700; letter-spacing: -.02em; }
-.sun span { font-size: 13px; font-weight: 600; margin-top: 2px; }
+div.sun { position: relative; width: 104px; height: 104px; border-radius: 50%; background: var(--sun); color: var(--on); display: grid; place-content: center; text-align: center; line-height: 1; }
+div.sun b { font-size: 44px; font-weight: 700; letter-spacing: -.02em; }
+div.sun span { font-size: 13px; font-weight: 600; margin-top: 2px; }
 .stats { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); border-top: .5px solid var(--sep); padding-top: 12px; }
 .stats div { text-align: center; } .stats div + div { border-left: .5px solid var(--sep); }
 .stats b { display: block; font-size: 20px; font-weight: 600; } .stats span { font-size: 12px; color: var(--label2); }
@@ -154,6 +154,7 @@ a.r:active, button.r:active { background: var(--fill2); }
 .wxi { --s: 30px; flex: none; width: var(--s); height: var(--s); border-radius: calc(var(--s) * .27); display: inline-grid; place-items: center; background: linear-gradient(160deg, var(--g1), var(--g2)); box-shadow: inset 0 0 0 .5px rgba(255,255,255,.3); }
 .wxi svg { width: 100%; height: 100%; display: block; overflow: visible; }
 .wxi svg * { transform-box: fill-box; transform-origin: center; }
+:root[data-calm] .wxi *, :root[data-calm] div.sun, :root[data-calm] div.sun::after, :root[data-calm] .stl.now::after { animation-play-state: paused !important; }
 .wxi[data-c="clear"] { --g1: #FFB445; --g2: #E8631A; } .wxi[data-c="partly"] { --g1: #6DB6F2; --g2: #2F74CC; } .wxi[data-c="cloudy"] { --g1: #8E9DB6; --g2: #56657F; }
 .wxi[data-c="fog"] { --g1: #A5B0C0; --g2: #6F7E93; } .wxi[data-c="rain"] { --g1: #5A88CC; --g2: #31508D; } .wxi[data-c="snow"] { --g1: #8DB6E8; --g2: #567FBE; }
 .wxi[data-c="storm"] { --g1: #6C5CC4; --g2: #382C82; } .wxi[data-c="clearn"], .wxi[data-c="partlyn"] { --g1: #4450A5; --g2: #181D4B; }
@@ -383,10 +384,13 @@ body.scrolled .nav { border-bottom-color: var(--glass-brd); }
   .chk.pop { animation: pop .5s var(--spring); }
   @keyframes pop { 0% { transform: scale(.55); } 60% { transform: scale(1.22); } 100% { transform: scale(1); } }
   .chk svg { transition: opacity .2s; }
-  .sun { animation: glow 4s ease-in-out infinite; }
-  @keyframes glow { 50% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--sun) 14%, transparent), 0 14px 44px color-mix(in srgb, var(--sun) 42%, transparent); transform: scale(1.03); } }
-  .stl.now { animation: beat 2s ease-in-out infinite; }
-  @keyframes beat { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--red) 22%, transparent); } }
+  div.sun { animation: glow 4s ease-in-out infinite; }
+  div.sun::after { content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; opacity: 0; box-shadow: 0 0 0 10px color-mix(in srgb, var(--sun) 14%, transparent), 0 14px 44px color-mix(in srgb, var(--sun) 42%, transparent); animation: glowa 4s ease-in-out infinite; }
+  @keyframes glow { 50% { transform: scale(1.03); } }
+  @keyframes glowa { 50% { opacity: 1; } }
+  .stl.now { position: relative; }
+  .stl.now::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; box-shadow: 0 0 0 6px color-mix(in srgb, var(--red) 22%, transparent); animation: beat 2s ease-in-out infinite; }
+  @keyframes beat { 50% { opacity: 1; } }
   .sheet:not([hidden]) { animation: up .55s var(--spring); }
   .sheet.closing { animation: down .28s var(--ease) forwards; }
   .scrim.closing { animation: fadeout .28s ease forwards; }
@@ -1375,7 +1379,7 @@ function taxiYen(km, city) {
   const [base, first, step] = TAXI_TARIFF[city] || TAXI_TARIFF.KY;
   return base + Math.max(0, Math.ceil((km - first) * 1000 / step)) * 100;
 }
-const yenR = n => '¥' + (Math.round(n / 100) * 100).toLocaleString('en-US');
+const yenR = n => '¥' + String(Math.round(n / 100) * 100).replace(/\B(?=(\d{3})+$)/g, ',');
 function taxiFare(l, city, st) {
   if (city === 'MX') return '≈ $700–1,100 MXN en UberXL / DiDi XL (casetas incluidas en la tarifa de la app). Revisen el precio en la app antes de pedirlo.';
   const A = place(l.o), B = place(l.d), r = Math.PI / 180, main = l.steps.filter(x => !x.alt);
@@ -3423,9 +3427,8 @@ function route(opts = {}) {
 function afterRender(opts) {
   view.classList.remove('anim');
   if (opts.stagger && !RM) {
-    void view.offsetWidth;
     [...view.children].forEach((el, i) => el.style.setProperty('--d', Math.min(i, 10)));
-    view.classList.add('anim');
+    requestAnimationFrame(() => view.classList.add('anim'));
     view.querySelectorAll('.countup').forEach(el => {
       const to = +el.dataset.to, t0 = performance.now();
       const stepf = now => { const k = Math.min(1, (now - t0) / 900); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(stepf); };
@@ -4149,7 +4152,9 @@ const BG = (() => {
   }
   function frame(now) {
     raf = requestAnimationFrame(frame);
-    if (now - last < 33) return;
+    const calm = document.documentElement.dataset.calm;
+    if (calm === 'scroll') return;
+    if (now - last < (calm === 'idle' ? 160 : rain || flakes.length ? 41 : 50)) return;
     const dt = Math.min(.1, (now - (last || now)) / 1000); last = now;
     draw(dt, now / 1000);
   }
@@ -4401,7 +4406,19 @@ function wxPicker() {
   return `<div class="r wxrow"><div class="m"><div class="t sm">¿Cómo está el clima ahora?</div></div>
     <div class="wxb">${Object.keys(WX_N).map(k => `<button type="button" data-wx="${k}" aria-pressed="${cur === k}" aria-label="${WX_N[k]}">${WXI[k]}</button>`).join('')}</div></div>`;
 }
-function onScroll() { document.body.classList.toggle('scrolled', window.scrollY > 36); }
+let scrollRaf = 0, calmT = 0, idleT = 0;
+const setCalm = v => { const r = document.documentElement; if (v) { if (r.dataset.calm !== v) r.dataset.calm = v; } else if (r.dataset.calm) delete r.dataset.calm; };
+function onScroll() {
+  if (scrollRaf) return;
+  scrollRaf = requestAnimationFrame(() => { scrollRaf = 0; const on = window.scrollY > 36; if (document.body.classList.contains('scrolled') !== on) document.body.classList.toggle('scrolled', on); });
+}
+function wake(e) {
+  if (e && e.type === 'scroll') { setCalm('scroll'); clearTimeout(calmT); calmT = setTimeout(() => setCalm(null), 220); }
+  else if (document.documentElement.dataset.calm === 'idle') setCalm(null);
+  clearTimeout(idleT); idleT = setTimeout(() => { if (!document.documentElement.dataset.calm) setCalm('idle'); }, 40000);
+}
+['scroll', 'pointerdown', 'keydown', 'touchstart'].forEach(t => window.addEventListener(t, wake, { passive: true }));
+wake();
 
 function copyText(txt) {
   const fail = () => openSheet('Copiar', showCard('', esc(txt), 'Mantén presionado el texto para copiarlo.'));
