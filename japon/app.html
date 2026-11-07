@@ -1208,7 +1208,7 @@ const DAYS = [
     { o: 'seaworld', d: 'steakland', steps: [W(5, 'A Suma-kaihinkōen'), T('jrw', 'Suma-kaihinkōen → Sannomiya', 15), W(3, 'A Steakland')] },
     { o: 'steakland', d: 'harborland', steps: [T('jrw', 'Sannomiya → Kobe (2 paradas)', 4), W(5, 'A Harborland / Mosaic')] },
     { o: 'harborland', d: 'meriken', steps: [W(10, 'Por el malecón')] },
-    { o: 'meriken', d: 'b:osaka', steps: [W(10, 'A JR Kobe / Motomachi'), T('jrw', 'Kobe → Osaka (Special Rapid)', 27), W(10, 'En la estación Osaka: recoger los boletos del 4 dic (Thunderbird + Tsurugi) en una máquina JR West, con la tarjeta física y el número de 4 dígitos'), T('midosuji', 'Umeda → Shinsaibashi', 7), W(8, 'Al departamento')] }
+    { o: 'meriken', d: 'b:osaka', steps: [W(10, 'A JR Kobe / Motomachi'), T('jrw', 'Kobe → Osaka (Special Rapid)', 27), W(10, 'En la estación Osaka: recoger los boletos del Thunderbird (4 dic) y del Hida (7 dic) en una máquina JR West fuera de los torniquetes, con la tarjeta física y el número de 4 dígitos'), T('midosuji', 'Umeda → Shinsaibashi', 7), W(8, 'Al departamento')] }
    ],
    tips: ['Kobe Beef auténtico lleva certificado con sello de crisantemo. «Wagyu» o «Japanese beef» no es lo mismo.', 'Meriken Park tiene el letrero «BE KOBE»: buena foto al atardecer (~16:50).'] },
 
@@ -1262,17 +1262,18 @@ const DAYS = [
 
  { n: 18, date: '2026-12-07', city: 'TK', base: 'tokyo2', title: 'Takayama → Tokio', wx: [12, 4], sun: '16:28',
    items: [
-    { t: '07:30', e: '10:00', h: 'Mercado matutino y check-out (hasta 11:00)', d: 'Mercado Miyagawa junto al río: encurtidos, miso, dulces.', f: 'Desayuno local; comprar snacks para el tren.', p: ['asaichi', 'b:takayama'] },
-    { t: '10:30', e: '15:00', h: 'Tren Hida a Nagoya + Shinkansen a Tokio', d: 'Comprar y reservar asientos.', f: 'Bento en el tren.', p: ['takayamast', 'nagoya', 'tokyost'], r: 'Día de traslado real. Transporte sin comprar.' },
-    { t: '16:00', e: '20:30', h: 'Check-in Airbnb de Eiji (Ikenohata)', d: 'Desde las 16:00: si llegan antes, Tokyo Character Street está en la misma estación de Tokio. Cena ligera cerca del estanque Shinobazu.', f: 'Ueno / Okachimachi.', p: ['b:tokyo2'] }
+    { t: '08:15', e: '10:45', h: 'Mercado matutino y check-out (hasta 11:00)', d: 'Mercado Miyagawa junto al río: encurtidos, miso, dulces.', f: 'Desayuno local; comprar snacks para el tren.', p: ['asaichi', 'b:takayama'] },
+    { t: '11:35', e: '16:15', h: 'Tren Hida 8 + Shinkansen Nozomi 24 · RESERVADO', d: 'Hida 8: Takayama 11:35 → Nagoya 14:04, Green, coche 1, asientos 6-A, 6-B y 6-C. Transbordo de 32 min. Nozomi 24: Nagoya 14:36 → Tokio 16:15, coche 12, asientos 1-A, 1-B y 1-C, con espacio para maletas grandes detrás de los asientos.', f: 'Ekiben en la estación de Takayama para comer en el Hida.', p: ['b:takayama', 'takayamast', 'nagoya', 'tokyost'], k: 'res', r: 'Hida: boleto físico de JR-West, recójanlo antes con la tarjeta física con la que pagaron y su número de 4 dígitos (no se recoge en las máquinas dentro de los torniquetes). Nozomi: QR-Ticket de la app smartEX; en Nagoya crucen por la puerta de transbordo al Shinkansen.' },
+    { t: '16:45', e: '20:30', h: 'Check-in Airbnb de Eiji (Ikenohata)', d: 'Desde las 16:00: si llegan antes, Tokyo Character Street está en la misma estación de Tokio. Cena ligera cerca del estanque Shinobazu.', f: 'Ueno / Okachimachi.', p: ['b:tokyo2'] }
    ],
    legs: [
     { o: 'b:takayama', d: 'asaichi', steps: [W(15, 'Al río Miyagawa')] },
-    { o: 'takayamast', d: 'nagoya', steps: [T('hida', 'Limited Express Hida Takayama → Nagoya', 140, 'Paisaje de río y montaña; asientos reservados.')] },
-    { o: 'nagoya', d: 'tokyost', steps: [T('shinkansen', 'Nozomi Nagoya → Tokio', 100, 'App SmartEX; reservar espacio para maletas grandes.')] },
+    { o: 'b:takayama', d: 'takayamast', plan: '11:05', steps: [W(5, 'Con las maletas a la estación de Takayama')] },
+    { o: 'takayamast', d: 'nagoya', dep: '11:35', steps: [T('hida', 'Hida 8 · Takayama 11:35 → Nagoya 14:04', 149, 'Reservado: Green, coche 1, asientos 6-A, 6-B y 6-C. Paisaje de río y montaña.')] },
+    { o: 'nagoya', d: 'tokyost', dep: '14:36', steps: [T('shinkansen', 'Nozomi 24 · Nagoya 14:36 → Tokio 16:15', 99, 'Reservado: coche 12, asientos 1-A, 1-B y 1-C, con espacio para maletas grandes. QR-Ticket de smartEX.')] },
     { o: 'tokyost', d: 'b:tokyo2', steps: [X(15, 'Taxi desde Yaesu con maletas', '≈ ¥2,000'), T('yamanote', 'O JR Tokio → Ueno + 10 min a pie', 8, null, true)] }
    ],
-   tips: ['Vuelven a Tokio con otras temperaturas: ~12 °C de día. Pueden guardar la ropa más pesada.'] },
+   tips: ['En Nagoya: al bajar del Hida sigan los letreros «Shinkansen» hasta la puerta de transbordo; metan el boleto del Hida y escaneen el QR de smartEX. Tienen 32 min.', 'Las maletas grandes van en el espacio detrás de sus asientos (fila 1 del coche 12): ya está reservado.', 'Vuelven a Tokio con otras temperaturas: ~12 °C de día. Pueden guardar la ropa más pesada.'] },
 
  { n: 19, date: '2026-12-08', city: 'TK', base: 'tokyo2', title: 'Compras y maletas', wx: [12, 4], sun: '16:28',
    items: [
@@ -1453,7 +1454,9 @@ const TICKETS = [
   { d: '2026-11-27', day: 8, n: 'Bus Kawaguchiko → Mishima', when: '27 nov · Kawaguchiko 09:20 → Mishima 10:50', st: 'ok', stl: 'Pagado ¥6,250', info: '2 adultos + 1 niño, asientos 3-A, 3-B y 3-C. Sale de la estación Kawaguchiko y llega a la salida norte de Mishima. Mostrar el QR de Fujiyama Connect al subir; el bus no espera.', place: 'kawaguchiko' },
   { d: '2026-11-27', day: 8, n: 'Shinkansen Kodama 819', when: '27 nov · Mishima 11:55 → Kioto 14:34', st: 'ok', stl: 'Pagado ¥29,820', info: '2 adultos + 1 niño en Green, coche 8: asientos 6-B, 6-C y 6-D. Tarifa Hayatoku: solo vale en este tren. Se aborda con el QR-Ticket de smartEX.', place: 'mishima' },
   { d: '2026-12-04', day: 15, n: 'Thunderbird 13 + Shinkansen Tsurugi 14', when: '4 dic · Osaka 09:41 → Kanazawa 12:02', st: 'ok', stl: 'Pagado ¥30,600', info: '2 adultos + 1 niño. Thunderbird 13: Osaka 09:41 → Tsuruga 11:02, Green, coche 1, asientos 6-A, 6-B y 6-C. Tsurugi 14: Tsuruga 11:17 → Kanazawa 12:02, coche 8, asientos 7-A, 7-B y 7-C. Boleto físico: recogerlo antes en una máquina o taquilla JR West con la tarjeta física con la que se pagó y el número de 4 dígitos. Sale de la estación Osaka, no de Shin-Osaka.', place: 'osakast' },
-  { d: '2026-12-06', day: 17, n: 'Bus Shirakawa-gō → Takayama', when: '6 dic · Shirakawa-gō 13:30 → Takayama 14:20', st: 'ok', stl: 'Pagado ¥7,250', info: '2 adultos + 1 niño, Nōhi Bus, coche 01, asientos 2A, 2B y 3A. Sale de la parada Ogimachi y llega al Nōhi Bus Center, junto a la estación de Takayama. Mostrar el boleto impreso al conductor.', place: 'shirakawa' }
+  { d: '2026-12-06', day: 17, n: 'Bus Shirakawa-gō → Takayama', when: '6 dic · Shirakawa-gō 13:30 → Takayama 14:20', st: 'ok', stl: 'Pagado ¥7,250', info: '2 adultos + 1 niño, Nōhi Bus, coche 01, asientos 2A, 2B y 3A. Sale de la parada Ogimachi y llega al Nōhi Bus Center, junto a la estación de Takayama. Mostrar el boleto impreso al conductor.', place: 'shirakawa' },
+  { d: '2026-12-07', day: 18, n: 'Tren Hida 8', when: '7 dic · Takayama 11:35 → Nagoya 14:04', st: 'ok', stl: 'Pagado ¥21,920', info: '2 adultos + 1 niño en Green, coche 1: asientos 6-A, 6-B y 6-C. Boleto físico de JR-West: recogerlo antes en una máquina o taquilla (fuera de los torniquetes) con la tarjeta física con la que se pagó y el número de 4 dígitos.', place: 'takayamast' },
+  { d: '2026-12-07', day: 18, n: 'Shinkansen Nozomi 24', when: '7 dic · Nagoya 14:36 → Tokio 16:15', st: 'ok', stl: 'Pagado ¥27,250', info: '2 adultos + 1 niño, coche 12: asientos 1-A, 1-B y 1-C, con espacio para maletas grandes detrás. Se aborda con el QR-Ticket de smartEX.', place: 'nagoya' }
 ];
 
 // Lo que falta comprar (checklist)
@@ -1468,10 +1471,10 @@ const TODO = [
   { pr: 1, why: 'Abre venta el 27 oct; une Fuji con Kioto', id: 't-kyoto', done: 1, t: 'Kawaguchiko → Mishima → Kioto', date: '2026-11-27', opens: '2026-10-27', on: 'Shinkansen ~1 mes antes', s: 'Comprado: bus Fujikyū 09:20 a Mishima + Shinkansen Kodama 819 de las 11:55 a Kioto.', links: [['Bus Fujikyū', 'https://bus-en.fujikyu.co.jp/'], ['SmartEX (Shinkansen)', 'https://smart-ex.jp/en/']], note: 'La venta en línea del bus a veces rechaza tarjetas extranjeras; si pasa, se compra en la taquilla de Kawaguchiko.' },
   { pr: 3, why: 'Comida; se puede llegar temprano sin reserva', id: 't-steak', t: 'Steakland Kobe', date: '2026-12-03', s: 'Reservar o llegar temprano; pedir el curso «Kobe Beef».', links: [['Ver en Google Maps', 'https://www.google.com/maps/search/?api=1&query=Steakland%20Kobe%20Sannomiya']] },
   { pr: 2, done: 1, why: 'Abre venta el 4 nov', id: 't-kanazawa', t: 'Osaka → Kanazawa', date: '2026-12-04', opens: '2026-11-04', on: '1 mes antes, 10:00 JST', s: 'Comprado: Thunderbird 13 de las 09:41 desde la estación Osaka + Tsurugi 14, llegan a Kanazawa a las 12:02.', links: [['JR West (reservas)', 'https://www.westjr.co.jp/global/en/'], ['Guía Thunderbird', 'https://ekitan.com/en/article/thunderbird']] },
-  { pr: 1, why: 'Sin boleto en mano hay que volver a pagar', id: 't-kzpick', t: 'Recoger boletos Osaka → Kanazawa', date: '2026-12-03', s: 'En una máquina o taquilla JR West (Osaka, Shin-Osaka, Kioto o Kobe). Necesitan la tarjeta física con la que pagaron y su número de identificación de 4 dígitos. Lo más cómodo: el 3 dic al volver de Kobe por la estación Osaka.', when: 'Antes del 4 dic', links: [['Dónde recogerlos (JR West)', 'https://www.westjr.co.jp/global/en/howto/train-reservation/receive/']] },
+  { pr: 1, why: 'Sin boleto en mano hay que volver a pagar', id: 't-kzpick', t: 'Recoger boletos de JR-West: Thunderbird (4 dic) y Hida (7 dic)', date: '2026-12-03', s: 'En una máquina o taquilla JR West fuera de los torniquetes (Osaka, Shin-Osaka, Kioto o Kobe). Necesitan la tarjeta física con la que pagaron y su número de identificación de 4 dígitos. Lo más cómodo: los dos juntos el 3 dic al volver de Kobe por la estación Osaka; si el del Hida no sale ahí, revisen la lista de estaciones del enlace.', when: 'Antes del 4 dic', links: [['Dónde recogerlos (JR West)', 'https://www.westjr.co.jp/global/en/howto/train-reservation/receive/']] },
   { pr: 1, done: 1, why: 'Obligatorio y se agota', id: 't-bus1', t: 'Bus Kanazawa → Shirakawa-gō', date: '2026-12-06', s: 'Comprado: bus de las 08:10 desde la salida Oeste (andén 4), llega a las 09:25.', links: [['Japan Bus Online', 'https://japanbusonline.com/en/DestinationSearch/21'], ['Nōhi Bus', 'https://www.nouhibus.co.jp/english/']], note: 'Por teléfono, en inglés: +81 577-32-1688 (9:00–18:00 JST).' },
   { pr: 1, done: 1, why: 'Obligatorio y se agota', id: 't-bus2', t: 'Bus Shirakawa-gō → Takayama', date: '2026-12-06', s: 'Comprado: bus de las 13:30, llega a Takayama a las 14:20.', links: [['Japan Bus Online', 'https://japanbusonline.com/en/DestinationSearch/21'], ['Nōhi Bus', 'https://www.nouhibus.co.jp/english/']], note: 'Si el tramo no aparece en línea, resérvenlo por teléfono.' },
-  { pr: 2, why: 'Abre venta el 7 nov', id: 't-hida', t: 'Takayama → Nagoya → Tokio', date: '2026-12-07', opens: '2026-11-07', on: '~1 mes antes', s: 'Limited Express Hida + Shinkansen Nozomi.', links: [['Hida (revendedor)', 'https://shinkansen-ticket.com/es/products/limitedexpresstrainticket-takayama-nagoya'], ['SmartEX (Nozomi)', 'https://smart-ex.jp/en/']], note: 'El link del Hida es un revendedor, no JR. También se compra en la taquilla JR de Takayama.' },
+  { pr: 2, done: 1, why: 'Abre venta el 7 nov', id: 't-hida', t: 'Takayama → Nagoya → Tokio', date: '2026-12-07', opens: '2026-11-07', on: '~1 mes antes', s: 'Comprado: Hida 8 de las 11:35 + Nozomi 24 de las 14:36, llegan a Tokio a las 16:15.', links: [['Hida (revendedor)', 'https://shinkansen-ticket.com/es/products/limitedexpresstrainticket-takayama-nagoya'], ['SmartEX (Nozomi)', 'https://smart-ex.jp/en/']], note: 'El link del Hida es un revendedor, no JR. También se compra en la taquilla JR de Takayama.' },
   { pr: 2, why: 'Abre venta el 9 nov; vuelo temprano', id: 't-sky', t: 'Skyliner Ueno → Narita', date: '2026-12-09', opens: '2026-11-09', on: 'desde 30 días antes', s: 'E-ticket con descuento (¥2,310 adulto, ¥1,150 niño). Se canjea con pasaporte.', links: [['Skyliner e-ticket', 'https://www.keisei.co.jp/keisei/tetudou/skyliner/e-ticket/en/']] }
 ];
 
@@ -1488,7 +1491,7 @@ const ALERTS = [
   { d: '2026-11-24', t: 'teamLab: el QR aparece desde las 00:00 JST' },
   { d: '2026-11-29', t: 'Nintendo Museum: descargar QR desde las 14:00 JST' },
   { d: '2026-12-02', t: 'USJ: llevar los 6 e-tickets y revisar horas del Express' },
-  { d: '2026-12-03', t: 'Al volver de Kobe: recoger en la estación Osaka los boletos del Thunderbird de mañana (tarjeta física + número de 4 dígitos)' },
+  { d: '2026-12-03', t: 'Al volver de Kobe: recoger en la estación Osaka los boletos del Thunderbird (4 dic) y del Hida (7 dic): tarjeta física + número de 4 dígitos' },
   { d: '2026-12-05', t: 'Mañana: bus 08:10 desde la salida OESTE de Kanazawa (andén 4). Tengan listos los boletos impresos' },
   { d: '2026-12-06', t: 'Mercure Takayama: confirmar impuestos y desayuno de Sam' },
   { d: '2026-12-08', t: 'Empacar, pesar maletas y elegir Skyliner' }
@@ -2287,7 +2290,7 @@ const MORNING = {
   15: { wake: '07:15', leave: '08:45', note: 'Check-out y a la estación Osaka (Umeda), no Shin-Osaka: el Thunderbird 13 sale a las 09:41 y el Tsurugi 14 llega a Kanazawa a las 12:02. Lleven los boletos físicos ya recogidos.' },
   16: { wake: '07:05', leave: '08:35', note: 'Kenroku-en abre temprano: a esta hora hay poca gente.' },
   17: { wake: '06:10', leave: '07:40', note: 'Taxi a la salida OESTE de la estación de Kanazawa, andén 4: el bus a Shirakawa-gō sale a las 08:10 y no espera. Lleven los boletos impresos.' },
-  18: { wake: '05:45', leave: '07:15', note: 'Check-out hasta las 11:00: después del mercado regresen por las maletas para tomar el tren Hida a Nagoya.' },
+  18: { wake: '06:45', leave: '08:15', note: 'Mercado de la mañana y check-out antes de las 11:00. El Hida 8 sale a las 11:35: estén en la estación a las 11:10 con los boletos físicos ya recogidos.' },
   19: { wake: '07:15', leave: '08:45', note: 'Último día completo: empiecen con calma.' },
   20: { wake: '04:30', leave: '06:00', note: 'Maletas listas desde la noche anterior. Skyliner de Keisei Ueno a Narita (~45 min); el vuelo AM 57 sale a las 09:35, lleguen antes de las 07:30.' }
 };
