@@ -1359,7 +1359,7 @@ function toggleExtra(id) {
 // Día 0: de Tecámac al avión (horas del centro de México; la llegada a Narita, en hora de Japón)
 const DAY0 = { n: 0, date: '2026-11-18', city: 'MX', title: 'Salida: Tecámac → Tokio', wx: [23, 9], sun: '17:54',
   items: [
-    { t: '09:00', e: '13:00', h: 'Últimos pendientes y maletas', d: 'Pesen las maletas: cada quien una documentada de hasta 25 kg y, en cabina, maleta de mano + artículo personal que juntos no pasen de 10 kg (tarifa Básica). Baterías externas y cargadores siempre en la mochila, nunca en la documentada.', r: 'Confirmen en «Mis viajes» de la app de Aeroméxico cuántas maletas incluye su boleto. Si falta la documentada, cómprenla en la app: en el mostrador sale más cara.', p: ['casa'] },
+    { t: '09:00', e: '13:00', h: 'Últimos pendientes y maletas', d: 'Pesen las maletas: el boleto de Aeroméxico incluye 2 maletas documentadas por persona (hasta 25 kg cada una) y, en cabina, maleta de mano + artículo personal que juntos no pasen de 10 kg (tarifa Básica). Baterías externas y cargadores siempre en la mochila, nunca en la documentada.', r: 'El recibo del boleto electrónico dice «Límite de equipaje: 2 PIEZAS» por persona, de ida y de regreso. Si van más pesadas de 25 kg, ahí sí cobran sobrepeso.', p: ['casa'] },
     { t: '13:00', e: '15:30', h: 'Comida en casa y cerrar la casa', d: 'Gas cerrado, boiler apagado, aparatos desconectados, refri sin perecederos, basura fuera, ventanas cerradas y llaves con alguien de confianza.', f: 'Comida ligera en casa; en el avión dan cena y desayuno.', p: ['casa'] },
     { t: '16:00', e: '17:30', h: 'Traslado Tecámac → AICM Terminal 2', d: 'Uber o DiDi en camioneta (UberXL / DiDi XL) por las 3 personas y las maletas, o que los lleve alguien de la familia. Por el Circuito Exterior Mexiquense y la autopista Peñón–Texcoco se llega a la Terminal 2 sin cruzar la ciudad.', r: 'Salgan a las 16:00: en la tarde se cargan la México–Pachuca y el Circuito. Revisen Waze antes de salir. Dejar el auto 21 días en el estacionamiento del aeropuerto sale caro.', p: ['casa', 'aicm2'] },
     { t: '17:30', e: '19:00', h: 'Documentar en la Terminal 2 (Aeroméxico)', d: 'Mostradores de Aeroméxico en la zona de salidas de la Terminal 2. Entreguen los 3 pasaportes y documenten las maletas directo hasta Narita: revisen que la etiqueta diga NRT. Después pasen el filtro de seguridad y busquen la puerta del AM 58 en las pantallas.', r: 'El AICM pide llegar 3 h antes en vuelos internacionales y la documentación cierra 60 min antes de la salida.', p: ['aicm2'] },
@@ -1415,7 +1415,7 @@ const CHECK0 = [
   ['p0-chk', 'Check-in en línea hecho', 'Abre el martes 17 a las 21:30 (24 h antes).'],
   ['p0-vjw', 'QR de Visit Japan Web de cada uno', 'Captura de pantalla de los 3 QR por si no hay señal al aterrizar.'],
   ['p0-sim', 'eSIM instalada', 'Instálenla en casa con wifi; se activa al aterrizar en Japón.'],
-  ['p0-kg', 'Maletas pesadas', 'Documentada ≤ 25 kg; maleta de mano + artículo personal ≤ 10 kg juntos.'],
+  ['p0-kg', 'Maletas pesadas', 'Hasta 2 documentadas por persona, ≤ 25 kg cada una; maleta de mano + artículo personal ≤ 10 kg juntos.'],
   ['p0-liq', 'Líquidos de mano', 'Bolsa transparente, frascos de 100 ml máximo.'],
   ['p0-bat', 'Cargadores y baterías en la mochila', 'Batería externa nunca en la documentada. Adaptador de 3 a 2 patas.'],
   ['p0-med', 'Medicinas a la mano', 'Las de Sam y las de ustedes, en la mochila con su receta si es controlada.'],
@@ -1476,7 +1476,7 @@ const TICKETS = [
 
 // Lo que falta comprar (checklist)
 const TODO = [
-  { pr: 1, why: 'El pago programado es el 24 oct', id: 't-toshi', t: 'Cancelar / confirmar cancelación del Airbnb anterior de Osaka', s: 'Cambiaron a Chateau DATE. Revisen que la reserva de Toshi en Shimanouchi esté cancelada y que no se cobren $4,340.43 MXN el 24 oct.', when: 'Antes del 24 oct', links: [['Mis viajes en Airbnb', 'https://www.airbnb.mx/trips']] },
+  { pr: 1, done: 1, why: 'El pago programado es el 24 oct', id: 't-toshi', t: 'Cancelar / confirmar cancelación del Airbnb anterior de Osaka', s: 'Confirmado por correo (19 oct): la reserva de Toshi en Shimanouchi está cancelada y el cobro de $4,340.43 MXN quedó en $0. También se canceló el departamento c41; se quedan con el c53 de Chateau DATE.', when: 'Antes del 24 oct', links: [['Mis viajes en Airbnb', 'https://www.airbnb.mx/trips']] },
   { pr: 2, why: 'Para planear la llegada del 1 dic', id: 't-osakain', t: 'Hora de check-in y equipaje en Chateau DATE', s: 'Pregunten a Emi la hora de entrada y salida y si pueden dejar maletas antes.', when: 'Antes del 1 dic', links: [['Mensajes de Airbnb', 'https://www.airbnb.mx/guest/inbox']] },
   { pr: 2, why: 'Lo piden en migración; 1–2 semanas antes', id: 't-vjw', t: 'Registrar Visit Japan Web (3 personas)', s: 'QR de migración y aduana para Narita. Ya crearon la cuenta (3 nov); falta registrar a los 3 (pasaportes) y el viaje para que salga el QR de cada uno. Háganlo 1–2 semanas antes.', when: 'Antes del 20 nov', links: [['Visit Japan Web', 'https://www.vjw.digital.go.jp/']] },
   { pr: 2, why: 'Sin datos no hay Google Maps', id: 't-esim', t: 'eSIM o pocket wifi', s: 'Datos para Google Maps los 20 días.', when: 'Antes del 20 nov', links: [['eSIM Japón (Airalo)', 'https://www.airalo.com/japan-esim']] },
