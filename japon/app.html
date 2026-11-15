@@ -411,13 +411,7 @@ body.scrolled .nav { border-bottom-color: var(--glass-brd); }
   /* la insignia del día viaja entre la fila de la lista y el encabezado del día */
   ::view-transition-group(daybadge) { animation-duration: .45s; animation-timing-function: var(--ease); }
   ::view-transition-old(daybadge), ::view-transition-new(daybadge) { animation-duration: .25s; }
-  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .45s; animation-timing-function: var(--ease); }
-  :root[data-nav="push"]::view-transition-old(root) { animation-name: vt-out-l; }
-  :root[data-nav="push"]::view-transition-new(root) { animation-name: vt-in-r; }
-  :root[data-nav="pop"]::view-transition-old(root) { animation-name: vt-out-r; }
-  :root[data-nav="pop"]::view-transition-new(root) { animation-name: vt-in-l; }
-  :root[data-nav="fade"]::view-transition-old(root) { animation-name: vt-fo; animation-duration: .2s; }
-  :root[data-nav="fade"]::view-transition-new(root) { animation-name: vt-fi; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .28s; }
   :root[data-nav="theme"]::view-transition-old(root) { animation: none; }
   :root[data-nav="theme"]::view-transition-new(root) { animation: vt-reveal .7s var(--ease); }
   :root[data-nav="theme"]::view-transition-group(navbar), :root[data-nav="theme"]::view-transition-group(tabbar) { animation-duration: .5s; }
@@ -835,11 +829,86 @@ a.gf::before { content: ""; position: absolute; inset: -6px 0; }
 .nav-l a { position: relative; } .nav-l a::after { content: ""; position: absolute; inset: -11px -10px -11px -12px; }
 .r.field input, .r.field select { align-self: stretch; margin-block: -11px; min-height: 44px; }
 html, body { overscroll-behavior-x: none; }
+/* nada se sale por los lados: una tarjeta que entra desde la derecha (o la página arrastrada con el dedo) no debe ensanchar la vista del teléfono */
+html, body { overflow-x: clip; }
 a, button, input, select, textarea, label { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+/* ===== Buscador ===== */
+.nav-r { gap: 8px; }
+.sbar { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 50px); z-index: 6; display: flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 6px 0 14px; border-radius: 23px;
+  background: var(--card); border: .5px solid var(--hair); box-shadow: var(--lift); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%); }
+.sbar:focus-within { box-shadow: 0 0 0 2px var(--tint), var(--lift); }
+.sbar > svg { flex: none; width: 19px; height: 19px; stroke: var(--label2); fill: none; stroke-width: 2; stroke-linecap: round; }
+.sbar input { flex: 1; min-width: 0; border: 0; background: none; outline: none; font-size: 17px; color: var(--label); padding: 11px 0; appearance: none; -webkit-appearance: none; }
+.sbar input::placeholder { color: var(--label2); opacity: 1; }
+.sbar input::-webkit-search-cancel-button { display: none; }
+.sbar .sx { position: relative; flex: none; width: 30px; height: 30px; border-radius: 50%; border: 0; padding: 0 0 2px; background: var(--fill2); color: var(--label); font-size: 20px; line-height: 1; cursor: pointer; }
+.sbar .sx::before { content: ""; position: absolute; inset: -7px; }
+.sres { display: grid; gap: 24px; min-width: 0; }
+/* coincidencia: tinta plena, negrita y subrayado (sin fondo de color, que le quitaría contraste al texto) */
+mark { background: none; color: var(--label); font-weight: 700; text-decoration: underline; text-decoration-color: var(--tint); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.sxq { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 2px; }
+.sxq button { position: relative; border: .5px solid var(--hair); background: var(--card); color: var(--tint); font-size: 15px; font-weight: 600; padding: 8px 14px; border-radius: 999px; cursor: pointer; }
+.sxq button::before { content: ""; position: absolute; inset: -4px 0; }
+.sxq button:active { background: var(--fill2); }
+.r.hit { animation: rowhit 2s ease-out .25s backwards; }
+@keyframes rowhit { from { background-color: color-mix(in srgb, var(--tint) 22%, transparent); } 45% { background-color: color-mix(in srgb, var(--tint) 22%, transparent); } to { background-color: transparent; } }
+
+/* ===== Tira de días: calendario del viaje dentro de cada día ===== */
+.dstrip { position: relative; display: flex; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scroll-snap-type: x proximity;
+  background: var(--card); border: .5px solid var(--hair); border-radius: 18px; padding: 6px 4px; min-width: 0; }
+.dstrip::-webkit-scrollbar { display: none; }
+.dstrip a { --c: var(--tint); position: relative; flex: none; width: 46px; display: grid; justify-items: center; gap: 3px; padding: 3px 0 8px; color: var(--label); scroll-snap-align: center; }
+.dstrip i { font-style: normal; font-size: 11px; line-height: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: .02em; color: var(--label2); }
+.dstrip b { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 15px; font-weight: 600; box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--c) 60%, transparent); }
+.dstrip a[aria-current] b { background: var(--c); color: var(--on); box-shadow: none; font-weight: 700; }
+.dstrip a[aria-current] i { color: var(--label); }
+.dstrip a.today::after { content: ""; position: absolute; bottom: 1px; width: 5px; height: 5px; border-radius: 50%; background: var(--red); }
+.dstrip .dmo { flex: none; align-self: center; writing-mode: vertical-rl; transform: rotate(180deg); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--label2); padding: 0 3px 0 5px; }
+.dstrip a:focus-visible { outline-offset: -2px; }
+@media (prefers-reduced-motion: no-preference) { .dstrip b { transition: transform .3s var(--spring); } .dstrip a:active b { transform: scale(.88); } }
+
+/* ===== Deslizar entre días ===== */
+main.dayp { touch-action: pan-y pinch-zoom; }
+.dpeek { position: fixed; top: 44%; z-index: 25; max-width: 64vw; padding: 9px 14px 10px; border-radius: 16px; display: grid; gap: 1px; pointer-events: none;
+  background: var(--card); color: var(--label); border: .5px solid var(--hair); box-shadow: var(--lift); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+.dpeek.r { right: 10px; text-align: right; } .dpeek.l { left: 10px; }
+.dpeek small { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--label2); }
+.dpeek b { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dpeek.go { background: var(--tint); color: var(--on); border-color: transparent; } .dpeek.go small { color: var(--on); }
+
+/* ===== Transiciones de página =====
+   La raíz (que incluye el fondo de la ciudad) solo hace un fundido simétrico entre la página que sale y la que entra:
+   como el fondo es idéntico en ambas, se queda perfectamente quieto. El movimiento lo ponen las tarjetas reales de la
+   página nueva, que conservan su cristal.
+   · Lista → detalle: la página nueva se abre desde la fila que tocaste y, al volver, se recoge en ella.
+   · Día ↔ día y pestañas: las tarjetas entran en cascada por el lado hacia el que vas.
+   · La cápsula de la barra viaja de una pestaña a otra; la insignia del día, de la fila al encabezado.
+   · Buscar: el botón de la lupa se convierte en el campo de búsqueda. */
+@media (prefers-reduced-motion: no-preference) {
+  .anim[data-in="r"] > *:not(.grp), .anim[data-in="r"] > .grp > * { animation-name: in-r; animation-duration: .55s; animation-delay: calc(var(--d, 0) * 38ms); }
+  .anim[data-in="l"] > *:not(.grp), .anim[data-in="l"] > .grp > * { animation-name: in-l; animation-duration: .55s; animation-delay: calc(var(--d, 0) * 38ms); }
+  .anim[data-in] > .lt, .anim[data-in] > .dstrip { animation: none; }   /* el encabezado y la tira de días no se mueven: solo cambian */
+  .anim[data-in="none"] > *, .anim[data-in="none"] > .grp > * { animation: none; }   /* al volver a la lista, la lista ya está en su sitio */
+  @keyframes in-r { from { opacity: 0; transform: translateX(44px); } }
+  @keyframes in-l { from { opacity: 0; transform: translateX(-44px); } }
+
+  :root[data-nav^="zoom"]::view-transition-old(root), :root[data-nav^="zoom"]::view-transition-new(root) { mix-blend-mode: normal; animation: none; }
+  :root[data-nav="zoomin"]::view-transition-new(root) { animation: vt-zoom-in .5s var(--ease) both; }
+  :root[data-nav="zoomout"]::view-transition-old(root) { animation: vt-zoom-out .44s var(--ease) both; z-index: 1; }
+  @keyframes vt-zoom-in { from { clip-path: inset(var(--zt) var(--zr) var(--zb) var(--zl) round 14px); } to { clip-path: inset(0 0 0 0 round 0px); } }
+  @keyframes vt-zoom-out { from { clip-path: inset(0 0 0 0 round 0px); } to { clip-path: inset(var(--zt) var(--zr) var(--zb) var(--zl) round 14px); } }
+
+  :root[data-nav^="day"] .dstrip { view-transition-name: dstrip; }
+  :root[data-nav^="tab"] .tabs a[aria-current="page"] :is(.tbi, .hb) { view-transition-name: tabpill; }
+  ::view-transition-group(tabpill) { animation-duration: .5s; animation-timing-function: var(--spring); }
+
+  ::view-transition-group(sbox) { animation-duration: .45s; animation-timing-function: var(--ease); overflow: clip; border-radius: 23px; }
+  ::view-transition-old(sbox), ::view-transition-new(sbox) { width: auto; height: 100%; object-fit: none; object-position: left center; }
+}
 </style>
 
 <canvas id="bgfx" aria-hidden="true"></canvas>
-<header class="nav"><div class="wrap"><div class="nav-l" id="navL"></div><div class="nav-t" id="navT">Japón 2026</div><div class="nav-r"><span id="clock"></span><button class="themeb" id="themeB" type="button" aria-label="Cambiar entre tema claro y oscuro"></button></div></div></header>
+<header class="nav"><div class="wrap"><div class="nav-l" id="navL"></div><div class="nav-t" id="navT">Japón 2026</div><div class="nav-r"><span id="clock"></span><button class="themeb" id="searchB" type="button" aria-label="Buscar en todo el viaje"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></button><button class="themeb" id="themeB" type="button" aria-label="Cambiar entre tema claro y oscuro"></button></div></div></header>
 
 <main class="wrap" id="view"></main>
 <div class="sr" id="say" role="status" aria-live="polite"></div>
@@ -862,6 +931,7 @@ a, button, input, select, textarea, label { touch-action: manipulation; -webkit-
   <div id="sheetBody"></div>
 </div>
 <div class="hud" id="hud" hidden></div>
+<div class="dpeek" id="dpeek" hidden aria-hidden="true"></div>
 
 <script>
 /* ============ DATOS DEL VIAJE (del itinerario verificado, 17 oct 2026) ============ */
@@ -1428,6 +1498,15 @@ const CHECK0 = [
   ['p0-kazu', 'Mensaje a Kazu por Airbnb', 'Pregúntenle si pueden entrar antes de las 16:00 el 20 nov (dejar maletas desde las 12:00 ya está confirmado).'],
   ['p0-casa', 'Casa cerrada', 'Gas, boiler, aparatos, refri, basura, ventanas y llaves con alguien de confianza.']
 ];
+// Tira de días: un calendario del viaje para saltar de un día a otro sin volver a la lista
+function dayStrip(n) {
+  const today = jstNow().ymd; let mo = 0;
+  return `<nav class="dstrip" aria-label="Días del viaje">${[DAY0, ...DAYS].map(d => {
+    const p = ymdParts(d.date), sep = p.m !== mo ? `<span class="dmo" aria-hidden="true">${MES[p.m - 1]}</span>` : ''; mo = p.m;
+    return `${sep}<a href="#dia${d.n}" style="--c:${cityVar(d.city)}"${d.n === n ? ' aria-current="true"' : ''}${d.date === today ? ' class="today"' : ''} aria-label="Día ${d.n}, ${DOW[p.w]} ${p.d} ${MES[p.m - 1]}: ${esc(d.title)}"><i>${DOW[p.w]}</i><b>${p.d}</b></a>`;
+  }).join('')}</nav>`;
+}
+function dayStripAfter() { const st = view.querySelector('.dstrip'), a = st && st.querySelector('[aria-current]'); if (a) st.scrollLeft = a.offsetLeft - (st.clientWidth - a.offsetWidth) / 2; }
 function viewDay0() {
   const day = DAY0, c = checks(), n = 0, seg = mem.seg[0] || 'plan';
   const [done, tot] = dayProgress(day), ready = CHECK0.filter(([id]) => c[id]).length;
@@ -1445,6 +1524,7 @@ function viewDay0() {
   else content = grp('Tips para el viaje', tipRows(day.tips.map(esc)), null) +
     grp('Clima', row({ t: 'Ciudad de México', tr: `${day.wx[0]}° / ${day.wx[1]}°` }) + row({ t: 'Narita al llegar (06:30)', tr: '≈ 8°' }) + row({ t: 'Atardecer en CDMX', tr: '≈ ' + day.sun }), null, 'Promedio de temporada');
   const body = `
+  ${dayStrip(0)}
   <div class="tiles">
     <div class="tile"><span>Salen de casa</span><b>16:00 · mié 18</b></div>
     <div class="tile"><span>Vuelo AM 58</span><b>21:30 · Terminal 2</b></div>
@@ -1454,7 +1534,7 @@ function viewDay0() {
   ${segHtml('day0', [['plan', 'Plan'], ['rutas', 'Rutas'], ['tips', 'Tips']].map(([k, l]) => ['0:' + k, l]), '0:' + seg, 'data-seg', 'Sección del día')}
   ${content}
   ${grp(null, row({ href: '#dia1', t: 'Día 1', s: esc(DAYS[0].title), chev: 1, cls: 'link' }))}`;
-  return { title: esc(day.title), cap: 'Día 0 · Mié 18 nov · Ciudad de México', lead: roundel(day, 'lg'), back: { href: '#itinerario', label: 'Itinerario' }, body };
+  return { title: esc(day.title), cap: 'Día 0 · Mié 18 nov · Ciudad de México', lead: roundel(day, 'lg'), back: { href: '#itinerario', label: 'Itinerario' }, body, after: dayStripAfter };
 }
 const day0Row = () => { const [a, b] = dayProgress(DAY0); return row({ href: '#dia0', cls: 'lr', lead: roundel(DAY0, a === b ? 'done' : ''), t: esc(DAY0.title), s: `${fdate(DAY0.date, true)} · salen de casa a las 16:00 · ${a} de ${b}`, tr: '<span class="pill tint">Reserva</span>', chev: 1 }); };
 
@@ -1897,6 +1977,7 @@ function viewDay(n, opts = {}) {
     (n < DAYS.length ? row({ href: '#dia' + (n + 1), t: `Día ${n + 1}`, s: esc(DAYS[n].title), chev: 1, cls: 'link' }) : ''));
   const body = `
   ${opts.preview ? grp(null, row({ t: `Vista previa del Día ${n} a las ${opts.hm}` }) + row({ tag: 'button', cls: 'center', t: 'Salir de la vista previa', attrs: 'data-preview-off' })) : ''}
+  ${opts.today ? '' : dayStrip(n)}
   <div class="tiles">
     <div class="tile"><span>Duermen en</span><b>${esc(base.n)}</b></div>
     ${wxTile(day)}
@@ -1907,7 +1988,7 @@ function viewDay(n, opts = {}) {
   ${segHtml('day' + n, [['plan', 'Plan'], ['rutas', 'Rutas'], ['paradas', 'Paradas'], ['tips', 'Tips']].map(([k, l]) => [n + ':' + k, l]), n + ':' + seg, 'data-seg', 'Sección del día')}
   ${content}
   ${nav}`;
-  const after = null;
+  const after = opts.today ? null : dayStripAfter;
   return { title: esc(day.title), cap: `${opts.today ? 'Hoy · ' : ''}Día ${n} · ${DOW[p.w]} ${p.d} ${MES[p.m - 1]} · ${CITY[day.city].n}`, lead: roundel(day, 'lg'), back: opts.today ? null : { href: '#itinerario', label: 'Itinerario' }, body, after };
 }
 
@@ -3458,6 +3539,87 @@ try {
 let hudT;
 function hud(msg) { const h = $('#hud'); h.textContent = msg; h.hidden = false; clearTimeout(hudT); hudT = setTimeout(() => { h.hidden = true; }, 1300); }
 
+/* ---------- buscador: días, actividades, trayectos, reservas, pendientes, guía, frases, compras y sellos ---------- */
+const SX_GROUPS = ['Días', 'Actividades', 'Trayectos', 'Reservas y alojamiento', 'Pendientes', 'Guía', 'Frases', 'Compras', 'Sellos'];
+const SX_ACC = { a: 'aáàâäã', e: 'eéèêë', i: 'iíìîï', o: 'oóòôöōõ', u: 'uúùûüū', n: 'nñ', c: 'cç' };
+// sin acentos, sin mayúsculas y sin guiones: «sensoji» encuentra «Sensō-ji» y «checkin», «check-in»; «kioto» también encuentra «Kyoto»
+const sxNorm = t => String(t == null ? '' : t).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[-‐‑·'’]/g, '').replace(/kyoto/g, 'kioto').replace(/tokyo/g, 'tokio');
+const sxToks = q => sxNorm(q).split(/\s+/).filter(Boolean);
+const sxRe = toks => new RegExp('(' + toks.map(t => [...t].map(ch => SX_ACC[ch] ? '[' + SX_ACC[ch] + ']' : ch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join("[-‐‑·'’]?")).join('|') + ')', 'gi');
+const sxMark = (text, toks) => toks.length ? String(text).split(sxRe(toks)).map((part, i) => i % 2 ? '<mark>' + esc(part) + '</mark>' : esc(part)).join('') : esc(text);
+function sxBuild() {
+  const out = [];
+  const add = (g, t, sub, x, o) => { out.push({ g, t, s: sub || '', x: x || '', nt: sxNorm(t), ns: sxNorm(sub), nx: sxNorm(x), ...o }); };
+  const safe = f => { try { f(); } catch (e) {} };
+  [DAY0, ...DAYS].forEach(d => {
+    const dl = `Día ${d.n} · ${fdate(d.date, true)}`;
+    safe(() => add('Días', `Día ${d.n} · ${d.title}`, `${fdate(d.date, true)} · ${d.city === 'MX' ? 'Ciudad de México' : CITY[d.city].n}`, d.base ? BASES[d.base].n : '', { href: '#dia' + d.n, cls: 'lr', lead: roundel(d) }));
+    d.items.forEach((it, i) => safe(() => add('Actividades', it.h, `${dl} · ${it.t}–${it.e}`, [it.d, it.f, it.r, (it.p || []).map(k => place(k).n).join(', ')].filter(Boolean).join(' · '),
+      { href: '#dia' + d.n, seg: d.n + ':plan', flash: 'd' + d.n + '-' + i, cls: 'lr', lead: roundel(d) })));
+    (d.legs || []).forEach(l => safe(() => add('Trayectos', `${place(l.o).n} → ${place(l.d).n}`, dl, l.steps.map(st => [st.t, st.n].filter(Boolean).join(': ')).join(' · '),
+      { href: '#dia' + d.n, seg: d.n + ':rutas', cls: 'ld', lead: ico(I.route, 'var(--tint)') })));
+  });
+  TICKETS.forEach((tk, i) => safe(() => add('Reservas y alojamiento', tk.n, [tk.when, tk.stl].filter(Boolean).join(' · '), tk.info, { attrs: `data-ticket="${i}"`, cls: 'ld', lead: ico(I.ticket, 'var(--green)') })));
+  Object.entries(BASES).forEach(([k, b]) => safe(() => add('Reservas y alojamiento', b.n, `${b.in} → ${b.out}`, [b.addr, b.host ? 'Anfitrión: ' + b.host : '', b.ja].filter(Boolean).join(' · '), { attrs: `data-base="${k}"`, cls: 'ld', lead: ico(I.bed, cityVar(b.city)) })));
+  TODO.forEach(t => safe(() => add('Pendientes', t.t, [t.why, t.when].filter(Boolean).join(' · '), t.s, { href: '#pendientes', flash: t.id, cls: 'ld', lead: ico(I.check, 'var(--orange)') })));
+  Object.keys(GUIA).filter(k => k !== 'claude').forEach(k => safe(() => {
+    let txt = ''; try { txt = new DOMParser().parseFromString(viewGuia(k).body.replace(/</g, ' <'), 'text/html').body.textContent.replace(/\s+/g, ' ').trim(); } catch (e) {}
+    add('Guía', GUIA[k].n, 'Sección de la Guía', txt, { href: '#guia-' + k, cls: 'ld', lead: ico(GUIA[k].i, GUIA[k].c) });
+  }));
+  PHRASES.forEach((ph, i) => { if (Array.isArray(ph)) safe(() => add('Frases', ph[0], `${ph[1]} · ${ph[2]}`, '', { attrs: `data-phrase="${i}"`, cls: 'ld', lead: ico(I.speech, 'var(--orange)') })); });
+  BUYS.forEach(b => safe(() => add('Compras', b.n + (b.jp ? ' · ' + b.jp : ''), [CITY[b.c] ? CITY[b.c].n : '', b.where, b.price].filter(Boolean).join(' · '), [b.what, b.tip].filter(Boolean).join(' '), { attrs: `data-buy="${b.id}"`, cls: 'ld', lead: ico(I.gift, 'var(--pink)') })));
+  STAMPS.forEach(st => safe(() => add('Sellos', `${st[3]} · ${st[2]}`, [CITY[st[0]] ? CITY[st[0]].n : '', st[4]].filter(Boolean).join(' · '), '', { href: '#guia-sellos', cls: 'ld', lead: ico(I.ticket, 'var(--red)') })));
+  return out;
+}
+function sxFind(q) {
+  const toks = sxToks(q); if (!toks.length) return [];
+  const idx = mem.sx || (mem.sx = sxBuild()), res = [];
+  for (const en of idx) {
+    let sc = 0, ok = true;
+    for (const t of toks) {
+      const a = en.nt.indexOf(t);
+      if (a >= 0) sc += a === 0 || /[\s·(]/.test(en.nt[a - 1]) ? 6 : 4; else if (en.ns.includes(t)) sc += 2; else if (en.nx.includes(t)) sc += 1; else { ok = false; break; }
+    }
+    if (ok) res.push([sc, en]);
+  }
+  return res.sort((a, b) => b[0] - a[0]).map(r => r[1]);
+}
+// Si la coincidencia está en la descripción (no en el título), se muestra ese fragmento
+function sxSnip(en, toks) {
+  const t = toks.find(k => !en.nt.includes(k) && !en.ns.includes(k)); if (!t) return '';
+  const m = sxRe([t]).exec(en.x); if (!m) return '';
+  let a = Math.max(0, m.index - 40), b = Math.min(en.x.length, m.index + m[0].length + 70);
+  if (a) { const sp = en.x.indexOf(' ', a); if (sp > 0 && sp < m.index) a = sp + 1; }
+  if (b < en.x.length) { const sp = en.x.lastIndexOf(' ', b); if (sp > m.index + m[0].length) b = sp; }
+  return (a ? '…' : '') + en.x.slice(a, b) + (b < en.x.length ? '…' : '');
+}
+function sxResultsHtml(q) {
+  const toks = sxToks(q);
+  if (!toks.length) {
+    const rec = store.get('sxRecent', []), chips = a => `<div class="sxq">${a.map(w => `<button type="button" data-sx-q="${esc(w)}">${esc(w)}</button>`).join('')}</div>`;
+    return (rec.length ? `<section class="grp"><h2 class="gh"><span>Recientes</span></h2>${chips(rec)}</section>` : '') +
+      `<section class="grp"><h2 class="gh"><span>Prueba con</span></h2>${chips(['QR', 'taxi', 'Shinkansen', 'check-in', 'boletos', 'Pokémon', 'ramen', 'baño', 'maletas'])}<p class="gf">Busca en los días, trayectos, reservas, pendientes, la Guía, las frases, las compras y los sellos. No hace falta escribir acentos.</p></section>`;
+  }
+  const res = sxFind(q);
+  if (!res.length) return grp(null, row({ t: `Sin resultados para «${esc(q)}»`, s: 'Prueba con otra palabra o con menos letras.' }) + row({ href: '#chat', cls: 'center', t: 'Preguntarle a tu mascota', attrs: `data-sx-draft="${esc(q)}"` }));
+  return SX_GROUPS.map(g => {
+    const all = res.filter(en => en.g === g); if (!all.length) return '';
+    const open = mem.sxMore === g, list = open ? all : all.slice(0, 5);
+    return grp(g, list.map(en => { const sn = sxSnip(en, toks);
+      return row({ href: en.href, tag: 'button', cls: 'sgo ' + (en.cls || ''), lead: en.lead, t: sxMark(en.t, toks), s: en.s ? sxMark(en.s, toks) : '', x: sn ? sxMark(sn, toks) : '', chev: 1,
+        attrs: (en.attrs || '') + (en.seg ? ` data-sx-seg="${en.seg}"` : '') + (en.flash ? ` data-sx-flash="${en.flash}"` : '') }); }).join('') +
+      (all.length > list.length ? row({ tag: 'button', cls: 'center', t: `Ver los ${all.length}`, attrs: `data-sx-more="${esc(g)}"` }) : ''), null, String(all.length));
+  }).join('');
+}
+function sxUpdate() { const box = $('#sres'); if (!box) return; box.innerHTML = sxResultsHtml(mem.q || ''); const x = view.querySelector('.sbar .sx'); if (x) x.hidden = !mem.q; }
+function viewBuscar() {
+  const q = mem.q || '';
+  const body = `<div class="sbar" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input id="sq" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Lugar, tren, reserva, frase…" aria-label="Buscar en todo el viaje" value="${esc(q)}"><button type="button" class="sx" aria-label="Borrar búsqueda"${q ? '' : ' hidden'}>×</button></div>
+  <div class="sres" id="sres" aria-live="polite">${sxResultsHtml(q)}</div>`;
+  const from = mem.searchFrom || 'hoy';
+  return { title: 'Buscar', cap: 'En todo el viaje', back: { href: '#' + from, label: 'Atrás' }, body };
+}
+
 /* ---------- router ---------- */
 const view = $('#view');
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -3475,7 +3637,12 @@ function route(opts = {}) {
   else if (h === 'chat') v = viewChat();
   else if (h === 'reservas') v = viewReservas();
   else if (h === 'guia' || h.startsWith('guia-')) { tab = 'guia'; v = viewGuia(h.slice(5)); }
+  else if (h === 'buscar') { tab = ''; v = viewBuscar(); }
   else { tab = 'hoy'; v = viewHoy(); }
+  if (v.back && mem.backOver === h) v.back = { href: '#buscar', label: 'Buscar' };   // llegaste desde un resultado: «atrás» vuelve a la búsqueda
+  view.style.transform = ''; view.style.transition = ''; view.style.willChange = '';   // por si venía a medio deslizar
+  view.classList.toggle('dayp', isDayHash(h));
+  $('#searchB').hidden = h === 'buscar';
   $('#navL').innerHTML = v.back ? `<a href="${v.back.href}">${v.back.label}</a>` : '';
   $('#navT').innerHTML = v.title;
   view.innerHTML = `<header class="lt">${v.lead || ''}<div>${v.cap ? `<div class="cap">${esc(v.cap)}</div>` : ''}<h1>${v.title}</h1></div></header>${v.body}`;
@@ -3488,14 +3655,16 @@ function route(opts = {}) {
     window.scrollTo(0, y || 0);
     const fromRow = opts.pop && opts.from ? view.querySelector(`a.r[href="#${opts.from}"]`) : null;
     if (fromRow) { const fr = fromRow.getBoundingClientRect(); if (fr.top < 64 || fr.bottom > innerHeight - 96) fromRow.scrollIntoView({ block: 'center' }); fromRow.classList.add('from'); }
+    // Vienes de un resultado de búsqueda: se va directo a esa actividad o pendiente y se resalta
+    if (mem.flash) { const fb = view.querySelector(`.chk[data-check="${mem.flash}"]`), hit = fb && fb.closest('.r'); if (hit) { hit.scrollIntoView({ block: 'center' }); hit.classList.add('hit'); } }
     const tmp = document.createElement('div'); tmp.innerHTML = v.title; $('#say').textContent = tmp.textContent;
   }
-  mem.lastHash = h;
+  mem.lastHash = h; mem.flash = null;
   afterRender(opts);
   onScroll();
 }
 function afterRender(opts) {
-  view.classList.remove('anim');
+  view.classList.remove('anim'); if (opts.inDir) view.dataset.in = opts.inDir; else delete view.dataset.in;
   if (opts.stagger && !RM) {
     [...view.children].forEach((el, i) => el.style.setProperty('--d', Math.min(i, 10)));
     requestAnimationFrame(() => view.classList.add('anim'));
@@ -3519,36 +3688,66 @@ function afterRender(opts) {
 }
 const depth = h => /^dia\d|^guia-/.test(h) ? 2 : 1;
 const isDayHash = h => /^dia\d+$/.test(h || '');
+const dayNum = h => { const m = /^dia(\d+)$/.exec(h || ''); return m ? +m[1] : null; };
 const inView = el => { const r = el.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight; };
+const TAB_POS = { itinerario: 0, reservas: 1, pendientes: 2, hoy: 2, chat: 3, guia: 4 };   // orden en la barra: decide por qué lado entra el contenido
 mem.scrollY = {};
 try { history.scrollRestoration = 'manual'; } catch (e) {}
+// Lista → detalle: la página nueva se abre desde el rectángulo r de la fila tocada (y al volver se recoge en él)
+function zoomVars(r, mode) {
+  const root = document.documentElement, st = root.style;
+  st.setProperty('--zt', Math.max(0, r.top) + 'px'); st.setProperty('--zb', Math.max(0, innerHeight - r.bottom) + 'px');
+  st.setProperty('--zl', Math.max(0, r.left) + 'px'); st.setProperty('--zr', Math.max(0, innerWidth - r.right) + 'px');
+  root.dataset.nav = mode;
+}
 function navigate() {
   const h = (location.hash || '#hoy').slice(1), prev = mem.lastHash;
-  const ropts = { pop: prev != null && depth(h) < depth(prev), from: prev };
+  const opening = !!mem.sxOpen && h === 'buscar', closing = prev === 'buscar' && h === mem.searchFrom && !mem.resultTap;
+  const tapped = mem.tapRow, tapBadge = mem.tapBadge;
+  mem.sxOpen = false; mem.resultTap = false; mem.tapRow = mem.tapBadge = null;
+  if (prev === 'buscar' && !closing && depth(h) > 1) mem.backOver = h; else if (h !== 'buscar' && prev !== h) mem.backOver = null;
+  const ropts = { pop: prev != null && (depth(h) < depth(prev) || closing), from: prev };
+  const focusSearch = () => { const q = $('#sq'); if (q) { q.focus(); q.select(); } };
   let dir = null;
   if (prev != null && prev !== h) {
-    const dp = depth(prev), dh = depth(h);
-    const dn = (x => { const mm = x.match(/^dia(\d+)$/); return mm ? +mm[1] : null; });
-    if (dn(prev) && dn(h)) dir = dn(h) > dn(prev) ? 'push' : 'pop';
-    else if (TABS.includes(h) && TABS.includes(prev)) dir = 'fade';
-    else dir = dh > dp ? 'push' : dh < dp ? 'pop' : 'fade';
+    const a = dayNum(prev), b = dayNum(h);
+    if (opening || closing) dir = 'search';
+    else if (a != null && b != null) dir = b > a ? 'daynext' : 'dayprev';
+    else if (h in TAB_POS && prev in TAB_POS) dir = TAB_POS[h] === TAB_POS[prev] ? 'fade' : TAB_POS[h] > TAB_POS[prev] ? 'tabr' : 'tabl';
+    else dir = depth(h) > depth(prev) ? 'push' : depth(h) < depth(prev) ? 'pop' : 'fade';
   }
+  // por qué lado entran las tarjetas de la página nueva
+  const inDir = { tabr: 'r', daynext: 'r', push: 'r', tabl: 'l', dayprev: 'l', pop: 'l' }[dir] || '';
   if (dir && document.startViewTransition && !RM) {
-    const root = document.documentElement;
-    root.dataset.nav = dir;
+    const root = document.documentElement, navId = mem.navId = (mem.navId || 0) + 1;   // si llega otra navegación antes de terminar, la limpieza de esta no toca a la nueva
+    const clearNames = () => document.querySelectorAll('#view .st, #view .sbar, #searchB').forEach(el => { if (el.style.viewTransitionName) el.style.viewTransitionName = ''; });
+    clearNames(); root.dataset.nav = dir;
     // La insignia del día viaja entre la fila que tocaste y el encabezado del día (y de regreso)
     let oldB = null;
-    if (isDayHash(prev)) oldB = view.querySelector('.lt .st.lg');
-    else if (isDayHash(h)) oldB = mem.tapBadge && mem.tapBadge.isConnected ? mem.tapBadge : view.querySelector(`a[href="#${h}"] .st`);
+    if (dayNum(prev) != null) oldB = view.querySelector('.lt .st.lg');
+    else if (dayNum(h) != null) oldB = tapBadge && tapBadge.isConnected ? tapBadge : view.querySelector(`a.r[href="#${h}"] .st`);
     if (oldB && inView(oldB)) oldB.style.viewTransitionName = 'daybadge'; else oldB = null;
+    // Lista → detalle: se recuerda de qué fila sale la página
+    const src = dir === 'push' && tapped && tapped.isConnected && inView(tapped) ? tapped.getBoundingClientRect() : null;
+    // Buscar: la lupa se convierte en el campo (y al revés)
+    const sOld = dir === 'search' ? (prev === 'buscar' ? view.querySelector('.sbar') : $('#searchB')) : null;
+    if (sOld) sOld.style.viewTransitionName = 'sbox';
     const vt = document.startViewTransition(() => {
-      route({ stagger: dir === 'fade', ...ropts });
-      const nb = !oldB ? null : isDayHash(h) ? view.querySelector('.lt .st.lg') : view.querySelector(`a.r[href="#${prev}"] .st`);
+      route({ stagger: !src, inDir, ...ropts });
+      if (sOld) sOld.style.viewTransitionName = '';
+      const sNew = dir === 'search' ? (h === 'buscar' ? view.querySelector('.sbar') : $('#searchB')) : null;
+      if (sNew && !sNew.hidden) sNew.style.viewTransitionName = 'sbox';
+      const nb = !oldB ? null : dayNum(h) != null ? view.querySelector('.lt .st.lg') : view.querySelector(`a.r[href="#${prev}"] .st`);
       if (nb && inView(nb)) nb.style.viewTransitionName = 'daybadge';
+      if (src) zoomVars(src, 'zoomin');
+      else if (dir === 'pop') { const back = view.querySelector(`a.r[href="#${prev}"]`); if (back && inView(back)) { zoomVars(back.getBoundingClientRect(), 'zoomout'); view.dataset.in = 'none'; } }
     });
-    vt.finished.finally(() => { delete root.dataset.nav; view.querySelectorAll('.st').forEach(b => { if (b.style.viewTransitionName) b.style.viewTransitionName = ''; }); });
-  } else route({ stagger: true, ...ropts });
-  mem.tapBadge = null;
+    vt.finished.finally(() => {
+      if (opening) focusSearch();
+      if (mem.navId !== navId) return;
+      delete root.dataset.nav; ['--zt', '--zb', '--zl', '--zr'].forEach(k => root.style.removeProperty(k)); clearNames();
+    });
+  } else { route({ stagger: true, ...ropts }); if (opening) focusSearch(); }
 }
 // Selector estable de un botón o enlace, para devolverle el foco después de repintar o de cerrar una hoja
 function focusKey(el) {
@@ -4617,7 +4816,67 @@ function attachSwipe(card) {
   card.addEventListener('pointercancel', end);
 }
 document.addEventListener('click', e => { if (mem.swallowClick) { e.preventDefault(); e.stopPropagation(); } }, true);
-document.addEventListener('click', e => { const a = e.target.closest && e.target.closest('a[href^="#dia"]'); mem.tapBadge = a ? a.querySelector('.st') : null; }, true);
+// Qué se tocó: la fila de la que «nace» la página siguiente, su insignia de día y, si es un resultado de búsqueda, a qué parte del día lleva
+document.addEventListener('click', e => {
+  const a = e.target.closest && e.target.closest('a[href^="#"]');
+  mem.tapRow = a && a.classList.contains('r') ? a : null;
+  mem.tapBadge = a && /^#dia\d/.test(a.getAttribute('href')) ? a.querySelector('.st') : null;
+  const go = e.target.closest && e.target.closest('.sgo, [data-sx-draft]'); if (!go) return;
+  const q = (mem.q || '').trim(); if (q.length > 1) store.set('sxRecent', [q, ...store.get('sxRecent', []).filter(w => sxNorm(w) !== sxNorm(q))].slice(0, 6));
+  if (go.dataset.sxDraft != null) { mem.draft = go.dataset.sxDraft; return; }
+  if (go.dataset.sxSeg) { const [n, k] = go.dataset.sxSeg.split(':'); mem.seg[n] = k; }
+  mem.flash = go.dataset.sxFlash || null; mem.resultTap = !!go.getAttribute('href');
+}, true);
+// Buscador: abrir, escribir, borrar, sugerencias y «ver todos»
+$('#searchB').addEventListener('click', () => { const cur = (location.hash || '#hoy').slice(1); if (cur === 'buscar') return; mem.searchFrom = cur; mem.sxOpen = true; mem.sxMore = null; location.hash = '#buscar'; });
+document.addEventListener('input', e => { if (e.target.id !== 'sq') return; mem.q = e.target.value; mem.sxMore = null; sxUpdate(); if (window.scrollY > 0) window.scrollTo(0, 0); });
+document.addEventListener('click', e => {
+  const t = e.target.closest && e.target.closest('[data-sx-q], [data-sx-more], .sbar .sx'); if (!t) return;
+  const q = $('#sq');
+  if (t.dataset.sxMore) { mem.sxMore = t.dataset.sxMore; sxUpdate(); return; }
+  mem.q = t.dataset.sxQ || ''; mem.sxMore = null; if (q) { q.value = mem.q; if (!mem.q) q.focus(); } sxUpdate(); window.scrollTo(0, 0);
+});
+// Deslizar a los lados cambia de día: la página sigue al dedo y una tarjeta en la orilla dice a qué día vas
+(() => {
+  const peek = $('#dpeek'); let x0 = 0, y0 = 0, dx = 0, st = 0, lx = 0, lt = 0, vx = 0, tgt = null, armed = false;
+  const neighbor = step => { const n = dayNum((location.hash || '').slice(1)); if (n == null) return null; const m = n + step; return m === 0 ? DAY0 : m > 0 ? DAYS[m - 1] || null : null; };
+  const limit = () => Math.min(120, innerWidth * .28);
+  view.addEventListener('touchstart', e => {
+    st = 0; if (e.touches.length !== 1 || !view.classList.contains('dayp') || !$('#sheet').hidden) return;
+    const t = e.touches[0]; if (t.clientX < 24 || t.clientX > innerWidth - 24) return;   // las orillas son del gesto «atrás» del sistema
+    for (let el = e.target; el && el !== view; el = el.parentElement) {   // nada que ya se deslice de lado por su cuenta
+      if (el.matches('input, select, textarea, .map, .leaflet-container') || (el.scrollWidth > el.clientWidth + 4 && /auto|scroll/.test(getComputedStyle(el).overflowX))) return;
+    }
+    st = 1; x0 = lx = t.clientX; y0 = t.clientY; lt = e.timeStamp; dx = vx = 0; armed = false;
+  }, { passive: true });
+  view.addEventListener('touchmove', e => {
+    if (!st) return; const t = e.touches[0], ax = t.clientX - x0, ay = t.clientY - y0;
+    if (st === 1) {
+      if (Math.abs(ay) > 10 && Math.abs(ay) >= Math.abs(ax)) { st = 0; return; }
+      if (Math.abs(ax) < 14 || Math.abs(ax) < Math.abs(ay) * 1.6) return;
+      st = 2; view.style.transition = 'none'; view.style.willChange = 'transform';
+    }
+    if (e.cancelable) e.preventDefault();
+    if (e.timeStamp > lt) { vx = (t.clientX - lx) / (e.timeStamp - lt); lx = t.clientX; lt = e.timeStamp; }
+    const step = ax < 0 ? 1 : -1, raw = ax - Math.sign(ax) * 14; tgt = neighbor(step);
+    dx = tgt ? raw : raw * .2;   // sin día vecino: la página se resiste
+    view.style.transform = `translateX(${dx}px)`;
+    if (!tgt) { peek.hidden = true; return; }
+    const k = Math.min(1, Math.abs(dx) / limit()), on = k >= 1;
+    if (on !== armed) { armed = on; if (on) buzz(8); }
+    peek.className = 'dpeek ' + (step > 0 ? 'r' : 'l') + (on ? ' go' : '');
+    peek.innerHTML = `<small>${step > 0 ? 'Día ' + tgt.n + ' ›' : '‹ Día ' + tgt.n}</small><b>${esc(tgt.title)}</b>`;
+    peek.style.opacity = String(Math.min(1, k * 1.4)); peek.style.transform = `translateX(${(step > 0 ? 1 : -1) * (1 - k) * 60}%)`; peek.hidden = false;
+  }, { passive: false });
+  const end = e => {
+    peek.hidden = true; if (st !== 2) { st = 0; return; } st = 0;
+    const go = e.type === 'touchend' && tgt && (Math.abs(dx) >= limit() || (Math.abs(dx) > 30 && Math.abs(vx) > .5 && Math.sign(vx) === Math.sign(dx)));
+    if (go) { location.hash = '#dia' + tgt.n; return; }   // la transición de página recoge la página desde donde la soltaste
+    view.style.transition = 'transform .34s cubic-bezier(.2, .9, .25, 1)'; view.style.transform = '';
+    setTimeout(() => { if (!st) { view.style.transition = ''; view.style.willChange = ''; } }, 360);
+  };
+  view.addEventListener('touchend', end); view.addEventListener('touchcancel', end);
+})();
 const buzz = ms => { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {} };
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-say],[data-check],[data-extra],[data-taxi],[data-copy],[data-phrase],[data-del],[data-preview],[data-preview-off],[data-kid],[data-seg],[data-base],[data-ticket],[data-step],[data-focus],[data-food],[data-theme-set],[data-stamp],[data-ask],[data-chat-stop],[data-chat-clear],[data-doc],[data-doc-add],[data-doc-del],[data-offline-all],[data-doc-edit],[data-pet-pick],[data-pet],[data-me],[data-unstamp],[data-sheet-close],[data-scene-phase],[data-scene-wx],[data-wx],[data-scene-city],[data-shop-buy],[data-shop-del],[data-shop-idea],[data-wxopen],[data-wxrefresh],[data-buy],[data-buy-city]');
@@ -4723,7 +4982,7 @@ document.querySelector('.tabs').addEventListener('click', e => {
   e.preventDefault(); window.scrollTo({ top: 0, behavior: RM ? 'auto' : 'smooth' });
 });
 document.addEventListener('keydown', e => {
-  if (e.target.id === 'chatIn' && e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); askClaude(e.target.value); return; } if (e.key === 'Escape' && !$('#sheet').hidden) closeSheet(); });
+  if (e.target.id === 'chatIn' && e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); askClaude(e.target.value); return; } if (e.target.id === 'sq' && e.key === 'Enter') { e.preventDefault(); e.target.blur(); return; } if (e.key === 'Escape' && !$('#sheet').hidden) closeSheet(); });
 window.addEventListener('scroll', onScroll, { passive: true });
 window.addEventListener('hashchange', navigate);
 $('#themeB').addEventListener('click', e => setTheme(isDark() ? 'light' : 'dark', e));
