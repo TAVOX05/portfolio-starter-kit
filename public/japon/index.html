@@ -857,7 +857,8 @@ a, button, input, select, textarea, label { touch-action: manipulation; -webkit-
 /* coincidencia: tinta plena, negrita y subrayado (sin fondo de color, que le quitaría contraste al texto) */
 mark { background: none; color: var(--label); font-weight: 700; text-decoration: underline; text-decoration-color: var(--tint); text-decoration-thickness: 2px; text-underline-offset: 3px; }
 .sxq { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 2px; }
-.sxq button { position: relative; border: .5px solid var(--hair); background: var(--card); -webkit-backdrop-filter: var(--glass-fx); backdrop-filter: var(--glass-fx); color: var(--tint); font-size: 15px; font-weight: 600; padding: 8px 14px; border-radius: 999px; cursor: pointer; }
+/* sugerencias: fondo casi sólido en vez de cristal (nueve desenfoques más no valen su costo en el teléfono) */
+.sxq button { position: relative; border: .5px solid var(--hair); background: color-mix(in srgb, var(--bg) 86%, transparent); color: var(--tint); font-size: 15px; font-weight: 600; padding: 8px 14px; border-radius: 999px; cursor: pointer; }
 .sxq button::before { content: ""; position: absolute; inset: -4px 0; }
 .sxq button:active { background: var(--fill2); }
 .r.hit { animation: rowhit 2s ease-out .25s backwards; }
@@ -3473,12 +3474,13 @@ function closeSheet(instant, dragged) {
       on = true; sh.classList.remove('settle'); sc.classList.remove('settle'); sh.classList.add('dragged'); sc.classList.add('dragged');
     }
     if (e.cancelable) e.preventDefault();
-    if (e.timeStamp > lt) { vy = (t.clientY - ly) / (e.timeStamp - lt); ly = t.clientY; lt = e.timeStamp; }
+    if (e.timeStamp - lt >= 40) { vy = (t.clientY - ly) / (e.timeStamp - lt); ly = t.clientY; lt = e.timeStamp; }   // velocidad en ventanas de ≥ 40 ms: dos muestras seguidas dan valores muy ruidosos
     dy = Math.max(0, d - 8);
     sh.style.transform = `translateY(${dy}px)`; sc.style.opacity = String(Math.max(0, 1 - dy / sh.offsetHeight));
   }, { passive: false });
-  const end = () => {
+  const end = e => {
     if (!on) return; on = ok = false;
+    if (e && e.timeStamp - lt > 140) vy = 0;   // el dedo se quedó quieto antes de soltar: no es un impulso
     if (dy > sh.offsetHeight * .28 || (dy > 24 && vy > .45)) { closeSheet(false, true); return; }
     sh.classList.add('settle'); sc.classList.add('settle'); sh.style.transform = ''; sc.style.opacity = '';
     setTimeout(() => { sh.classList.remove('settle'); sc.classList.remove('settle'); }, 300);
@@ -4950,7 +4952,7 @@ document.addEventListener('click', e => {
       st = 2; view.style.transition = 'none'; view.style.willChange = 'transform';
     }
     if (e.cancelable) e.preventDefault();
-    if (e.timeStamp > lt) { vx = (t.clientX - lx) / (e.timeStamp - lt); lx = t.clientX; lt = e.timeStamp; }
+    if (e.timeStamp - lt >= 40) { vx = (t.clientX - lx) / (e.timeStamp - lt); lx = t.clientX; lt = e.timeStamp; }
     const step = ax < 0 ? 1 : -1, raw = ax - Math.sign(ax) * 14; tgt = neighbor(step);
     dx = tgt ? raw : raw * .2;   // sin día vecino: la página se resiste
     view.style.transform = `translateX(${dx}px)`;
@@ -4963,6 +4965,7 @@ document.addEventListener('click', e => {
   }, { passive: false });
   const end = e => {
     peek.hidden = true; if (st !== 2) { st = 0; return; } st = 0;
+    if (e.timeStamp - lt > 140) vx = 0;
     const go = e.type === 'touchend' && tgt && (Math.abs(dx) >= limit() || (Math.abs(dx) > 30 && Math.abs(vx) > .5 && Math.sign(vx) === Math.sign(dx)));
     if (go) { location.hash = '#dia' + tgt.n; return; }   // la transición de página recoge la página desde donde la soltaste
     view.style.transition = 'transform .34s cubic-bezier(.2, .9, .25, 1)'; view.style.transform = '';
