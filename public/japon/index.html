@@ -3863,6 +3863,8 @@ const BG = (() => {
     // aguada: capas translúcidas que se acumulan al centro; el borde queda un poco más cargado
     const wash = (pts, col, a, o = {}) => {
       const n = o.n || 6, amt = o.amt ?? .04, b = deform(pts, o.d0 ?? 2, amt * 1.5), al = 1 - Math.pow(1 - a, 1 / n);
+      // base opaca con el tono del ambiente: lo emblemático tapa lo que tiene detrás (cerros, edificios, el sol) en vez de dejarlo transparentar
+      if (o.solid) { k.save(); k.globalAlpha = o.solid === true ? .96 : o.solid; k.fillStyle = M.under; trace(b); k.fill(); k.restore(); }
       k.save(); k.globalCompositeOperation = o.op || (dark ? 'source-over' : 'multiply'); k.fillStyle = col;
       if (o.soft) k.filter = `blur(${o.soft}px)`;
       for (let i = 0; i < n; i++) { k.globalAlpha = al; trace(deform(b, o.d ?? 2, amt)); k.fill(); }
@@ -3921,6 +3923,21 @@ const BG = (() => {
       }
       k.restore();
     };
+    // color del cielo (sin sol ni nubes) a una altura f = 0…1: sirve para «borrar» lo que queda detrás de un edificio
+    const skyAt = f => {
+      const st = M.grad || [[0, M.sky], [.6, M.hz], [1, dark ? mix(M.hz, M.paper, .6) : M.paper]]; f = Math.max(0, Math.min(1, f));
+      for (let i = 1; i < st.length; i++) if (f <= st[i][0]) return mix(st[i - 1][1], st[i][1], (f - st[i - 1][0]) / Math.max(1e-6, st[i][0] - st[i - 1][0]));
+      return st[st.length - 1][1];
+    };
+    // altura de una cresta (la misma fórmula de ridge) en una x dada, y manchas de otoño que la siguen
+    const ridgeY = (y, amp, waves, seed) => px => { const t = (px + 30) / (W + 60); return y - amp * (.55 + .3 * Math.sin(t * waves * 6.283 + seed) + .15 * Math.sin(t * waves * 17 + seed * 3)); };
+    const momiji = (yAt, n, sc = 1, depth = 12, base = M.far) => {
+      const hues = ['#C2412F', '#D4603A', '#E0902F', '#D8A43A', '#A83434', '#C7772E'], fade = M.night ? .5 : 1;
+      for (let i = 0; i < n; i++) {
+        const px = rnd(-10, W + 10), dz = Math.pow(Math.random(), 1.6), col = mix(pig(hues[i % 6]), base, .14 + dz * .3);
+        wash(ellP(px + gauss() * u, yAt(px) + (1 + dz * depth) * u * sc, rnd(1.1, 2.4) * u * sc, rnd(.6, 1.2) * u * sc, 10), col, (dark ? rnd(.16, .26) : rnd(.3, .5)) * (1 - dz * .5) * fade, { amt: .28, n: 4, edge: .25, tex: 0, op: 'source-over' });
+      }
+    };
     const ridge = (y, amp, waves, seed = rnd(0, 9)) => {
       const pts = [[-30, H + 30, 0]];
       for (let i = 0; i <= 36; i++) { const t = i / 36; pts.push([-30 + (W + 60) * t, y - amp * (.55 + .3 * Math.sin(t * waves * 6.283 + seed) + .15 * Math.sin(t * waves * 17 + seed * 3)), 1]); }
@@ -3941,6 +3958,16 @@ const BG = (() => {
         const bw = rnd(4, 11) * u, bh = H * rnd(minH, maxH), top = y - bh, cc = mix(col, M.paper, rnd(0, M.clearSky ? .1 : .35)), aa = a * rnd(.6, 1.2) * (M.clearSky ? 1.5 : 1);
         const g = k.createLinearGradient(0, top, 0, y + 6), q = deform(rectP(px, top, bw, bh + 6, .5), 2, .012);
         g.addColorStop(0, rgba(cc, aa)); g.addColorStop(.55, rgba(cc, aa * .6)); g.addColorStop(1, rgba(cc, M.clearSky ? aa * .4 : 0));
+        // con el sol bajo, el edificio que queda delante lo tapa: se repinta el cielo detrás de él antes de dar la aguada
+        if (M.glow && M.clearSky && M.sunXY) {
+          const sr = u * M.sunR * 1.12;
+          if (px < M.sunXY[0] + sr && px + bw > M.sunXY[0] - sr && top < M.sunXY[1] + sr) {
+            const sg = k.createLinearGradient(0, top, 0, y + 6); sg.addColorStop(0, skyAt(top / H)); sg.addColorStop(1, skyAt((y + 6) / H));
+            k.save(); trace(q); k.clip(); k.beginPath(); k.arc(M.sunXY[0], M.sunXY[1], sr, 0, 7); k.fillStyle = sg; k.fill();
+            if (M.sunHalo) { k.globalCompositeOperation = dark ? 'screen' : 'source-over'; k.fillStyle = M.sunHalo; k.fill(); }
+            k.restore();
+          }
+        }
         k.save(); k.globalCompositeOperation = dark ? 'source-over' : 'multiply'; k.fillStyle = g; trace(q); k.fill();
         k.strokeStyle = g; k.globalAlpha = .6; k.lineWidth = .8; trace(q); k.stroke();
         if (!dark) { k.globalAlpha = aa * .5; k.fillStyle = mix(cc, M.ink, .3); for (let wy = top + 4; wy < y - bh * .45; wy += rnd(4, 7)) if (Math.random() < .5) k.fillRect(px + 1.5, wy, bw - 3, .6); }
@@ -3988,11 +4015,11 @@ const BG = (() => {
       let y = by;
       for (let i = 0; i < tiers; i++) {
         const w = h * .46 * (1 - i * .09), bw = w * .5, bh = th * .55;
-        wash(rectP(cx - bw / 2, y - bh, bw, bh, .2), body, a * .8, { amt: .01, n: 3, shade: 'right' });
+        wash(rectP(cx - bw / 2, y - bh, bw, bh, .2), body, a * .9, { amt: .01, n: 3, shade: 'right', solid: 1 });
         ink([[cx - bw / 2, y], [cx - bw / 2, y - bh]], .7, .35); ink([[cx + bw / 2, y], [cx + bw / 2, y - bh]], .7, .35);
         y -= bh;
         const ry = y, rt = th * .42, eave = [[-.64, -.46], [-.57, -.16], [-.45, .02], [-.23, .1], [0, .12], [.23, .1], [.45, .02], [.57, -.16], [.64, -.46]].map(([ex, ey]) => [cx + w * ex, ry + rt * ey, .15]);
-        wash([...eave, [cx + w * .27, ry - rt, .2], [cx - w * .27, ry - rt, .2]], roof, a, { amt: .012, n: 4, shade: 'down' });
+        wash([...eave, [cx + w * .27, ry - rt, .2], [cx - w * .27, ry - rt, .2]], roof, Math.min(.9, a * 1.3), { amt: .012, n: 4, shade: 'down', solid: 1 });
         ink(eave.map(([ex, ey]) => [ex, ey]), 1, .6);
         y -= rt;
       }
@@ -4000,7 +4027,7 @@ const BG = (() => {
       for (let j = 1; j <= 7; j++) ink([[cx - 1.2 * u, y - sp * j / 9], [cx + 1.2 * u, y - sp * j / 9]], .8, .45);
       return y - sp;
     };
-    return { dark, u, Y, pig, deform, wash, reserve, rectP, ellP, blob, ink, mist, ridge, water, streak, lamp, blocks, ginkgo, maple, pine, cedar, pagoda };
+    return { dark, u, Y, pig, deform, wash, reserve, rectP, ellP, blob, ink, mist, skyAt, ridgeY, momiji, ridge, water, streak, lamp, blocks, ginkgo, maple, pine, cedar, pagoda };
   }
 
   /* ---------- lo emblemático de cada ciudad ---------- */
@@ -4014,7 +4041,7 @@ const BG = (() => {
       const sx = W * .24, b = Y(.82), h = H * .38, f = t => b - h * t;
       const half = [[3.4, 0], [1.1, .52], [2.1, .52], [2.1, .56], [.8, .56], [.8, .7], [1.35, .7], [1.35, .725], [.35, .725], [.12, 1]];
       const sky = [...half.map(([w, t]) => [sx - w * u, f(t), .25]), ...half.slice().reverse().map(([w, t]) => [sx + w * u, f(t), .25])];
-      wash(sky, pig(PIG.sky), dark ? .6 : .42, { amt: .006, n: 4, edge: .4 });
+      wash(sky, pig(PIG.sky), dark ? .6 : .55, { amt: .006, n: 4, edge: .4, solid: 1 });
       ink([[sx - 3.4 * u, b], [sx - 1.1 * u, f(.52)]], .9, .45); ink([[sx + 3.4 * u, b], [sx + 1.1 * u, f(.52)]], .9, .45);
       ink([[sx - .8 * u, f(.56)], [sx - .8 * u, f(.7)]], .7, .4); ink([[sx + .8 * u, f(.56)], [sx + .8 * u, f(.7)]], .7, .4);
       ink([[sx, f(.725)], [sx, f(1)]], .8, .5);
@@ -4027,7 +4054,7 @@ const BG = (() => {
       const tx = W * .8, h2 = H * .22, g = t => b - h2 * t;
       const th = [[4.2, 0], [2.3, .16], [1.4, .3], [2.2, .3], [2.2, .34], [1.3, .34], [.9, .62], [1.3, .62], [1.3, .65], [.5, .65], [.15, 1]];
       const tw = [...th.map(([w, t]) => [tx - w * u, g(t), .2]), ...th.slice().reverse().map(([w, t]) => [tx + w * u, g(t), .2])];
-      wash(tw, pig(PIG.ver), dark ? .55 : .5, { amt: .006, n: 4, edge: .4 });
+      wash(tw, pig(PIG.ver), dark ? .55 : .6, { amt: .006, n: 4, edge: .4, solid: 1 });
       reserve(K.rectP(tx - 2.2 * u, g(.34), 4.4 * u, h2 * .04, 0), .8); reserve(K.rectP(tx - 1.3 * u, g(.65), 2.6 * u, h2 * .03, 0), .8);
       for (let t = .02; t < .3; t += .05) { const w = 4.2 - 2.8 * t / .3; ink([[tx - w * u, g(t)], [tx + w * u * .3, g(t + .05)]], .5, .25); ink([[tx + w * u, g(t)], [tx - w * u * .3, g(t + .05)]], .5, .25); }
       for (let t = .04; t < .62; t += .05) { const w = t < .3 ? 4.2 - 2.8 * t / .3 : 1.4 - .5 * (t - .3) / .32; lamp(tx - w * u, g(t), .8, '#FFB45A', 'glow'); lamp(tx + w * u, g(t), .8, '#FFB45A', 'glow'); }
@@ -4040,14 +4067,16 @@ const BG = (() => {
     },
     FJ(K) { // Fuji sobre el lago Kawaguchiko, la pagoda Chūreitō y los últimos arces
       const { u, Y, pig, wash, reserve, ink, mist, ridge, water, lamp, pagoda, maple, dark } = K;
-      wash(ridge(Y(.76), H * .04, 1.4), M.far, .3, { amt: .02, n: 4 });
+      const sdF = rnd(0, 9);
+      wash(ridge(Y(.76), H * .04, 1.4, sdF), M.far, .3, { amt: .02, n: 4 });
+      K.momiji(K.ridgeY(Y(.76), H * .04, 1.4, sdF), 26, .7, 7, M.far);
       const fx0 = W * .6, peak = Y(.47), bl = Y(.8), pw = 2.6 * u;
       const qb = (A, C, B, t) => [(1 - t) ** 2 * A[0] + 2 * (1 - t) * t * C[0] + t * t * B[0], (1 - t) ** 2 * A[1] + 2 * (1 - t) * t * C[1] + t * t * B[1]];
       const L0 = [fx0 - W * .95, bl], C0 = [fx0 - W * .2, bl - H * .1], P0 = [fx0 - pw, peak], R0 = [fx0 + W * .95, bl], C1 = [fx0 + W * .2, bl - H * .1], P1 = [fx0 + pw, peak];
       const flank = (A, C, B, n = 18) => Array.from({ length: n + 1 }, (_, i) => [...qb(A, C, B, i / n), .3]);
       const fuji = (s = 1) => [...flank(L0, C0, P0), ...flank(R0, C1, P1).reverse(), [W + 40, bl + 40, 0], [-40, bl + 40, 0]];
       const mcol = dark ? '#2A3352' : '#8FA2BF';
-      wash(fuji(), mcol, dark ? .7 : .45, { amt: .008, n: 5, edge: .35, shade: 'down' });
+      wash(fuji(), mcol, dark ? .7 : .5, { amt: .008, n: 5, edge: .35, shade: 'down', solid: 1 });
       if (M.glow) drawSun(K, fuji().map(([px, py]) => [px, py]));
       // capa de nieve pareja: sigue la silueta (recortada al cono) y baja en dedos regulares por las cañadas
       const qL = qb(L0, C0, P0, .8), qR = qb(R0, C1, P1, .8), ys = qL[1], fd = [.8, 1.5, 1.05, 1.9, 1.3, 1.9, 1.05, 1.5, .8];
@@ -4068,7 +4097,7 @@ const BG = (() => {
       wash(hill, pig(mix(PIG.pine, PIG.moss, .5)), dark ? .5 : .22, { amt: .05, n: 5, edge: .2, shade: 'down' });
       k_reflect(() => wash(hill, pig(mix(PIG.pine, PIG.moss, .5)), dark ? .2 : .1, { amt: .05, n: 3, edge: 0, tex: 0 }), Y(.81));
       for (let i = 0; i < 26; i++) { const tx = rnd(0, W * .42), ty = Y(.735) + (tx / (W * .42)) * H * .07 + rnd(0, H * .05); K.cedar(tx, ty, rnd(1.4, 2.2) * u, rnd(3.5, 6) * u, dark ? .35 : .22); }
-      maple(W * .06, Y(.76), 7 * u); maple(W * .3, Y(.79), 6 * u, .4);
+      maple(W * .06, Y(.76), 7 * u); maple(W * .3, Y(.79), 6 * u, .4); maple(W * .38, Y(.797), 4.5 * u, .4); maple(W * .0, Y(.795), 5 * u, .4);
       const top = pagoda(W * .17, Y(.79), H * .13, 5, pig(PIG.ver), pig(mix(PIG.ver, '#3A2A2A', .45)), .55);
       lamp(W * .17, Y(.785), 1.6, '#FFC070', 'up');
       for (let i = 0; i < 4; i++) { const hx = W * (.66 + i * .07); wash(K.rectP(hx, Y(.8) - 2.6 * u, 5.5 * u, 2.6 * u, .2), M.mid, .35, { amt: .01, n: 3 }); ink([[hx - .8 * u, Y(.8) - 2.6 * u], [hx + 2.75 * u, Y(.8) - 4.4 * u], [hx + 6.3 * u, Y(.8) - 2.6 * u]], .9, .5); lamp(hx + 2.75 * u, Y(.8) - 1.3 * u, 1.1, '#FFC870', 'window'); }
@@ -4077,21 +4106,26 @@ const BG = (() => {
     },
     KY(K) { // Kioto: pagoda Yasaka sobre los machiya de Ninenzaka, en pleno momiji
       const { u, Y, pig, wash, ink, mist, ridge, lamp, pagoda, maple, rectP, dark } = K;
-      wash(ridge(Y(.62), H * .06, 1.1), mix(M.far, PIG.moss, dark ? .1 : M.sunny ? .4 : .2), .32, { amt: .02, n: 4 });
+      const sd1 = rnd(0, 9), sd2 = rnd(0, 9);
+      wash(ridge(Y(.62), H * .06, 1.1, sd1), mix(M.far, PIG.moss, dark ? .1 : M.sunny ? .4 : .2), .32, { amt: .02, n: 4 });
+      K.momiji(K.ridgeY(Y(.62), H * .06, 1.1, sd1), 46, .8, 13, M.far);   // Higashiyama en pleno momiji
       mist(Y(.64), H * .04, .6);
-      wash(ridge(Y(.7), H * .05, 1.6), mix(M.mid, PIG.pine, dark ? .1 : M.sunny ? .45 : .25), .3, { amt: .02, n: 4 });
+      wash(ridge(Y(.7), H * .05, 1.6, sd2), mix(M.mid, PIG.pine, dark ? .1 : M.sunny ? .45 : .25), .3, { amt: .02, n: 4 });
+      K.momiji(K.ridgeY(Y(.7), H * .05, 1.6, sd2), 60, 1, 14, M.mid);
       mist(Y(.72), H * .035, .55);
       const top = pagoda(W * .57, Y(.86), H * .4, 5, pig(PIG.wood), pig(mix(M.ink, M.far, .2)), .55);
       lamp(W * .57, top, 1, '#FF4A3A', 'blink');
       if (dark) for (let i = -2; i <= 2; i++) lamp(W * .57 + i * 2.6 * u, Y(.85), 2.4, '#FFB869', 'up');
       // machiya escalonados a los dos lados de la cuesta
       const machiya = (x0, y0, w) => {
-        wash(rectP(x0, y0 - 5.5 * u, w, 5.5 * u + 30, .2), pig(mix(PIG.wood, M.paper, .45)), .4, { amt: .01, n: 3 });
-        wash([[x0 - 1.4 * u, y0 - 5.2 * u, .2], [x0 + w + 1.4 * u, y0 - 5.2 * u, .2], [x0 + w - .6 * u, y0 - 7.6 * u, .2], [x0 + .6 * u, y0 - 7.6 * u, .2]], pig(mix(M.ink, M.far, .35)), .55, { amt: .01, n: 3 });
+        wash(rectP(x0, y0 - 5.5 * u, w, 5.5 * u + 30, .2), pig(mix(PIG.wood, M.paper, .45)), .45, { amt: .01, n: 3, solid: 1 });
+        wash([[x0 - 1.4 * u, y0 - 5.2 * u, .2], [x0 + w + 1.4 * u, y0 - 5.2 * u, .2], [x0 + w - .6 * u, y0 - 7.6 * u, .2], [x0 + .6 * u, y0 - 7.6 * u, .2]], pig(mix(M.ink, M.far, .35)), .65, { amt: .01, n: 3, solid: 1 });
         ink([[x0 - 1.4 * u, y0 - 5.2 * u], [x0 + w + 1.4 * u, y0 - 5.2 * u]], .9, .55);
         for (let lx = x0 + 1.2 * u; lx < x0 + w - .8 * u; lx += 1.1 * u) ink([[lx, y0 - 4.4 * u], [lx, y0 - 1 * u]], .5, .25);
         lamp(x0 + w * .2, y0 - 3.6 * u, 1.7, '#FF6A3D', 'lantern');
       };
+      // arces detrás de los tejados, a los dos lados de la pagoda
+      maple(W * .1, Y(.775), 8 * u, .5); maple(W * .32, Y(.8), 6.5 * u, .45); maple(W * .8, Y(.79), 8 * u, .5); maple(W * .96, Y(.775), 6 * u, .45);
       [[-2, .83], [12, .845], [26, .86]].forEach(([px, fy]) => machiya(px * u, Y(fy), 13 * u));
       [[73, .86], [86, .845]].forEach(([px, fy]) => machiya(W * px / 100, Y(fy), 13 * u));
       wash(rectP(-10, Y(.885), W + 20, H, .3), pig(PIG.stone), .22, { amt: .01, n: 3 });
@@ -4108,7 +4142,7 @@ const BG = (() => {
       const wall = [[cx - 30 * u, wb, 0]];
       for (let i = 0; i <= 8; i++) { const t = i / 8; wall.push([cx - (30 - 9 * Math.sqrt(t)) * u, wb - (wb - wt) * t, .2]); }
       for (let i = 8; i >= 0; i--) { const t = i / 8; wall.push([cx + (30 - 9 * Math.sqrt(t)) * u, wb - (wb - wt) * t, .2]); }
-      wash(wall, pig(PIG.stone), dark ? .55 : .4, { amt: .006, n: 4, edge: .35 });
+      wash(wall, pig(PIG.stone), dark ? .55 : .45, { amt: .006, n: 4, edge: .35, solid: 1 });
       for (let f = .15; f < 1; f += .17) { const yy = wb - (wb - wt) * f, hw = (30 - 9 * Math.sqrt(f)) * u; ink([[cx - hw, yy], [cx + hw, yy]], .5, .14); }
       // la torre: cinco pisos blancos con tejados verde cobre y adornos dorados
       const wallC = dark ? '#3A3F52' : M.paper, roof = pig(PIG.cel), gold = pig(PIG.gold);
@@ -4122,13 +4156,15 @@ const BG = (() => {
         ink([[cx - hw, y + .3 * u], [cx + hw, y + .3 * u]], .9, .5, { col: gold });
         const rw = hw + 3 * u, rh = 2.3 * u;
         const eave = [[-rw, y - .4 * u], [-rw + 1.6 * u, y + .3 * u], [-hw * .5, y + .55 * u], [0, y + .6 * u], [hw * .5, y + .55 * u], [rw - 1.6 * u, y + .3 * u], [rw, y - .4 * u]].map(([ex, ey]) => [cx + ex, ey, .1]);
-        wash([...eave, [cx + hw * .9, y - rh, .2], [cx - hw * .9, y - rh, .2]], roof, .6, { amt: .01, n: 4, shade: 'down' });
+        wash([...eave, [cx + hw * .9, y - rh, .2], [cx - hw * .9, y - rh, .2]], roof, .7, { amt: .01, n: 4, shade: 'down', solid: 1 });
         ink(eave.map(([ex, ey]) => [ex, ey]), .9, .55);
         if (i === 1 || i === 3) { wash([[cx - 4.4 * u, y - .6 * u, .1], [cx, y - 4 * u, .1], [cx + 4.4 * u, y - .6 * u, .1]], roof, .6, { amt: .01, n: 3 }); ink([[cx - 4.4 * u, y - .6 * u], [cx, y - 4 * u], [cx + 4.4 * u, y - .6 * u]], .8, .5); }
         y -= rh;
         if (i === 4) { wash([[cx - 4.6 * u, y, .1], [cx, y - 2.8 * u, .1], [cx + 4.6 * u, y, .1]], roof, .6, { amt: .01, n: 3 }); [-1, 1].forEach(s => wash(rectP(cx + s * 4.9 * u - .6 * u, y - 2 * u, 1.2 * u, 2 * u, .2), gold, .8, { amt: .02, n: 3 })); }
       });
       for (let i = -3; i <= 3; i++) lamp(cx + i * 5 * u, wt + 1 * u, 2.8, '#FFE2B0', 'up');
+      // ginkgos y un arce a la orilla del foso, a los lados de la muralla
+      ginkgo(W * .06, Y(.853), 10 * u); ginkgo(W * .92, Y(.853), 11 * u); K.maple(W * .99, Y(.8), 5 * u, .45);
       water(Y(.85), .45);
       streak(cx, Y(.855), 22 * u, H * .05, dark ? '#4A5068' : M.far, .3);
       wash(rectP(-10, Y(.905), W + 20, H, .4), pig(PIG.moss), dark ? .4 : .25, { amt: .02, n: 3 });
@@ -4137,7 +4173,9 @@ const BG = (() => {
     },
     KB(K) { // Kobe: Port Tower, la noria de Harborland, el puente Akashi Kaikyō y el Rokko con su vista nocturna
       const { u, Y, pig, wash, reserve, ink, mist, ridge, blocks, water, streak, lamp, rectP, dark } = K;
-      wash(ridge(Y(.62), H * .09, .9), M.far, .4, { amt: .02, n: 4, shade: 'down' });
+      const sdR = rnd(0, 9);
+      wash(ridge(Y(.62), H * .09, .9, sdR), M.far, .4, { amt: .02, n: 4, shade: 'down' });
+      if (!M.night) K.momiji(K.ridgeY(Y(.62), H * .09, .9, sdR), 44, .85, 20, M.far);
       // laderas del Rokko: de noche, la «vista de 10 millones de dólares»
       for (let i = 0; i < 70; i++) { const lx = W * rnd(0, 1); lamp(lx, Y(rnd(.6, .7) + Math.abs(lx / W - .5) * .02), rnd(.4, .75), ['#FFD9A0', '#FFE9C4', '#CFE6FF'][i % 3], 'window'); }
       mist(Y(.68), H * .045, .6);
@@ -4157,7 +4195,7 @@ const BG = (() => {
       const tx = W * .22, b = Y(.82), h = H * .32, hw = t => (1.1 + 2.2 * ((t - .64) / .64) ** 2) * u;
       const Lp = [], Rp = [];
       for (let i = 0; i <= 16; i++) { const t = i / 16; Lp.push([tx - hw(t), b - h * t, .15]); Rp.unshift([tx + hw(t), b - h * t, .15]); }
-      wash([...Lp, ...Rp], pig(PIG.ver), dark ? .6 : .55, { amt: .005, n: 5, edge: .45, shade: 'right' });
+      wash([...Lp, ...Rp], pig(PIG.ver), dark ? .6 : .6, { amt: .005, n: 5, edge: .45, shade: 'right', solid: 1 });
       for (let i = 0; i < 9; i++) { const t0 = i / 9, t1b = (i + 1) / 9; ink([[tx - hw(t0), b - h * t0], [tx + hw(t1b) * .5, b - h * t1b]], .5, .25); ink([[tx + hw(t0), b - h * t0], [tx - hw(t1b) * .5, b - h * t1b]], .5, .25); }
       reserve(rectP(tx - 2.3 * u, b - h - 1.4 * u, 4.6 * u, 1.4 * u, .1), dark ? .7 : .95);
       ink([[tx - 2.3 * u, b - h], [tx + 2.3 * u, b - h]], .8, .5); ink([[tx, b - h - 1.4 * u], [tx, b - h - 3.6 * u]], .8, .55);
@@ -4176,11 +4214,13 @@ const BG = (() => {
     },
     KZ(K) { // Kanazawa: el castillo (Gojikken Nagaya y torres), casas de té de Higashi Chaya, yukitsuri y pan de oro
       const { u, Y, pig, wash, reserve, ink, mist, ridge, lamp, pine, rectP, dark } = K;
-      wash(ridge(Y(.62), H * .05, 1.4), mix(M.far, PIG.pine, dark ? .15 : .3), .34, { amt: .02, n: 4, shade: 'down' });
+      const sdK = rnd(0, 9);
+      wash(ridge(Y(.62), H * .05, 1.4, sdK), mix(M.far, PIG.pine, dark ? .15 : .3), .34, { amt: .02, n: 4, shade: 'down' });
+      K.momiji(K.ridgeY(Y(.62), H * .05, 1.4, sdK), 40, .8, 11, M.far);
       mist(Y(.65), H * .045, .6);
       // muralla de piedra del castillo
       const c0 = W * .3, c1 = W * 1.04, wT = Y(.715), wB = Y(.79), stone = pig(PIG.stone);
-      wash([[c0 - 4 * u, wB, 0], [c0 + 1 * u, wT, .2], [c1, wT, .2], [c1, wB, 0]], stone, dark ? .55 : .42, { amt: .006, n: 4, shade: 'down' });
+      wash([[c0 - 4 * u, wB, 0], [c0 + 1 * u, wT, .2], [c1, wT, .2], [c1, wB, 0]], stone, dark ? .55 : .45, { amt: .006, n: 4, shade: 'down', solid: 1 });
       if (M.sunny) wash(rectP(-10, wB - .5 * u, W + 20, H - wB + 20, .2), dark ? '#24372C' : mix(PIG.moss, '#A9C2B0', .45), dark ? .55 : .32, { amt: .01, n: 4, shade: 'down' });   // jardín al sol
       // piedras talladas en hiladas alternas
       k.save(); k.strokeStyle = rgba(M.ink, dark ? .22 : .16); k.lineWidth = .6; k.beginPath();
@@ -4194,7 +4234,7 @@ const BG = (() => {
       k.save(); k.beginPath(); k.rect(c0 + 3 * u, nm, c1 - c0 - 3 * u, wT - nm); k.clip(); k.strokeStyle = dark ? 'rgba(200,210,230,.45)' : 'rgba(255,255,255,.9)'; k.lineWidth = .9; k.beginPath();
       const g = 1.7 * u; for (let xx = c0 - (wT - nm); xx < c1 + (wT - nm); xx += g) { k.moveTo(xx, nm); k.lineTo(xx + (wT - nm), wT); k.moveTo(xx + (wT - nm), nm); k.lineTo(xx, wT); } k.stroke(); k.restore();
       for (let xx = c0 + 6 * u; xx < c1 - 2 * u; xx += 4.5 * u) { if (!dark) wash(rectP(xx, nT + 1.4 * u, 1.3 * u, 1.3 * u, 0), M.ink, .3, { amt: 0, n: 1, edge: 0, tex: 0 }); lamp(xx + .65 * u, nT + 2 * u, .8, '#FFD58A', 'window'); }
-      wash([[c0 + 1 * u, nT + .4 * u, .1], [c0 + 4 * u, nT - 2.4 * u, .1], [c1 + 2, nT - 2.4 * u, .1], [c1 + 2, nT + .4 * u, .1]], lead, .65, { amt: .006, n: 3, shade: 'down' });
+      wash([[c0 + 1 * u, nT + .4 * u, .1], [c0 + 4 * u, nT - 2.4 * u, .1], [c1 + 2, nT - 2.4 * u, .1], [c1 + 2, nT + .4 * u, .1]], lead, .7, { amt: .006, n: 3, shade: 'down', solid: 1 });
       ink([[c0 + 1 * u, nT + .4 * u], [c1, nT + .4 * u]], .9, .55); ink([[c0 + 4 * u, nT - 2.4 * u], [c1, nT - 2.4 * u]], .7, .35);
       // torres (Hishi yagura) en los extremos
       const tower = (x, s) => {
@@ -4207,7 +4247,7 @@ const BG = (() => {
           lamp(x, y - bh * .65, .9, '#FFD58A', 'window');
           y -= bh; const rw = hw + 2.4 * u * s;
           const eave = [[-rw, -.3], [-rw + 1.4 * u * s, .4], [0, .6], [rw - 1.4 * u * s, .4], [rw, -.3]].map(([ex, ey]) => [x + ex, y + ey * u * s, .1]);
-          wash([...eave, [x + hw * .85, y - 2.2 * u * s, .2], [x - hw * .85, y - 2.2 * u * s, .2]], lead, .7, { amt: .008, n: 3, shade: 'down' });
+          wash([...eave, [x + hw * .85, y - 2.2 * u * s, .2], [x - hw * .85, y - 2.2 * u * s, .2]], lead, .75, { amt: .008, n: 3, shade: 'down', solid: 1 });
           ink(eave.map(([ex, ey]) => [ex, ey]), .9, .55);
           if (i === 1) { wash([[x - 3.5 * u * s, y - .3 * u * s, .1], [x, y - 3.4 * u * s, .1], [x + 3.5 * u * s, y - .3 * u * s, .1]], lead, .7, { amt: .008, n: 2 }); ink([[x - 3.5 * u * s, y - .3 * u * s], [x, y - 3.4 * u * s], [x + 3.5 * u * s, y - .3 * u * s]], .8, .5); }
           y -= 2.2 * u * s;
@@ -4257,13 +4297,14 @@ const BG = (() => {
         const n = 30, R = [];
         for (let i = 0; i <= n; i++) { const t = i / n, v = Math.pow(Math.abs(Math.sin(t * 3.1 + seed)), 1.6) * .6 + Math.abs(Math.sin(t * 7.3 + seed * 2)) * .28 + Math.sin(t * 17 + seed) * .06; R.push([-30 + (W + 60) * t, y - amp * v, 1]); }
         wash([[-30, H + 30, 0], ...R, [W + 30, H + 30, 0]], col, a, { amt: .012, n: 5, shade: 'down' });
+        if (snowy && dark && M.night && M.clearSky) ink(R.map(([px, py]) => [px, py]), .9, .3, { col: '#AEBBDD' });   // filo de luna en la cresta
         if (snowy) for (let i = 1; i < n; i++) if (R[i][1] < R[i - 1][1] && R[i][1] < R[i + 1][1] && y - R[i][1] > amp * .5) {
           const j0 = Math.max(0, i - 2), j1 = Math.min(n, i + 2), m = (j1 - j0) / 2, top = R.slice(j0, j1 + 1).map(([px, py]) => [px, py, .2]);
           const bot = top.slice().reverse().map(([px, py], j) => [px, py + H * .035 * (1 - Math.abs(j - m) / m) * rnd(.6, 1.1) + 1, .7]);
           reserve([...top, ...bot], dark ? .45 : .9, M.glow ? mix(dark ? '#C3CAD8' : M.paper, M.glow, dark ? .45 : .35) : dark ? '#C3CAD8' : undefined);
         }
       };
-      range(Y(.6), H * .13, M.far, .42, 1, true);
+      range(Y(.6), H * .13, dark && M.night ? mix(M.far, '#56628F', .6) : M.far, dark && M.night ? .62 : .42, 1, true);
       mist(Y(.6), H * .05, .75);
       range(Y(.7), H * .08, mix(M.mid, PIG.pine, dark ? .1 : .3), .36, 3, false);
       mist(Y(.71), H * .04, .7);
@@ -4274,8 +4315,8 @@ const BG = (() => {
       const thatch = pig(PIG.thatch), wood = pig(mix(PIG.wood, '#2E2622', .35)), snow = dark ? '#C9D0DE' : undefined;
       const gassho = (cx, by, s, smoke) => {
         const w = 24 * u * s, wh = 4.5 * u * s, rh = 21 * u * s, top = by - wh - rh;
-        wash(rectP(cx - w / 2, by - wh, w, wh, .1), wood, .55, { amt: .01, n: 3 });
-        wash([[cx - w / 2 - 1.2 * u, by - wh, .1], [cx, top, .1], [cx + w / 2 + 1.2 * u, by - wh, .1]], thatch, dark ? .6 : .5, { amt: .01, n: 4 });
+        wash(rectP(cx - w / 2, by - wh, w, wh, .1), wood, .6, { amt: .01, n: 3, solid: 1 });
+        wash([[cx - w / 2 - 1.2 * u, by - wh, .1], [cx, top, .1], [cx + w / 2 + 1.2 * u, by - wh, .1]], thatch, dark ? .6 : .55, { amt: .01, n: 4, solid: 1 });
         reserve([[cx, top - .4 * u, .2], [cx + w * .14, top + rh * .2, .4], [cx + w * .05, top + rh * .17, .4], [cx - w * .05, top + rh * .2, .4], [cx - w * .15, top + rh * .16, .4]], dark ? .5 : .95, snow);
         reserve([[cx - w / 2 - 1.2 * u, by - wh, .1], [cx - w / 2 + 1.5 * u, by - wh - rh * .14, .4], [cx - w * .1, top + rh * .5, .3], [cx - w / 2 + 3 * u, by - wh - .2 * u, .3]], dark ? .35 : .7, snow);
         ink([[cx - w / 2 - 1.2 * u, by - wh], [cx, top], [cx + w / 2 + 1.2 * u, by - wh]], 1.1, .55);
@@ -4308,7 +4349,7 @@ const BG = (() => {
     k.save(); k.globalCompositeOperation = dark ? 'screen' : 'source-over';
     const hl = k.createRadialGradient(sx, sy, 0, sx, sy, R);
     hl.addColorStop(0, rgba(M.glow, .85 * vis)); hl.addColorStop(.12, rgba(M.glow, .5 * vis)); hl.addColorStop(.4, rgba(M.glow, .16 * vis)); hl.addColorStop(1, rgba(M.glow, 0));
-    k.fillStyle = hl; k.fillRect(0, 0, W, H);
+    k.fillStyle = hl; k.fillRect(0, 0, W, H); M.sunHalo = hl;
     // rayos crepusculares, pocos y desenfocados
     if (clear) {
       k.filter = 'blur(7px)';
@@ -4324,7 +4365,7 @@ const BG = (() => {
     k.save();
     if (clip) { k.beginPath(); k.rect(-50, -50, W + 100, H + 100); clip.forEach(([px, py], i) => i ? k.lineTo(px, py) : k.moveTo(px, py)); k.closePath(); k.clip('evenodd'); }
     const r = K.u * M.sunR;
-    K.wash(K.ellP(sx, sy, r, r, 22), M.sun, .9, { amt: .018, n: 6, edge: .3, ew: 1.4, op: 'source-over', tex: 0 });
+    K.wash(K.ellP(sx, sy, r, r, 22), M.sun, .9, { amt: .018, n: 6, edge: .14, ew: 1.2, op: 'source-over', tex: 0 });
     const core = k.createRadialGradient(sx, sy, 0, sx, sy, r * .85); core.addColorStop(0, rgba(M.core, .9)); core.addColorStop(1, rgba(M.core, 0));
     k.fillStyle = core; k.fillRect(sx - r, sy - r, r * 2, r * 2);
     k.restore();
@@ -4337,6 +4378,7 @@ const BG = (() => {
   }
   function build() {
     M = mood();
+    M.under = M.dark ? mix(M.mid, M.paper, .4) : mix(M.paper, M.hz, .3);
     const wx = scene.weather, clear = wx === 'clear', dark = M.dark;
     base = document.createElement('canvas'); base.width = c.width; base.height = c.height;
     k = base.getContext('2d'); k.scale(dpr, dpr);
@@ -4390,6 +4432,17 @@ const BG = (() => {
       K.wash(K.ellP(mx - R * .25, my + R * .1, R * .45, R * .3, 10), dark ? '#BFB79C' : '#CFC4A0', .18, { amt: .1, n: 3, edge: 0 });
     }
     (LAND[scene.city] || LAND.TK)(K);
+    if (M.moon && clear) for (const w of waters) {
+      // camino de luz de la luna sobre el agua (las chispas que se mueven van en la animación)
+      const mx = W * .78; k.save(); k.globalCompositeOperation = dark ? 'screen' : 'source-over';
+      for (let yy = w.y0 + 3; yy < H * .96; yy += 3) { if (Math.random() > .6) continue; const d = (yy - w.y0) / (H - w.y0), xx = mx + gauss() * K.u * (1.5 + d * 7), l = rnd(3, 9) * (1 + d); k.fillStyle = rgba(M.moon, (dark ? .3 : .5) * (1 - d * .6)); k.fillRect(xx - l / 2, yy, l, 1); }
+      k.restore(); glitter.push({ x: mx, y0: w.y0, hw: K.u * 5, c: M.moon, n: 14 });
+    }
+    if (clear && !M.night && scene.city !== 'KB') {
+      // una bandada pequeña cruza el cielo, lejos y despacio
+      const v = rnd(9, 14) * (Math.random() < .5 ? 1 : -1), lx = rnd(W * .1, W * .9), ly = H * rnd(.28, .36), gap = 5.5 * K.u;
+      fx.push({ kind: 'gulls', far: true, p: [[0, 0], [1, .55], [2, 1.15], [1.1, -.5], [2.3, -1.05]].map(([bx, by]) => ({ x: lx - Math.sign(v) * bx * gap, y: ly + by * gap * .6, v, s: K.u * rnd(.36, .46), ph: rnd(0, 6) })) });
+    }
     if (wx === 'rain') { K.mist(H * .8, H * .07, .55); K.mist(H * .66, H * .06, .35); }
     if (M.glow) {
       // gradación: luz cálida que envuelve lo cercano al sol y sombras frías y ricas abajo (contraluz)
@@ -4434,7 +4487,26 @@ const BG = (() => {
       ripples: [], gust: [{ x: rnd(-W * .9, W), v: rnd(26, 42) }]
     } : null;
     flakes = wx === 'snow' || scene.city === 'HD' ? Array.from({ length: Math.round(W * H / (wx === 'snow' ? 7000 : 16000)) }, () => ({ x: rnd(0, W), y: rnd(0, H), r: rnd(1, 2.4), v: rnd(16, 40), ph: rnd(0, 6) })) : [];
-    clouds = clear ? [] : Array.from({ length: wx === 'cloudy' ? 8 : 4 }, (_, i) => {
+    if (stars.length) fx.push({ kind: 'meteor', wait: rnd(5, 11), life: 0 });
+    // cielo despejado de día, al alba y al ocaso: unas pocas nubes de algodón que pasan despacio (con el sol bajo, el vientre encendido)
+    const nFair = M.glow ? 3 : 4, fair = () => M.night ? [] : Array.from({ length: nFair }, (_, i) => {
+      const cw = rnd(W * .34, W * .6), chh = cw * rnd(.2, .26), cv = document.createElement('canvas'); cv.width = Math.ceil(cw * dpr); cv.height = Math.ceil(chh * dpr);
+      const q = cv.getContext('2d'); q.scale(dpr, dpr);
+      const body = M.glow ? mix(M.glow, dark ? '#8A4A5E' : '#FFFFFF', dark ? .5 : .6) : dark ? '#7C90B8' : '#FFFFFF', ba = M.glow ? (dark ? .26 : .5) : dark ? .15 : .6, base = chh * .68, m = 6 + (i % 3);
+      for (let b = 0; b < m; b++) {
+        const f = (b + .5) / m, hg = Math.pow(Math.sin(f * Math.PI), .7), rx = cw * rnd(.1, .16) * (.6 + hg * .5), ry = chh * rnd(.26, .4) * (.5 + hg * .7), bx = cw * (.16 + f * .68) + gauss() * cw * .025;
+        q.save(); q.translate(bx, base - ry * .55); q.scale(1, ry / rx);
+        const rg = q.createRadialGradient(0, 0, 0, 0, 0, rx); rg.addColorStop(0, rgba(body, ba)); rg.addColorStop(.55, rgba(body, ba * .6)); rg.addColorStop(1, rgba(body, 0));
+        q.fillStyle = rg; q.fillRect(-rx, -rx, rx * 2, rx * 2); q.restore();
+      }
+      // vientre de la nube: sombra azulada de día; luz cálida cuando el sol está bajo
+      const uc = M.glow ? (M.core || M.glow) : dark ? '#0E1A30' : '#7FA2CC', ua = M.glow ? (dark ? .5 : .5) : dark ? .12 : .13, urx = cw * .36;
+      q.save(); q.globalCompositeOperation = 'source-atop'; q.translate(cw * .5, base + chh * .04); q.scale(1, chh * .16 / urx);
+      const ug = q.createRadialGradient(0, 0, 0, 0, 0, urx); ug.addColorStop(0, rgba(uc, ua)); ug.addColorStop(1, rgba(uc, 0)); q.fillStyle = ug; q.fillRect(-urx, -urx, urx * 2, urx * 2); q.restore();
+      const y0 = M.glow ? .27 : .2, y1 = M.glow ? .46 : .4;
+      return { cv, w: cw, h: chh, x: (i + rnd(.1, .7)) * (W + cw) / nFair - cw, y: H * (y0 + (y1 - y0) * (i / (nFair - 1)) + rnd(-.015, .015)) - chh / 2, v: rnd(2, 4.5) * (i % 2 ? 1 : .7) };
+    });
+    clouds = clear ? fair() : Array.from({ length: wx === 'cloudy' ? 8 : 4 }, (_, i) => {
       // nubes como bandas largas de aguada, al estilo de los rollos japoneses
       const cw = rnd(W * .6, W * (wx === 'cloudy' ? 1.15 : .95)), chh = cw * (wx === 'cloudy' ? .2 : .16), cv = document.createElement('canvas'); cv.width = cw * dpr; cv.height = chh * dpr;
       const q = cv.getContext('2d'); q.scale(dpr, dpr);
@@ -4462,6 +4534,7 @@ const BG = (() => {
     const dt = Math.min(.1, (now - (last || now)) / 1000); last = now;
     draw(dt, now / 1000);
   }
+  const calmNow = () => !!document.documentElement.dataset.calm;
   const glowDot = (lx, ly, r, col, a) => { x.globalAlpha = a * .3; x.fillStyle = col; x.beginPath(); x.arc(lx, ly, r * 3.4, 0, 7); x.fill(); x.globalAlpha = a; x.beginPath(); x.arc(lx, ly, r, 0, 7); x.fill(); };
   function draw(dt, t) {
     const lf = M.lit, dark = M.dark;
@@ -4504,8 +4577,18 @@ const BG = (() => {
         x.globalAlpha = 1; glowDot(cx, cy, 2, lf > .3 ? '#FFE9C4' : rgba(M.ink, .6), lf > .3 ? .9 : .7); x.globalAlpha = 1;
         continue;
       }
+      if (f.kind === 'meteor') {
+        // estrella fugaz: cada tanto, un trazo breve en lo alto (no mientras la app está en reposo)
+        if (f.life > 0) {
+          f.life -= dt; const q = Math.min(1, 1 - f.life / f.dur), hx = f.x + f.dx * q, hy = f.y + f.dy * q, a = Math.sin(q * Math.PI), tx = hx - f.dx * .26, ty = hy - f.dy * .26;
+          const mg = x.createLinearGradient(tx, ty, hx, hy); mg.addColorStop(0, 'rgba(255,250,235,0)'); mg.addColorStop(1, `rgba(255,250,235,${.85 * a})`);
+          x.strokeStyle = mg; x.lineWidth = 1.4; x.lineCap = 'round'; x.beginPath(); x.moveTo(tx, ty); x.lineTo(hx, hy); x.stroke(); x.lineCap = 'butt';
+          glowDot(hx, hy, 1.1, '#FFF8E6', .9 * a); x.globalAlpha = 1;
+        } else if (!calmNow() && (f.wait -= dt) < 0) { f.wait = rnd(16, 38); f.dur = f.life = rnd(.7, 1.05); f.x = W * rnd(.2, .8); f.y = H * rnd(.16, .3); f.dx = (Math.random() < .5 ? 1 : -1) * W * rnd(.3, .45); f.dy = H * rnd(.07, .13); }
+        continue;
+      }
       if (f.kind === 'gulls') {
-        x.strokeStyle = dark ? 'rgba(220,228,245,.55)' : rgba(M.ink, .55); x.lineWidth = 1.1; x.lineCap = 'round';
+        x.strokeStyle = dark ? 'rgba(220,228,245,.55)' : rgba(M.ink, f.far ? .5 : .55); x.lineWidth = f.far ? .9 : 1.1; x.lineCap = 'round';
         for (const g of f.p) {
           g.x += g.v * dt; if (g.x > W + 30) g.x = -30; if (g.x < -30) g.x = W + 30;
           const fl = Math.sin(t * 5 + g.ph) * .5 + .5, s = g.s * 3, yy = g.y + Math.sin(t * .7 + g.ph) * 4;
@@ -4562,8 +4645,8 @@ const BG = (() => {
     }
     // destellos del sol sobre el agua
     for (const gl of glitter) {
-      x.fillStyle = M.core;
-      for (let i = 0; i < 26; i++) {
+      x.fillStyle = gl.c || M.core;
+      for (let i = 0, n = gl.n || 26; i < n; i++) {
         const d = ((i * 37) % 100) / 100, yy = gl.y0 + 3 + d * (H * .95 - gl.y0), xx = gl.x + Math.sin(i * 12.9) * gl.hw * (.3 + d) + Math.sin(t * .8 + i) * 3;
         x.globalAlpha = Math.max(0, Math.sin(t * 3 + i * 1.7)) * (dark ? .75 : .8) * (1 - d * .5);
         x.fillRect(xx, yy, 2 + d * 6, 1.2);
