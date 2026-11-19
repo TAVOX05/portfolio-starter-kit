@@ -957,7 +957,7 @@ const BASES = {
   tokyo1: { n: 'Airbnb Motoasakusa #401', host: 'Kazu', city: 'TK', lat: 35.7128, lng: 139.7852,
     addr: '3-20-12 Motoasakusa, Taito City, Tokyo 111-0041', ja: '〒111-0041 東京都台東区元浅草3-20-12', say: '東京都台東区元浅草、3丁目20番12号',
     in: '20 nov · 16:00+', out: '25 nov · 10:00', nights: 5, status: 'Confirmado',
-    note: 'Base real: Motoasakusa, no junto a Ueno Station. Entrada con teclado. Kazu confirmó que pueden dejar las maletas en el departamento desde las 12:00 del 20 nov; la entrada antes de las 16:00 depende de la limpieza y hay que preguntarle un día antes. Estaciones cercanas: Inaricho (Ginza) y Shin-Okachimachi (Oedo/TX).' },
+    note: 'Base real: Motoasakusa, no junto a Ueno Station. Entrada con teclado. Kazu confirmó (18 nov) que pueden dejar las maletas en el departamento desde las 12:00 del 20 nov; la entrada antes de las 16:00 depende de la limpieza y no la pueden confirmar antes, y nunca antes de las 12:00. La guía de llegada llega por correo después de llenar su formulario de registro. Después de la salida no guardan maletas. Estaciones cercanas: Inaricho (Ginza) y Shin-Okachimachi (Oedo/TX).' },
   ubuya: { n: 'Ryokan Ubuya', host: 'JAPANiCAN', city: 'FJ', lat: 35.5135, lng: 138.7745,
     addr: '10 Asakawa, Fujikawaguchiko, Yamanashi', ja: '山梨県南都留郡富士河口湖町浅川10　うぶや', say: '山梨県富士河口湖町浅川10番地、うぶやです',
     in: '25 nov · 16:00', out: '26 nov · verificar hora', nights: 1, status: 'Pagado ¥139,352',
@@ -1104,7 +1104,7 @@ const DAYS = [
  { n: 1, date: '2026-11-20', city: 'TK', base: 'tokyo1', title: 'Llegada y Asakusa', wx: [15, 8], sun: '16:31',
    items: [
     { t: '06:30', e: '08:30', h: 'Llegada a Narita', d: 'Migración y maletas. Tener a la mano el QR de Visit Japan Web. Sacar yenes en un cajero de 7-Eleven y cargar la Suica.', p: ['narita'], r: 'El AM 58 aterriza a las 06:30 en la Terminal 1. Migración, aduana y maletas toman 1 h o más.' },
-    { t: '08:30', e: '10:00', h: 'Traslado Narita → Ueno / Asakusa', d: 'Skyliner a Keisei Ueno. Kazu acepta las maletas en el departamento desde las 12:00; antes de esa hora, lockers en Ueno o Asakusa.', p: ['keiseiUeno'], r: 'Entrada antes de las 16:00 solo si Kazu la confirma un día antes. No asumir entrada al departamento antes de las 16:00.' },
+    { t: '08:30', e: '10:00', h: 'Traslado Narita → Ueno / Asakusa', d: 'Skyliner a Keisei Ueno. Kazu acepta las maletas en el departamento desde las 12:00; antes de esa hora, lockers en Ueno o Asakusa.', p: ['keiseiUeno'], r: 'Kazu no puede confirmar entrada anticipada: depende de la limpieza ese día. Cuenten con las 16:00; desde las 12:00 al menos pueden dejar las maletas.' },
     { t: '12:00', e: '15:00', h: 'Comida, descanso y libreta para sellos de estación', d: 'Almuerzo tranquilo cerca de Asakusa. Comprar una libreta para los sellos de estación (eki stamps): sirve cualquier cuaderno de hojas lisas de Daiso, Loft, una papelería o un konbini. Pongan el primer sello en la estación Ueno.', f: 'Tempura o soba en Asakusa; melonpan en Nakamise.', p: [], r: 'Los sellos de estación son gratis y la tinta mancha: dejen secar unos segundos antes de cerrar la libreta.' },
     { t: '15:00', e: '16:15', h: 'Sensō-ji + Nakamise-dōri · libreta de goshuin', d: 'Primer templo memorable: puerta Kaminarimon, Nakamise y el salón principal. Al anochecer se ilumina. Ahí mismo compren la libreta para los sellos de templos (goshuinchō, 御朱印帳) y pidan su primer goshuin.', f: 'Snacks en Nakamise (ningyo-yaki, kibi dango).', p: ['sensoji', 'nakamise'], r: 'Vayan primero a la oficina de goshuin: suele cerrar alrededor de las 16:30. El goshuin cuesta unos ¥500 y la libreta se usa solo para templos y santuarios, no para sellos de estación.' },
     { t: '16:15', e: '16:45', h: 'Amuletos de la buena suerte (omamori)', d: 'En los mostradores de amuletos junto al salón principal: cada quien escoge el suyo (salud, estudios, viajes seguros, buena suerte). Si quieren, saquen también un omikuji: la fortuna en papelito por ¥100.', p: ['sensoji'], r: 'Los mostradores cierran alrededor de las 17:00. El omamori no se abre: se lleva en la mochila o la cartera. Si el omikuji sale de mala suerte, se amarra en los ganchos de metal del templo y se queda ahí.' },
@@ -1112,7 +1112,7 @@ const DAYS = [
     { t: '18:00', e: '20:30', h: 'Check-in Airbnb Motoasakusa y cena cerca', d: 'Entrada con teclado desde las 16:00. Cena cercana y a dormir temprano por el jet lag.', p: ['b:tokyo1'], k: 'base' }
    ],
    legs: [
-    { o: 'narita', d: 'keiseiUeno', steps: [T('skyliner', 'Narita T1/T2 → Keisei Ueno', 44, 'Asientos reservados; boletos en máquinas o mostrador de Keisei.'), T('keisei', 'Alternativa: Access Express directo a Asakusa', 65, 'Sin reserva, más barato; útil si quieren ir directo a Asakusa.', true)] },
+    { o: 'narita', d: 'keiseiUeno', bought: 1, steps: [T('skyliner', 'Narita T1 → Keisei Ueno', 44, 'Comprado: Skyliner sencillo para 2 adultos y 1 niño, sirve en cualquier Skyliner del 20 nov. Canjeen el QR del correo de Keisei en el mostrador o la máquina del Skyliner de la estación Narita T1 (ahí les dan los asientos), o usen Face Check in Go si registraron su cara.'), T('keisei', 'Alternativa: Access Express directo a Asakusa', 65, 'Sin reserva, más barato; útil si quieren ir directo a Asakusa.', true)] },
     { o: 'keiseiUeno', d: 'sensoji', steps: [W(5, 'Caminar a Ueno (línea Ginza)'), T('ginza', 'Ueno (G16) → Asakusa (G19)', 5), W(5, 'Salida 1 → Kaminarimon')] },
     { o: 'sensoji', d: 'hashistudio', steps: [W(5, 'Por Nakamise hasta Kaminarimon')] },
     { o: 'hashistudio', d: 'b:tokyo1', steps: [T('ginza', 'Asakusa (G19) → Inaricho (G17)', 3), W(7, 'Inaricho → Motoasakusa 3-20-12'), X(10, 'Con maletas: taxi desde Asakusa', '≈ ¥1,000–1,500', true)] }
@@ -1517,7 +1517,7 @@ const CHECK0 = [
   ['p0-card', 'Tarjetas listas para el extranjero', 'Avisen al banco o activen el uso internacional en la app; lleven algo de efectivo.'],
   ['p0-ropa', 'Chamarra en la mochila', 'Narita amanece a unos 8 °C.'],
   ['p0-print', 'Boletos de bus a Shirakawa-gō impresos', 'Los 2 boletos de Japan Bus Online (6 dic): el conductor pide el impreso.'],
-  ['p0-kazu', 'Mensaje a Kazu por Airbnb', 'Pregúntenle si pueden entrar antes de las 16:00 el 20 nov (dejar maletas desde las 12:00 ya está confirmado).'],
+  ['p0-kazu', 'Guía de llegada de Kazu', 'Llenen su formulario de registro de huéspedes (el enlace está en el chat de Airbnb) y revisen que llegue la guía de llegada a su correo o a spam. Maletas desde las 12:00 confirmado; entrada antes de las 16:00 no la pueden confirmar.'],
   ['p0-casa', 'Casa cerrada', 'Gas, boiler, aparatos, refri, basura, ventanas y llaves con alguien de confianza.']
 ];
 // Tira de días: un calendario del viaje para saltar de un día a otro sin volver a la lista
@@ -1576,7 +1576,8 @@ const TICKETS = [
   { d: '2026-12-04', day: 15, n: 'Thunderbird 13 + Shinkansen Tsurugi 14', when: '4 dic · Osaka 09:41 → Kanazawa 12:02', st: 'ok', stl: 'Pagado ¥30,600', info: '2 adultos + 1 niño. Thunderbird 13: Osaka 09:41 → Tsuruga 11:02, Green, coche 1, asientos 6-A, 6-B y 6-C. Tsurugi 14: Tsuruga 11:17 → Kanazawa 12:02, coche 8, asientos 7-A, 7-B y 7-C. Boleto físico: recogerlo antes en una máquina o taquilla JR West con la tarjeta física con la que se pagó y el número de 4 dígitos. Sale de la estación Osaka, no de Shin-Osaka.', place: 'osakast' },
   { d: '2026-12-06', day: 17, n: 'Bus Shirakawa-gō → Takayama', when: '6 dic · Shirakawa-gō 13:30 → Takayama 14:20', st: 'ok', stl: 'Pagado ¥7,250', info: '2 adultos + 1 niño, Nōhi Bus, coche 01, asientos 2A, 2B y 3A. Sale de la parada Ogimachi y llega al Nōhi Bus Center, junto a la estación de Takayama. Mostrar el boleto impreso al conductor.', place: 'shirakawa' },
   { d: '2026-12-07', day: 18, n: 'Tren Hida 8', when: '7 dic · Takayama 11:35 → Nagoya 14:04', st: 'ok', stl: 'Pagado ¥21,920', info: '2 adultos + 1 niño en Green, coche 1: asientos 6-A, 6-B y 6-C. Boleto físico de JR-West: recogerlo antes en una máquina o taquilla (fuera de los torniquetes) con la tarjeta física con la que se pagó y el número de 4 dígitos.', place: 'takayamast' },
-  { d: '2026-12-07', day: 18, n: 'Shinkansen Nozomi 24', when: '7 dic · Nagoya 14:36 → Tokio 16:15', st: 'ok', stl: 'Pagado ¥27,250', info: '2 adultos + 1 niño, coche 12: asientos 1-A, 1-B y 1-C, con espacio para maletas grandes detrás. Se aborda con el QR-Ticket de smartEX.', place: 'nagoya' }
+  { d: '2026-12-07', day: 18, n: 'Shinkansen Nozomi 24', when: '7 dic · Nagoya 14:36 → Tokio 16:15', st: 'ok', stl: 'Pagado ¥27,250', info: '2 adultos + 1 niño, coche 12: asientos 1-A, 1-B y 1-C, con espacio para maletas grandes detrás. Se aborda con el QR-Ticket de smartEX.', place: 'nagoya' },
+  { d: '2026-11-20', day: 1, n: 'Skyliner Narita → Ueno', when: '20 nov · cualquier Skyliner del día', st: 'ok', stl: 'Pagado ¥5,770', info: 'Keisei Skyliner sencillo, Narita Airport T1 → Keisei Ueno, 2 adultos + 1 niño. Boleto abierto: sirve en cualquier Skyliner del 20 nov (vence el 19 dic). Canjeen el QR del correo de Keisei en el mostrador o la máquina del Skyliner de la estación Narita T1, donde les asignan los asientos; o usen Face Check in Go si registraron su cara. El número de canje y el PIN están en el correo.', place: 'narita' }
 ];
 
 // Lo que falta comprar (checklist)
@@ -1609,7 +1610,7 @@ const ALERTS = [
   ...PAYMENTS.map(p => ({ d: p.d, t: 'Pago programado: ' + p.t + ' · ' + p.a })),
   { d: '2026-11-17', t: 'Check-in en línea del AM 58 desde las 21:30 (24 h antes) en la app de Aeroméxico' },
   { d: '2026-11-18', t: 'Día 0: salen de casa a las 16:00 rumbo a la Terminal 2 del AICM' },
-  { d: '2026-11-18', t: 'Antes de salir: escribirle a Kazu por Airbnb para confirmar entrada anticipada el 20 nov (maletas desde las 12:00 ya confirmado)' },
+  { d: '2026-11-18', t: 'Antes de salir: confirmar que llegó la guía de llegada de Kazu (se manda al llenar su formulario de registro) y revisar que la dirección diga 3-20-12-401 Motoasakusa' },
   { d: '2026-11-24', t: 'teamLab: el QR aparece desde las 00:00 JST' },
   { d: '2026-11-29', t: 'Nintendo Museum: descargar QR desde las 14:00 JST' },
   { d: '2026-12-02', t: 'USJ: llevar los 6 e-tickets y revisar horas del Express' },
@@ -2075,7 +2076,7 @@ function tkBtn(i, label) {
   const docs = docsFor(['tk:' + i]), one = docs.length === 1;
   return `<button type="button" class="pill ok tkb" ${one ? `data-doc="${docs[0].id}"` : `data-ticket="${i}"`} aria-label="${esc(label.replace('✓ ', ''))}: ver ${one ? 'documento' : docs.length ? docs.length + ' documentos' : 'detalles'}">${label}<span class="tkv">${one ? 'Ver' : docs.length ? 'Ver ' + docs.length : 'Detalles'} ›</span></button>`;
 }
-const needsTicket = (l, t) => !t.fixed && l.steps.some(x => !x.alt && NEED_TICKET.includes(x.line) && (x.min || 0) >= 30);
+const needsTicket = (l, t) => !t.fixed && !l.bought && l.steps.some(x => !x.alt && NEED_TICKET.includes(x.line) && (x.min || 0) >= 30);
 // línea de transporte dentro del Plan: horario, cómo se mueven y si ya tienen boleto
 function trnHtml(l, t) {
   const main = l.steps.filter(x => !x.alt), lines = [...new Set(main.filter(x => x.m !== 'walk').map(x => (LINES[x.line] || [x.line])[0]))];
@@ -2084,8 +2085,8 @@ function trnHtml(l, t) {
   const how = (lines.length ? lines.join(' · ') + (walk ? ` + ${walk} min a pie` : '') : `A pie ${walk} min`) + cost;
   const ic = main.some(x => x.line === 'plane') ? I.plane : main.some(x => x.line === 'bus') ? I.bus : main.some(x => x.line === 'taxi') ? I.car : lines.length ? I.train : I.walk;
   const need = needsTicket(l, t);
-  const tag = t.fixed ? tkBtn(legTicket(l, t), '✓ Boleto reservado') : need ? '<span class="pill warn">Falta boleto</span>' : '';
-  return `<div class="trn${t.fixed ? ' ok' : need ? ' warn' : ''}">${ic}<span><b>${fmtHM(t.dep)} → ${t.arrTxt || fmtHM(t.arr)}</b> · ${esc(how)} · ${esc(place(l.o).n)} → ${esc(place(l.d).n)}</span>${tag}</div>`;
+  const tag = t.fixed ? tkBtn(legTicket(l, t), '✓ Boleto reservado') : l.bought ? tkBtn(TICKETS.findIndex(k => k.day === l.dn && k.place === l.o), '✓ Boleto comprado') : need ? '<span class="pill warn">Falta boleto</span>' : '';
+  return `<div class="trn${t.fixed || l.bought ? ' ok' : need ? ' warn' : ''}">${ic}<span><b>${fmtHM(t.dep)} → ${t.arrTxt || fmtHM(t.arr)}</b> · ${esc(how)} · ${esc(place(l.o).n)} → ${esc(place(l.d).n)}</span>${tag}</div>`;
 }
 function legGroup(l, T) {
   const a = place(l.o), b = place(l.d);
